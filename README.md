@@ -43,3 +43,13 @@ correctFoo(A a, B b, Allocator new, Console console)
   console.log("Mutated a&b");
 }
 ```
+
+Scope are opened and closed by `{}`.
+
+I want it to be self hosted ASAP.  
+It mean, when the language will be specified, I will rush an interpreteur, to write it's internal composant with it.
+The compiler: 
+Transform the source to an intermediary representation.
+
+The JIT/Query Engine.
+Do some optimisations at compile time, and at runtime. Write statistics in a file to reuse previous run data in next runs. 
