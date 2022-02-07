@@ -6,15 +6,14 @@ Relational, Object Oriented, General Purpose Programming Language.
 
 ### What is the difference between a object oriented database and a so called "relational database".
 In a relational database, (AKA table oriented), a foreign key is simply a reference to another table entry.  
-A primary key is simply the "object reference, 'this'".  
-The reference is typed, and to me, this is the difference: the OO database is simply typed, while the table oriented database represent everything withing tables
-The 'types' come from the constraint on the keys.  
+A primary key is simply the "object reference, `this`".  
+This is a raw reference which is not typed to what it represent, and to me, this is the difference: the OO database is simply fully typed, while the table oriented database represent everything within tables, being more "weakly typed" (it still have types, but you can't extends it to make your system more fool-proof). 
 
-### The most well 'optimised' piece of code the average webdev will write is a DB query written in 10 minutes.  
-Take any major DB, write a non trivial query, and it will get magically parallelised over all your CPU cores.
+### The most well 'optimised' piece of code in the everyday of a webdev life is a DB query written in 10 minutes.  
+Take any serious DB, write a non trivial query, and it will get magically parallelised over all your CPU cores, with fully asynchronous IO.
 
 ### A lot of hardware innovation does not happen because of software
-- We still rely a lot on a lot of software that compile to a static binary, so it cannot adapt to the machine.
+- We still rely a lot on a lot of software that compile to a single static binary, so it cannot adapt to the machine.
 - Most JIT or interpreters compile a procedural language that does not provide enough flexibility.
 Note: Mosts JITs can still profit a bit from small to medium changes in hardware.
 
