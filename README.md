@@ -20,10 +20,14 @@ Note: Mosts JITs can still profit a bit from small to medium changes in hardware
 
 ## Main principle, philosophy
 
-1. Contributing to the langage, and core library should be simple. It mean that, we should try to avoid using other programming language, like C, as much as possible in the core library.
-2. While writing code, users should not think about "does this need a Stack or a Queue, or a List, or a HashSet". This is an implementation detail, which the compilator should choose.
-3. The language should not get in the way of the advanced users. If an user have nicely represented it's data, but the compiler implementation is poor, we should give a way for the advanced user to write it's own implementation.
+- Contributing to the langage, and core library should be simple. It mean that, we should try to avoid using other programming language, like C, as much as possible in the core library.
+- While writing code, users should not think about "does this need a Stack or a Queue, or a List, or a HashSet". This is an implementation detail, which the compilator should choose.
+- The language should not get in the way of the advanced users. If an user have nicely represented it's data, but the compiler implementation is poor, we should give a way for the advanced user to write it's own implementation.
 
+
+### Some ideas
+
+point of entry is the mains, any external events + self emitted (shouldn't be abused)
 
 ### Current decisions:
 
@@ -47,7 +51,7 @@ correctFoo(A a, B b, Allocator new, Console console)
 Scope are opened and closed by `{}`.
 
 I want it to be self hosted ASAP.  
-It mean, when the language will be specified, I will rush an interpreteur, to write it's internal composant with it.
+It mean, when the language will be specified, I will rush an interpreter, to write it's internal composant with it.
 The compiler: 
 Transform the source to an intermediary representation.
 
