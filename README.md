@@ -49,6 +49,11 @@ correctFoo(A a, B b, Allocator new, Console console)
 
 Scope are opened and closed by `{}`.
 
+Typescript like typesystem: 
+Anonymous interfaces.
+Union types & interface grouping.
+
+
 I want it to be self hosted ASAP.  
 It mean, when the language will be specified, I will rush an interpreter, to write it's internal composant with it.
 The compiler: 
