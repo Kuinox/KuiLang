@@ -20,7 +20,7 @@ Note: Mosts JITs can still profit a bit from small to medium changes in hardware
 ## Main principle, philosophy
 
 - Contributing to the langage, and core library should be simple. It mean that, we should try to avoid using other programming language, like C, as much as possible in the core library.
-- While writing code, users should not think about "does this need a Stack or a Queue, or a List, or a HashSet". This is an implementation detail, which the compilator should choose.
+- While writing code, users should not think about "does this need a Stack or a Queue, or a List, or a HashSet". This is an implementation detail, which the compiler/query engine should choose. What the user should thing is "this has only unique entries, of the type XYZ".
 - The language should not get in the way of the advanced users. If an user have nicely represented it's data, but the compiler implementation is poor, we should give a way for the advanced user to write it's own implementation.
 
 
