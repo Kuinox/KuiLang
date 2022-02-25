@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+	  <FarkleGenerateHtml>true</FarkleGenerateHtml>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Farkle" Version="6.3.2" />
+		<PackageReference Include="Farkle.Tools.MSBuild" Version="6.3.2" PrivateAssets="all" />
+	</ItemGroup>
+</Project>
