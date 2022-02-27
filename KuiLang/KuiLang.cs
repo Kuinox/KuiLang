@@ -13,6 +13,10 @@ namespace KuiLang
     {
         public static readonly PrecompilableDesigntimeFarkle<SignatureDeclaration> RootDesignTime;
         public static readonly RuntimeFarkle<SignatureDeclaration> RootRuntime;
+        public static readonly Nonterminal<FieldLocation> FullNameDesignTime;
+        public static readonly Nonterminal<Expression> ExpressionRuntime;
+        public static readonly DesigntimeFarkle<SignatureDeclaration> MethodSignatureDeclarationRuntime;
+
         static KuiLang()
         {
             var typeKeyword = Terminal.Create("Type Keyword", Literal("type"));
@@ -37,7 +41,7 @@ namespace KuiLang
                 .Finish((a, b) => a.Append(b)),
                 simpleNamePart.Finish((s) => new FieldLocation(s))
             );
-
+            FullNameDesignTime = fullName.AutoWhitespace(false);
             var argument = Nonterminal.Create("Argument Declaration",
               fullName.Extended().Append(trivia).Extend(simpleNamePart).Finish((type, argName) => new Arg(type, argName))
             );
@@ -53,8 +57,9 @@ namespace KuiLang
 
 
             var fieldDeclaration = Nonterminal.Create("Field Declaration",
-                fullName.Extended().Append(trivia)
-                .Extend(simpleNamePart).Append(trivia).Finish((type, fieldName) => new FieldDeclaration(type, fieldName)));
+                fullName.Optional().Extended().Append(trivia) 
+                .Extend(fullName).Append(trivia)
+                .Extend(simpleNamePart).Append(trivia).Finish((accessModifier, type, fieldName) => new FieldDeclaration(accessModifier, type, fieldName)));
 
 
             var methodSignatureDeclaration = Nonterminal.Create("MethodSignatureDeclaration", fieldDeclaration.Extended().Append("(").Append(trivia)
@@ -62,7 +67,12 @@ namespace KuiLang
                 .Append(")")
                 .Finish((field, args) => new SignatureDeclaration(field.Type, field.Name, args)));
 
+            MethodSignatureDeclarationRuntime = methodSignatureDeclaration.AutoWhitespace(false);
+
             var expression = Nonterminal.Create<Expression>("Expression");
+
+            ExpressionRuntime = expression.AutoWhitespace(false);
+
             var argumentPassingList = Nonterminal.Create<List<Expression>>("ExpressionList");
             argumentPassingList.SetProductions(
                 argumentPassingList.Extended()

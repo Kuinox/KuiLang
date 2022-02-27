@@ -2,12 +2,17 @@
 {
     public class Expression
     {
-        public Expression(FunctionCall s)
+        public Expression(FunctionCall functionCall)
         {
+            FunctionCall = functionCall;
         }
 
-        public Expression(FieldLocation s)
+        public Expression(FieldLocation fieldLocation)
         {
+            FieldLocation = fieldLocation;
         }
+
+        public FieldLocation? FieldLocation { get; }
+        public FunctionCall? FunctionCall { get; }
     }
 }
