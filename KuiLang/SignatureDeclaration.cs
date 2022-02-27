@@ -8,14 +8,14 @@ namespace KuiLang
 {
     public class SignatureDeclaration
     {
-        public SignatureDeclaration(FullName returnType, string methodName, List<Arg>? arguments)
+        public SignatureDeclaration(FieldLocation returnType, string methodName, List<Arg>? arguments)
         {
             Type = returnType;
             Name = methodName;
             Arguments = arguments?? new List<Arg>();
         }
 
-        public FullName Type { get; }
+        public FieldLocation Type { get; }
         public string Name { get; }
         public IReadOnlyCollection<Arg> Arguments { get; }
 

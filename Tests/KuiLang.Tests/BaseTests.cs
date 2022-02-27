@@ -12,7 +12,7 @@ namespace KuiLang.Tests
         public void can_parse_full_name()
         {
             var fullname = @"Foo.Bar.Type";
-            var res = KuiLang.Runtime.Parse(fullname);
+            var res = KuiLang.RootRuntime.Parse(fullname);
             res.ResultValue.Should().BeEquivalentTo(new string[] { "Foo", "Bar", "Type" });
         }
 
@@ -21,7 +21,7 @@ namespace KuiLang.Tests
         [TestCase("Foo.Bar methodName(AnArg arg)")]
         public void can_parse_argument(string declaration)
         {
-            var res = KuiLang.Runtime.Parse(declaration);
+            var res = KuiLang.RootRuntime.Parse(declaration);
 
             res.ResultValue.Name.Should().Be("methodName");
         }

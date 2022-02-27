@@ -8,13 +8,13 @@ namespace KuiLang
 {
     public class FieldDeclaration
     {
-        public FieldDeclaration(FullName returnType, string fieldName)
+        public FieldDeclaration(FieldLocation returnType, string fieldName)
         {
             Type = returnType;
             Name = fieldName;
         }
 
-        public FullName Type { get; }
+        public FieldLocation Type { get; }
         public string Name { get; }
     }
 }

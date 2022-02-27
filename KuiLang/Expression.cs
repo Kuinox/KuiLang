@@ -1,6 +1,13 @@
 ﻿namespace KuiLang
 {
-    internal class Expression
+    public class Expression
     {
+        public Expression(FunctionCall s)
+        {
+        }
+
+        public Expression(FieldLocation s)
+        {
+        }
     }
 }

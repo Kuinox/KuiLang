@@ -4,13 +4,13 @@ namespace KuiLang
 {
     public class Arg
     {
-        public Arg(FullName type, string argumentName)
+        public Arg(FieldLocation type, string argumentName)
         {
             Type = type;
             ArgumentName = argumentName;
         }
 
-        public FullName Type { get; } 
+        public FieldLocation Type { get; } 
         public string ArgumentName { get; }
 
         public override string ToString() => $"{Type} {ArgumentName}";
