@@ -8,14 +8,14 @@ namespace KuiLang
 {
     public class FieldDeclaration
     {
-        public FieldDeclaration(FieldLocation accessModifier, FieldLocation returnType, string fieldName)
+        public FieldDeclaration(FieldLocation? accessModifier, FieldLocation returnType, string fieldName)
         {
             AccessModifier = accessModifier;
             Type = returnType;
             Name = fieldName;
         }
 
-        public FieldLocation AccessModifier { get; }
+        public FieldLocation? AccessModifier { get; }
         public FieldLocation Type { get; }
         public string Name { get; }
     }

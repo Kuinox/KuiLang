@@ -11,8 +11,8 @@ namespace KuiLang
 {
     public static class KuiLang
     {
-        public static readonly PrecompilableDesigntimeFarkle<SignatureDeclaration> RootDesignTime;
-        public static readonly RuntimeFarkle<SignatureDeclaration> RootRuntime;
+        public static readonly PrecompilableDesigntimeFarkle<FieldDeclaration> RootDesignTime;
+        public static readonly RuntimeFarkle<FieldDeclaration> RootRuntime;
         public static readonly Nonterminal<FieldLocation> FullNameDesignTime;
         public static readonly Nonterminal<Expression> ExpressionRuntime;
         public static readonly DesigntimeFarkle<SignatureDeclaration> MethodSignatureDeclarationRuntime;
@@ -23,12 +23,6 @@ namespace KuiLang
             var interfaceKeyword = Terminal.Create("Interface Keyword", Literal("interface"));
             var space = Terminal.Create("Space", (context, data) => data.ToString(), FromRegexString(@"\p{All Space}+"));
             var comment = Terminal.Create("Comment", (context, data) => data.ToString(), FromRegexString("//[^\n]*\n"));
-            var triviaPart = Nonterminal.Create("TriviaPart",
-                space.AsIs(),
-                comment.AsIs(),
-                Terminal.Create("AnotherSpace", (context, s) => s.ToString(), Literal(' ')).AsIs()
-            );
-            var trivia = triviaPart.Many<string, List<string>>();
             var varKeyword = Terminal.Create("Var Keyword", Literal("var"));
 
 
@@ -43,26 +37,27 @@ namespace KuiLang
             );
             FullNameDesignTime = fullName.AutoWhitespace(false);
             var argument = Nonterminal.Create("Argument Declaration",
-              fullName.Extended().Append(trivia).Extend(simpleNamePart).Finish((type, argName) => new Arg(type, argName))
+              fullName.Extended().Extend(simpleNamePart).Finish((type, argName) => new Arg(type, argName))
             );
 
             var argumentList = Nonterminal.Create<List<Arg>>("ArgumentList");
             argumentList.SetProductions(
                 argumentList.Extended()
-                    .Append(",").Append(trivia)
-                    .Extend(argument).Append(trivia)
+                    .Append(",")
+                    .Extend(argument)
                     .Finish((xs, s) => xs.Plus(s)),
                 argument.Finish((s) => new List<Arg>() { s })
             );
 
 
             var fieldDeclaration = Nonterminal.Create("Field Declaration",
-                fullName.Optional().Extended().Append(trivia) 
-                .Extend(fullName).Append(trivia)
-                .Extend(simpleNamePart).Append(trivia).Finish((accessModifier, type, fieldName) => new FieldDeclaration(accessModifier, type, fieldName)));
+                fullName.Extended()
+                .Extend(fullName.Optional())
+                .Extend(simpleNamePart)
+                .Finish((accessModifier, type, fieldName) => new FieldDeclaration(accessModifier, type, fieldName)));
 
 
-            var methodSignatureDeclaration = Nonterminal.Create("MethodSignatureDeclaration", fieldDeclaration.Extended().Append("(").Append(trivia)
+            var methodSignatureDeclaration = Nonterminal.Create("MethodSignatureDeclaration", fieldDeclaration.Extended().Append("(")
                 .Extend(argumentList.Optional())
                 .Append(")")
                 .Finish((field, args) => new SignatureDeclaration(field.Type, field.Name, args)));
@@ -76,16 +71,16 @@ namespace KuiLang
             var argumentPassingList = Nonterminal.Create<List<Expression>>("ExpressionList");
             argumentPassingList.SetProductions(
                 argumentPassingList.Extended()
-                .Append(",").Append(trivia)
-                .Extend(expression).Append(trivia)
+                .Append(",")
+                .Extend(expression)
                 .Finish((xs, s) => xs.Plus(s)),
                 expression.Finish(s => new List<Expression>())
             );
 
 
             var functionCall = Nonterminal.Create("FunctionCall",
-                fullName.Extended().Append(trivia)
-                    .Append("(").Append(trivia)
+                fullName.Extended()
+                    .Append("(")
                     .Extend(argumentPassingList)
                     .Append(")")
                     .Finish((functionRef, args) => new FunctionCall(functionRef, args))
@@ -93,18 +88,18 @@ namespace KuiLang
 
             var assignation = Nonterminal.Create("Assignation",
                     "=".Appended()
-                    .Append(trivia)
+
                     .Extend(expression).AsIs()
             );
 
             var variableDeclaration = Nonterminal.Create("Variable Declaration",
-                simpleNamePart.Extended().Append(trivia).Extend(simpleNamePart)
+                simpleNamePart.Extended().Extend(simpleNamePart)
                 .Extend(assignation.Optional())
                 .Finish((a, b, c) => new VariableDeclaration(new FieldLocation(a), b, c))
             );
 
             var variableAssign = Nonterminal.Create("Variable Assignation",
-                fullName.Extended().Append(trivia).Extend(assignation).Finish((a, b) => new VariableAssignation(a, b)));
+                fullName.Extended().Extend(assignation).Finish((a, b) => new VariableAssignation(a, b)));
 
             expression.SetProductions(
                 functionCall.Finish(s => new Expression(s)),
@@ -116,10 +111,10 @@ namespace KuiLang
             var statementList = statement.Many<Statement, List<Statement>>();
 
             var statementScope = Nonterminal.Create("StatementScope",
-                "{".Appended().Append(trivia)
+                "{".Appended()
                     .Extend(statementList)
                     .Append("}")
-                    .Append(trivia)
+
                     .Finish(s => s)
             );
             var statementContent = Nonterminal.Create("StatementContent",
@@ -127,15 +122,16 @@ namespace KuiLang
                 variableDeclaration.Finish(s => new Statement(s))
             );
             statement.SetProductions(
-                trivia.Appended()
-                .Extend(statementContent).Append(trivia)
-                .Append(";").Append(trivia).AsIs(),
+                statementContent.Extended().Append(";").AsIs(),
                 statementScope.Finish(s => new Statement(s))
             );
 
 
 
-            RootDesignTime = methodSignatureDeclaration.AutoWhitespace(false).MarkForPrecompile();
+            RootDesignTime = fieldDeclaration
+                .AddBlockComment("/*", "*/")
+                .AddLineComment("//")
+                .MarkForPrecompile();
             RootRuntime = RootDesignTime.Build();
         }
     }
