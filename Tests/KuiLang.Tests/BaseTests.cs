@@ -11,9 +11,9 @@ namespace KuiLang.Tests
     public class BaseTests
     {
 
-        static readonly RuntimeFarkle<FieldLocation> FullNameRuntime = KuiLang.FullNameDesignTime.Build();
-        static readonly RuntimeFarkle<Expression> ExpressionRuntime = KuiLang.ExpressionRuntime.Build();
-        static readonly RuntimeFarkle<SignatureDeclaration> MethodSignatureDeclarationRuntime = KuiLang.MethodSignatureDeclarationRuntime.Build();
+        static readonly RuntimeFarkle<FieldLocation> FullNameRuntime = KuiLang.FullNameDesigntime.Build();
+        static readonly RuntimeFarkle<Expression> ExpressionRuntime = KuiLang.ExpressionDesigntime.Build();
+        static readonly RuntimeFarkle<SignatureDeclaration> MethodSignatureDeclarationRuntime = KuiLang.MethodSignatureDeclarationDesigntime.Build();
         [Test]
         public void can_parse_full_name()
         {

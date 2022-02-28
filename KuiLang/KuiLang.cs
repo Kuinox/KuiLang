@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Farkle;
 using Farkle.Builder;
-using Farkle.Builder.OperatorPrecedence;
-using Microsoft.FSharp.Collections;
 using static Farkle.Builder.Regex;
 
 namespace KuiLang
 {
     public static class KuiLang
     {
-        public static readonly PrecompilableDesigntimeFarkle<FieldDeclaration> RootDesignTime;
-        public static readonly RuntimeFarkle<FieldDeclaration> RootRuntime;
-        public static readonly Nonterminal<FieldLocation> FullNameDesignTime;
-        public static readonly Nonterminal<Expression> ExpressionRuntime;
-        public static readonly DesigntimeFarkle<SignatureDeclaration> MethodSignatureDeclarationRuntime;
+        public static readonly PrecompilableDesigntimeFarkle<SignatureDeclaration> RootDesigntime;
+        public static readonly RuntimeFarkle<SignatureDeclaration> RootRuntime;
+        public static readonly DesigntimeFarkle<FieldLocation> FullNameDesigntime;
+        public static readonly DesigntimeFarkle<Expression> ExpressionDesigntime;
+        public static readonly DesigntimeFarkle<SignatureDeclaration> MethodSignatureDeclarationDesigntime;
 
         static KuiLang()
         {
@@ -35,7 +31,7 @@ namespace KuiLang
                 .Finish((a, b) => a.Append(b)),
                 simpleNamePart.Finish((s) => new FieldLocation(s))
             );
-            FullNameDesignTime = fullName.AutoWhitespace(false);
+            FullNameDesigntime = fullName.AutoWhitespace(false);
             var argument = Nonterminal.Create("Argument Declaration",
               fullName.Extended().Extend(simpleNamePart).Finish((type, argName) => new Arg(type, argName))
             );
@@ -62,11 +58,11 @@ namespace KuiLang
                 .Append(")")
                 .Finish((field, args) => new SignatureDeclaration(field.Type, field.Name, args)));
 
-            MethodSignatureDeclarationRuntime = methodSignatureDeclaration.AutoWhitespace(false);
+            MethodSignatureDeclarationDesigntime = methodSignatureDeclaration.AutoWhitespace(false);
 
             var expression = Nonterminal.Create<Expression>("Expression");
 
-            ExpressionRuntime = expression.AutoWhitespace(false);
+            ExpressionDesigntime = expression.AutoWhitespace(false);
 
             var argumentPassingList = Nonterminal.Create<List<Expression>>("ExpressionList");
             argumentPassingList.SetProductions(
@@ -114,8 +110,7 @@ namespace KuiLang
                 "{".Appended()
                     .Extend(statementList)
                     .Append("}")
-
-                    .Finish(s => s)
+                    .AsIs()
             );
             var statementContent = Nonterminal.Create("StatementContent",
                 expression.Finish(s => new Statement(s)),
@@ -132,7 +127,7 @@ namespace KuiLang
                 .AddBlockComment("/*", "*/")
                 .AddLineComment("//")
                 .MarkForPrecompile();
-            RootRuntime = RootDesignTime.Build();
+            RootRuntime = RootDesigntime.Build();
         }
     }
 }
