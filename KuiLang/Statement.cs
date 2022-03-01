@@ -2,7 +2,7 @@
 
 namespace KuiLang
 {
-    internal class Statement
+    public class Statement
     {
         public Statement(Expression s)
         {

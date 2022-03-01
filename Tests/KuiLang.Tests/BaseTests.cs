@@ -14,12 +14,14 @@ namespace KuiLang.Tests
         static readonly RuntimeFarkle<FieldLocation> FullNameRuntime = KuiLang.FullNameDesigntime.Build();
         static readonly RuntimeFarkle<Expression> ExpressionRuntime = KuiLang.ExpressionDesigntime.Build();
         static readonly RuntimeFarkle<SignatureDeclaration> MethodSignatureDeclarationRuntime = KuiLang.MethodSignatureDeclarationDesigntime.Build();
+        static readonly RuntimeFarkle<MethodDeclaration> MethodDeclarationRuntime = KuiLang.MethodDeclarationDesigntime.Build();
+        static readonly RuntimeFarkle<TypeDeclaration> TypeDeclarationRuntime = KuiLang.TypeDeclarationDesigntime.Build();
         [Test]
         public void can_parse_full_name()
         {
             var fullname = @"Foo.Bar.Type";
             var res = FullNameRuntime.Parse(fullname);
-            res.ResultValue.Should().BeEquivalentTo(new string[] { "Foo", "Bar", "Type" });
+            res.ResultValue.Parts.Should().BeEquivalentTo(new string[] { "Foo", "Bar", "Type" });
         }
 
 
@@ -30,6 +32,31 @@ namespace KuiLang.Tests
             var res = MethodSignatureDeclarationRuntime.Parse(declaration);
 
             res.ResultValue.Name.Should().Be("methodName");
+        }
+
+        [TestCase("Access.Public void DoNothing() { }")]
+        [TestCase("Access.Public void DoSomething() { Something(); }")]
+        public void can_parse_method(string method)
+        {
+            var res = MethodDeclarationRuntime.Parse(method);
+            res.IsOk.Should().BeTrue();
+            res.ResultValue.Signature.Name.Should().Contain("Do");
+        }
+
+        [TestCase(
+@"public type Foo
+{
+    number localField;
+    public void Test()
+    {
+        doThings();
+    }
+
+}")]
+        public void can_parse_type(string type)
+        {
+            var res = TypeDeclarationRuntime.Parse(type);
+            res.IsOk.Should().BeTrue();
         }
     }
 }

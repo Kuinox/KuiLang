@@ -1,6 +1,6 @@
 ﻿namespace KuiLang
 {
-    internal class VariableDeclaration
+    public class VariableDeclaration
     {
 
         public VariableDeclaration(FieldLocation type, string variableName, Expression? initValue)
