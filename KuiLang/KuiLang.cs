@@ -145,12 +145,16 @@ namespace KuiLang
 
 
             TypeDeclarationDesigntime = Nonterminal.Create("Type Declaration",
-                fullName.Optional().Extended()
+                fullName.Extended()
                     .Extend(simpleNamePart)
                     .Append("{")
                     .Extend(methodOrFieldDeclaration.Many<MethodOrFieldDeclaration, List<MethodOrFieldDeclaration>>())
-                    .Append("}").Finish((accesLevel, typeName, fields) => new TypeDeclaration(accesLevel, typeName, fields)
-            ));
+                    .Append("}").Finish((accesLevel, typeName, fields) => new TypeDeclaration(accesLevel, typeName, fields)),
+                simpleNamePart.Extended()
+                    .Append("{")
+                    .Extend(methodOrFieldDeclaration.Many<MethodOrFieldDeclaration, List<MethodOrFieldDeclaration>>())
+                    .Append("}").Finish((typeName, fields) => new TypeDeclaration(null, typeName, fields))
+            );
 
             RootDesigntime = TypeDeclarationDesigntime
                 .AddBlockComment("/*", "*/")
