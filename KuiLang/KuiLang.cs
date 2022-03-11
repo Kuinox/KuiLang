@@ -15,15 +15,10 @@ namespace KuiLang
         public static readonly DesigntimeFarkle<SignatureDeclaration> MethodSignatureDeclarationDesigntime;
         public static readonly DesigntimeFarkle<MethodDeclaration> MethodDeclarationDesigntime;
         public static readonly DesigntimeFarkle<TypeDeclaration> TypeDeclarationDesigntime;
+        public static readonly DesigntimeFarkle<TypeDeclaration> InterfaceDeclarationDesigntime;
         static KuiLang()
         {
-            var typeKeyword = Terminal.Create("Type Keyword", Literal("type"));
-            var interfaceKeyword = Terminal.Create("Interface Keyword", Literal("interface"));
-            var space = Terminal.Create("Space", (context, data) => data.ToString(), FromRegexString(@"\p{All Space}+"));
-            var comment = Terminal.Create("Comment", (context, data) => data.ToString(), FromRegexString("//[^\n]*\n"));
-
-
-            var simpleNamePart = Terminal.Create("Namespace Part", (context, data) => data.ToString(), FromRegexString(@"\p{All Letters}+"));
+            var simpleNamePart = Terminal.Create("Namespace Part", (context, data) => data.ToString(), FromRegexString(@"\p{All Letters}(\p{All Letters}|\d)*"));
             var fullName = Nonterminal.Create<FieldLocation>("FullName");
             fullName.SetProductions(
                 fullName.Extended()
@@ -119,16 +114,20 @@ namespace KuiLang
                 fullName.Extended()
                     .Extend(simpleNamePart).Finish((type, fieldName) => new FieldDeclaration(null, type, fieldName))
             );
-            var methodSignatureDeclaration = Nonterminal.Create("Method Signature Declaration",
+
+            var methodSignature = Nonterminal.Create("Method Signature",
                 fieldSignature.Extended().Append("(")
                     .Extend(argumentList.Optional())
                     .Append(")")
                     .Finish((field, args) => new SignatureDeclaration(field.Type, field.Name, args)));
-            MethodSignatureDeclarationDesigntime = methodSignatureDeclaration;
+            MethodSignatureDeclarationDesigntime = methodSignature;
 
+            var methodSignatureDeclaration = Nonterminal.Create("Method Signature Declaration",
+                methodSignature.Extended().Append(";").AsIs()
+            );
 
             var methodDeclaration = Nonterminal.Create("Method Declaration",
-                MethodSignatureDeclarationDesigntime.Extended()
+                methodSignature.Extended()
                     .Extend(statementScope)
                     .Finish((a, b) => new MethodDeclaration(a, b))
             );
@@ -140,21 +139,43 @@ namespace KuiLang
 
             var methodOrFieldDeclaration = Nonterminal.Create("Method or Field Declaration List",
                 methodDeclaration.Finish(s => new MethodOrFieldDeclaration(s)),
-                fieldSignature.Finish(s => new MethodOrFieldDeclaration(s))
+                fieldDeclaration.Finish(s => new MethodOrFieldDeclaration(s))
+            );
+            var interfaceDeclarations = Nonterminal.Create("Interface Declarations",
+                fieldDeclaration.Finish(s => new MethodOrFieldDeclaration(s)),
+                methodSignatureDeclaration.Finish(s => new MethodOrFieldDeclaration(s))
             );
 
-
-            TypeDeclarationDesigntime = Nonterminal.Create("Type Declaration",
-                fullName.Extended()
-                    .Extend(simpleNamePart)
+            var typeDeclaration = Nonterminal.Create("Type Declaration",
+                fullName.Extended() // access level
+                    .Append("type")
+                    .Extend(simpleNamePart) // type name
                     .Append("{")
                     .Extend(methodOrFieldDeclaration.Many<MethodOrFieldDeclaration, List<MethodOrFieldDeclaration>>())
-                    .Append("}").Finish((accesLevel, typeName, fields) => new TypeDeclaration(accesLevel, typeName, fields)),
-                simpleNamePart.Extended()
+                    .Append("}").Finish((accesLevel, typeName, fields) => new TypeDeclaration(false, accesLevel, typeName, fields)),
+               "type".Appended()
+                    .Extend(simpleNamePart) // type name
                     .Append("{")
                     .Extend(methodOrFieldDeclaration.Many<MethodOrFieldDeclaration, List<MethodOrFieldDeclaration>>())
-                    .Append("}").Finish((typeName, fields) => new TypeDeclaration(null, typeName, fields))
+                    .Append("}").Finish((typeName, fields) => new TypeDeclaration(false, null, typeName, fields))
             );
+            TypeDeclarationDesigntime = typeDeclaration;
+
+            var interfaceDeclaration = Nonterminal.Create("Interface Declaration",
+                fullName.Extended() // access level
+                    .Append("interface")
+                    .Extend(simpleNamePart) // type name
+                    .Append("{")
+                    .Extend(interfaceDeclarations.Many<MethodOrFieldDeclaration, List<MethodOrFieldDeclaration>>())
+                    .Append("}").Finish((accesLevel, typeName, fields) => new TypeDeclaration(true, accesLevel, typeName, fields)),
+               "interface".Appended()
+                    .Extend(simpleNamePart) // type name
+                    .Append("{")
+                    .Extend(interfaceDeclarations.Many<MethodOrFieldDeclaration, List<MethodOrFieldDeclaration>>())
+                    .Append("}").Finish((typeName, fields) => new TypeDeclaration(true, null, typeName, fields))
+            );
+
+            InterfaceDeclarationDesigntime = interfaceDeclaration;
 
             RootDesigntime = TypeDeclarationDesigntime
                 .AddBlockComment("/*", "*/")

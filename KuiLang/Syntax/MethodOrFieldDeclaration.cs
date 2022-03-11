@@ -13,7 +13,13 @@
             FieldDeclaration = fieldDeclaration;
         }
 
+        public MethodOrFieldDeclaration(SignatureDeclaration methodSignatureDeclaration)
+        {
+            MethodSignatureDeclaration = methodSignatureDeclaration;
+        }
+
         public MethodDeclaration? MethodDeclaration { get; }
         public FieldDeclaration? FieldDeclaration { get; }
+        public SignatureDeclaration? MethodSignatureDeclaration { get; }
     }
 }
