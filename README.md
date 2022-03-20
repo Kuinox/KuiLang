@@ -1,6 +1,26 @@
-# Kui-Lang
+# Kui-Lang #TODO: find a better name
 
-Relational, Object Oriented, General Purpose Programming Language.
+Declarative, Object Oriented, General Purpose Programming Language.
+
+## Why another language ?
+
+Disliking slow software, one of my concern when designing software is often "Will this architecture allow painlessly to increase performance if needed".  
+But, in practice: 
+1. In business code, slowness if often acceptable, the code written will try to compromise between readability, robustness, or written hastly (cheaper).
+2. Optimising something rarely make it more readable, it's often harder to maintain, so it's never made unless the user complain.  
+3. Targeting novel hardware require next to complete rewrite.
+
+Let's say a magical software allow to do high degree of optimisations, without touching a single line of the business logic, can survive multiples decades of hardware, changes to the major OS of the decade, it would be great yeah ?
+Well I would thought it would be impossible, except, this sort of software already exists.  
+Databases does that.  
+MySQL for example, can run on Linux, Solaris, macOS, Windows, FreeBSD.  
+Databases started when CPU had a single core, and can run today on clusters of machines with hundreds of cores available.
+
+That's not all, software thats require high performance begin to adopt more and more a database like architecture.
+
+Games Engine adopt the ECS patterns: https://en.wikipedia.org/wiki/Entity_component_system 
+Compilers start to be query based: https://rustc-dev-guide.rust-lang.org/query.html 
+
 
 ## Why current languages are not enough:
 
@@ -9,7 +29,7 @@ Current procedural languages make you:
  - Implement how the calculation is done.
 
 On the other hand, in procedural OOP languages, you don't really care about the data structure, or the way the calculation is made.
-You care about 2 things: 
+You care about 3 things: 
 1. Neatly representating your data & encapsulate it to reduce complexity: You don't care that if it's a LinkedList or an ArrayList, what you care about is thats it's a collection you can add item to, and expose a readonly view of it. 
 2. Representing the logic in comprehensible format.
 3. Getting your feature done in a reasonable time
