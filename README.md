@@ -2,57 +2,53 @@
 
 Declarative, Object Oriented, General Purpose Programming Language.
 
-## Why another language ?
+<details>
+<summary>
+    Why another language ? <sub>[Expand]</sub>
+</summary>
+Right now, most popular general purpose languages are procedural.  
 
-Disliking slow software, one of my concern when designing software is often "Will this architecture allow painlessly to increase performance if needed".  
-But, in practice: 
-1. In business code, slowness if often acceptable, the code written will try to compromise between readability, robustness, or written hastly (cheaper).
-2. Optimising something rarely make it more readable, it's often harder to maintain, so it's never made unless the user complain.  
-3. Targeting novel hardware require next to complete rewrite.
+They force the developer to choose the data structures implementations (DoublyLinkedList vs ArrayList).  
+They also for you to choose the implementation of all the common operations you do.
+For example, if you want to calculate a sum: 
+```js
+//pseudocode
+number sum(numbers: number[]){
+    var sum = 0;
+    foreach(var number in numbers) {
+        sum += number
+    }
+}
 
-Let's say a magical software allow to do high degree of optimisations, without touching a single line of the business logic, can survive multiples decades of hardware, changes to the major OS of the decade, it would be great yeah ?
-Well I would thought it would be impossible, except, this sort of software already exists.  
-Databases does that.  
-MySQL for example, can run on Linux, Solaris, macOS, Windows, FreeBSD.  
-Databases started when CPU had a single core, and can run today on clusters of machines with hundreds of cores available.
+```
 
-That's not all, software thats require high performance begin to adopt more and more a database like architecture.
+There, by accident, you specified that:  
+- The numbers are in a contiguous espace of memory.  
+- You must loop, in order on the numbers.  
+- You must loop sequentially on the numbers.  
+
+Will you run the same function on 40 thousands, millions, billions items ?  
+This example is for the sum example, but now, replace it with any business app. "This important logic was designed to run once and now is called thousands of times in a loop but we don't have the time to optimise it" is a too common scenario.  
+
+What I want, is that the logic and the implementation is decoupled.  
+
+And something we know well does that: SQL Databases.  
+In SQL DBs, you write your schema structure, queries, and the DB engine implement it.  
+You painlessly write highparalised code, doing async IO, that's can run and adapt without any work to your tiny laptop or on your production clusters of machines with hundreds of cores available.
+
+Sadly, SQL has a lot of issues, [but a lot are due to the language itself.](https://www.scattered-thoughts.net/writing/against-sql).  
+
+Finally, software thats require high performance begin to adopt more and more a database-like architecture.
 
 Games Engine adopt the ECS patterns: https://en.wikipedia.org/wiki/Entity_component_system 
 Compilers start to be query based: https://rustc-dev-guide.rust-lang.org/query.html 
+</details>
 
+## Ideal high level architecture
 
-## Why current languages are not enough:
-
-Current procedural languages make you:
- - Choose the data structure you have to use.
- - Implement how the calculation is done.
-
-On the other hand, in procedural OOP languages, you don't really care about the data structure, or the way the calculation is made.
-You care about 3 things: 
-1. Neatly representating your data & encapsulate it to reduce complexity: You don't care that if it's a LinkedList or an ArrayList, what you care about is thats it's a collection you can add item to, and expose a readonly view of it. 
-2. Representing the logic in comprehensible format.
-3. Getting your feature done in a reasonable time
-
-Which conflict with:
-- Having the right data structure for the job: Getting the perfect data structure for each workload is time consuming, a plain array is often faster than an HashSet.
-- Expressing your logic so it can be parallelized or simply processed faster, makes the code less readable, and takes more time to implement.
-
-It means the logic and the implementation must be decoupled.
-One way so, is that the programmer write the logic, and a magic compiler figure out how to implement it.
-
-And we already have multiple languages that does this:  
-SQL: you write your tables structures, relations, queries, and the DB engine implement it.
-Prolog: you write facts and rules, query, and prolog implement it.
-
-But these languages have weakness:
-
-No sane person write an entier app in SQL. SQL is made to store or process data, it's not "general purpose".
-SQL has several problems: https://www.scattered-thoughts.net/writing/against-sql
-
-Q: C# has linq, why you don't simply use it ?  
-First: you are still relying on a certain implementation of a data structure.
-Second: I believe thats the more your program is written in this unrelational way, the more the optimiser will have room to improve your program.
+The code is compiled to an intermediate language (to avoid parsing text at runtime).
+The optimizer run a pass on the intermediate language to run some optimisations.
+The runtime is like a JIT, Profile Guided Optimisation can help a lot (like statistics in DBs) to help choose the correct data structures, and to choose the best implementations to use.
 
 ## The language itself  
 
