@@ -35,22 +35,22 @@ What I want, is that the logic and the implementation is decoupled.
 
 And something we know well does that: SQL Databases.  
 In SQL DBs, you write your schema structure, queries, and the DB engine implement it.  
-You painlessly write highparalised code, doing async IO, that's can run and adapt without any work to your tiny laptop or on your production clusters of machines with hundreds of cores available.
+You painlessly write highparalised code, doing async IO, that's can run and adapt without any work to your tiny laptop or on your production clusters of machines with hundreds of cores available.  
 
 Sadly, SQL has a lot of issues, [but a lot are due to the language itself.](https://www.scattered-thoughts.net/writing/against-sql).  
 
-Finally, software thats require high performance begin to adopt more and more a database-like architecture.
+Finally, software thats require high performance begin to adopt more and more a database-like architecture.  
 
-Games Engine adopt the ECS patterns: https://en.wikipedia.org/wiki/Entity_component_system 
-Compilers start to be query based: https://rustc-dev-guide.rust-lang.org/query.html 
+Games Engine adopt the ECS patterns: https://en.wikipedia.org/wiki/Entity_component_system  
+Compilers start to be query based: https://rustc-dev-guide.rust-lang.org/query.html  
 </ul></p>
 </details>
 
 ## Ideal, High Level architecture
 
-The source code is compiled to an intermediate language, to avoid the costly text parsing at runtime.
+The source code is compiled to an intermediate language, to avoid the costly text parsing at runtime.  
 Ideally, the optimiser can run a pass on the outputed binary.  
-The runtime is like a JIT, except because it's up to the optimiser to choose how to implement the program, Profile Guided Optimisation will be very important (like statistics in SQL DBs), to choose the right data structures.
+The runtime is like a JIT, except because it's up to the optimiser to choose how to implement the program, Profile Guided Optimisation will be very important (like statistics in SQL DBs), to choose the right data structures.   
 
-Because the optimiser does the job of implementing the program, the problems of async IO, and maybe, most of the concurrency issues should be gone.
+Because the optimiser does the job of implementing the program, the problems of async IO, and maybe, most of the concurrency issues should be gone.  
 This also make it possible to offload work to something else than the OS CPU, or another machine, even if the code was not designed for it.
