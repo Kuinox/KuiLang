@@ -6,6 +6,7 @@ Declarative, Object Oriented, General Purpose Programming Language.
 <summary>
     Why another language ? <sub>[Expand]</sub>
 </summary>
+    <p><ul>
 Right now, most popular general purpose languages are procedural.  
 
 They force the developer to choose the data structures implementations (DoublyLinkedList vs ArrayList).  
@@ -42,6 +43,7 @@ Finally, software thats require high performance begin to adopt more and more a 
 
 Games Engine adopt the ECS patterns: https://en.wikipedia.org/wiki/Entity_component_system 
 Compilers start to be query based: https://rustc-dev-guide.rust-lang.org/query.html 
+</ul></p>
 </details>
 
 ## Ideal high level architecture
