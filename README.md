@@ -31,13 +31,13 @@ There, by accident, you specified that:
 Will you run the same function on 40 thousands, millions, billions items ?  
 In this example, we only compute a sum, but now, replace it with any business app. "This important logic was designed to run once and now is called thousands of times in a loop but we don't have the time to optimise it" is a too common scenario.  
 
-What I want, is that the logic and the implementation is decoupled.  
+What I want, is that the logic and implementation to be decoupled.  
 
 And something we know well does that: SQL Databases.  
 In SQL DBs, you write your schema structure, queries, and the DB engine implement it.  
-You painlessly write highparalised code, doing async IO, that's can run and adapt without any work to your tiny laptop or on your production clusters of machines with hundreds of cores available.  
+You painlessly write highparalised code, doing async IO, that can run and adapt without any work, from your tiny laptop to your production clusters of machines with hundreds of cores available.  
 
-Sadly, SQL has a lot of issues, [but a lot are due to the language itself.](https://www.scattered-thoughts.net/writing/against-sql).  
+Sadly, SQL has a lot of issues, [but a lot are due to the language itself], not declarative programming.(https://www.scattered-thoughts.net/writing/against-sql).  
 
 Finally, software thats require high performance begin to adopt more and more a database-like architecture.  
 
