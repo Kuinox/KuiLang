@@ -1,4 +1,4 @@
-# Kui-Lang #TODO: find a better name
+# KuiLang
 
 Declarative, Object Oriented, General Purpose Programming Language.
 
