@@ -10,7 +10,7 @@ Declarative, Object Oriented, General Purpose Programming Language.
 Right now, most popular general purpose languages are procedural.  
 
 They force the developer to choose the data structures implementations (DoublyLinkedList vs ArrayList).  
-They also for you to choose the implementation of all the common operations you do.
+They also force you to choose the implementation of all the common operations you do.
 For example, if you want to calculate a sum: 
 ```js
 //pseudocode
