@@ -29,7 +29,7 @@ There, by accident, you specified that:
 - You must loop sequentially on the numbers.  
 
 Will you run the same function on 40 thousands, millions, billions items ?  
-This example is for the sum example, but now, replace it with any business app. "This important logic was designed to run once and now is called thousands of times in a loop but we don't have the time to optimise it" is a too common scenario.  
+In this example, we only compute a sum, but now, replace it with any business app. "This important logic was designed to run once and now is called thousands of times in a loop but we don't have the time to optimise it" is a too common scenario.  
 
 What I want, is that the logic and the implementation is decoupled.  
 
