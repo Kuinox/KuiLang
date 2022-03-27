@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Farkle;
 using Farkle.Builder;
+using KuiLang.Syntax;
 
 namespace KuiLang.Tests
 {
@@ -12,11 +13,10 @@ namespace KuiLang.Tests
     {
 
         static readonly RuntimeFarkle<FieldLocation> FullNameRuntime = KuiLang.FullNameDesigntime.Build();
-        static readonly RuntimeFarkle<Expression> ExpressionRuntime = KuiLang.ExpressionDesigntime.Build();
-        static readonly RuntimeFarkle<SignatureDeclaration> MethodSignatureDeclarationRuntime = KuiLang.MethodSignatureDeclarationDesigntime.Build();
-        static readonly RuntimeFarkle<MethodDeclaration> MethodDeclarationRuntime = KuiLang.MethodDeclarationDesigntime.Build();
-        static readonly RuntimeFarkle<TypeDeclaration> TypeDeclarationRuntime = KuiLang.TypeDeclarationDesigntime.Build();
-        static readonly RuntimeFarkle<TypeDeclaration> InterfaceDeclarationRuntime = KuiLang.InterfaceDeclarationDesigntime.Build();
+        static readonly RuntimeFarkle<Ast.Expression> ExpressionRuntime = KuiLang.ExpressionDesigntime.Build();
+        static readonly RuntimeFarkle<Ast.Statement.Definition.MethodSignature> MethodSignatureDeclarationRuntime = KuiLang.MethodSignatureDeclarationDesigntime.Build();
+        static readonly RuntimeFarkle<Ast.Statement.Definition.Method> MethodDeclarationRuntime = KuiLang.MethodDeclarationDesigntime.Build();
+        static readonly RuntimeFarkle<Ast.Statement.Definition.Type> TypeDeclarationRuntime = KuiLang.TypeDeclarationDesigntime.Build();
         [Test]
         public void can_parse_full_name()
         {
@@ -61,19 +61,6 @@ namespace KuiLang.Tests
         public void can_parse_type(string type)
         {
             var res = TypeDeclarationRuntime.Parse(type);
-            res.IsOk.Should().BeTrue();
-        }
-
-        [TestCase(
-@"public interface Foo
-{
-    number aProperty;
-    void FooBar();
-}
-")]
-        public void can_parse_interface(string interface_declaration)
-        {
-            var res = InterfaceDeclarationRuntime.Parse(interface_declaration);
             res.IsOk.Should().BeTrue();
         }
     }
