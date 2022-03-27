@@ -18,9 +18,10 @@ namespace KuiLang
             existing._parts.CopyTo(_parts, 0);
             _parts[^1] = newPart;
         }
-        public IReadOnlyCollection<string> Parts => _parts;
+        public IReadOnlyList<string> Parts => _parts;
         public FieldLocation Append(string part) => new FieldLocation(part, this);
 
         public override string ToString() => string.Join(".", _parts);
+
     }
 }

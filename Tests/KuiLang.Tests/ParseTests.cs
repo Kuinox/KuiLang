@@ -5,17 +5,18 @@ using System;
 using System.Threading.Tasks;
 using Farkle;
 using Farkle.Builder;
+using KuiLang.Syntax;
 
 namespace KuiLang.Tests
 {
-    public class BaseTests
+    public class ParseTests
     {
 
         static readonly RuntimeFarkle<FieldLocation> FullNameRuntime = KuiLang.FullNameDesigntime.Build();
-        static readonly RuntimeFarkle<Expression> ExpressionRuntime = KuiLang.ExpressionDesigntime.Build();
-        static readonly RuntimeFarkle<SignatureDeclaration> MethodSignatureDeclarationRuntime = KuiLang.MethodSignatureDeclarationDesigntime.Build();
-        static readonly RuntimeFarkle<MethodDeclaration> MethodDeclarationRuntime = KuiLang.MethodDeclarationDesigntime.Build();
-        static readonly RuntimeFarkle<TypeDeclaration> TypeDeclarationRuntime = KuiLang.TypeDeclarationDesigntime.Build();
+        static readonly RuntimeFarkle<Ast.Expression> ExpressionRuntime = KuiLang.ExpressionDesigntime.Build();
+        static readonly RuntimeFarkle<Ast.Statement.Definition.MethodSignature> MethodSignatureDeclarationRuntime = KuiLang.MethodSignatureDeclarationDesigntime.Build();
+        static readonly RuntimeFarkle<Ast.Statement.Definition.Method> MethodDeclarationRuntime = KuiLang.MethodDeclarationDesigntime.Build();
+        static readonly RuntimeFarkle<Ast.Statement.Definition.Type> TypeDeclarationRuntime = KuiLang.TypeDeclarationDesigntime.Build();
         [Test]
         public void can_parse_full_name()
         {
@@ -26,7 +27,11 @@ namespace KuiLang.Tests
 
 
         [TestCase("Bar methodName()")]
+        [TestCase("Foo methodName()")]
         [TestCase("Foo.Bar methodName(AnArg arg)")]
+        [TestCase("Foo.Bar methodName(AnArg arg, Foo anotherArg)")]
+        [TestCase("Foo.Bar methodName(AnArg arg, Foo anotherArg1, Foo anotherArg2)")]
+        [TestCase("Foo.Bar methodName(AnArg arg, Foo anotherArg2, Foo anotherArg3)")]
         public void can_parse_argument(string declaration)
         {
             var res = MethodSignatureDeclarationRuntime.Parse(declaration);
