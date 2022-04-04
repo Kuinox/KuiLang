@@ -47,7 +47,7 @@ Compilers start to be query based: https://rustc-dev-guide.rust-lang.org/query.h
 </details>
 
 ## Ideal, High Level architecture
-
+* This is a plan, it's currently not implemented*
 The source code is compiled to an intermediate language, to avoid the costly text parsing at runtime.  
 Ideally, the optimiser can run a pass on the outputed binary.  
 The runtime is like a JIT, except because it's up to the optimiser to choose how to implement the program, Profile Guided Optimisation will be very important (like statistics in SQL DBs), to choose the right data structures.   
