@@ -48,9 +48,11 @@ Compilers start to be query based: https://rustc-dev-guide.rust-lang.org/query.h
 
 ## Ideal, High Level architecture
 *This is a plan, it's currently not implemented*  
-The source code is compiled to an intermediate language, to avoid the costly text parsing at runtime.  
-Ideally, the optimiser can run a pass on the outputed binary.  
-The runtime is like a JIT, except because it's up to the optimiser to choose how to implement the program, Profile Guided Optimisation will be very important (like statistics in SQL DBs), to choose the right data structures.   
+Ideally, the source could would be compiled to an intermediate language (still declarative).
+This would avoid costly source code parsing in runtime.  
+Ideally, the engine run a pass on the final app to pre-generate & optimise(PGO) things before the first real run.
 
-Because the optimiser does the job of implementing the program, the problems of async IO, and maybe, most of the concurrency issues should be gone.  
-This also make it possible to offload work to something else than the OS CPU, or another machine, even if the code was not designed for it.
+The runtime is like a JIT, except because it's up to the runtime to choose how to implement the program, Profile Guided Optimisation will be very important (like statistics in SQL DBs), to choose the right data structures and algorithms.   
+
+Because the optimiser does the job of implementing the program, the problems of async IO, and maybe, lot of the concurrency issues would be gone.  
+This also make it possible to offload work to something else than the CPU, like another machine, even if the code was not designed for it, the implementation can do whatever it want.
