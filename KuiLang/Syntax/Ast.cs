@@ -13,7 +13,7 @@ namespace KuiLang.Syntax
             public sealed record Block(IReadOnlyList<Statement> Statements) : Statement;
             public abstract record Definition(string Name) : Statement
             {
-                public sealed record Type(
+                public sealed record TypeDef(
                 FieldLocation? AccessLevel,
                 string Name,
                 IReadOnlyList<Definition> Fields) : Definition(Name);
@@ -24,17 +24,19 @@ namespace KuiLang.Syntax
                 //PR a better representation if you know how it should be.
                 public sealed record Argument(FieldLocation SignatureType, string Name) : Definition(Name);
                 public sealed record Field(bool IsStatic, FieldLocation? AccessModifier, Argument Signature) : Definition(Signature.Name);
-                public sealed record MethodSignature(Field Signature, IReadOnlyList<Argument> Arguments): Definition(Signature.Name);
+                public sealed record MethodSignature(Field Signature, IReadOnlyList<Argument> Arguments) : Definition(Signature.Name);
                 public sealed record Method(
                     MethodSignature Signature,
-                    IReadOnlyList<Statement> Statements
+                    Block Statements
                 ) : Definition(Signature.Signature.Name);
             }
 
             public sealed record ExpressionStatement(Expression TheExpression) : Statement;
-            public sealed record VariableDeclaration(FieldLocation Type, string Name, Expression InitValue) : Statement;
+            public sealed record VariableDeclaration(FieldLocation Type, string Name, Expression? InitValue) : Statement;
             public sealed record VariableAssignation(FieldLocation VariableLocation, Expression NewVariableValue) : Statement;
-
+            public sealed record Return(
+                Expression? ReturnedValue
+            ) : Statement;
         }
 
 

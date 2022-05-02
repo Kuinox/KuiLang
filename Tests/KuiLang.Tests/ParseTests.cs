@@ -1,8 +1,6 @@
 
 using FluentAssertions;
 using NUnit.Framework;
-using System;
-using System.Threading.Tasks;
 using Farkle;
 using Farkle.Builder;
 using KuiLang.Syntax;
@@ -16,7 +14,7 @@ namespace KuiLang.Tests
         static readonly RuntimeFarkle<Ast.Expression> ExpressionRuntime = KuiLang.ExpressionDesigntime.Build();
         static readonly RuntimeFarkle<Ast.Statement.Definition.MethodSignature> MethodSignatureDeclarationRuntime = KuiLang.MethodSignatureDeclarationDesigntime.Build();
         static readonly RuntimeFarkle<Ast.Statement.Definition.Method> MethodDeclarationRuntime = KuiLang.MethodDeclarationDesigntime.Build();
-        static readonly RuntimeFarkle<Ast.Statement.Definition.Type> TypeDeclarationRuntime = KuiLang.TypeDeclarationDesigntime.Build();
+        static readonly RuntimeFarkle<Ast.Statement.Definition.TypeDef> TypeDeclarationRuntime = KuiLang.TypeDeclarationDesigntime.Build();
         [Test]
         public void can_parse_full_name()
         {

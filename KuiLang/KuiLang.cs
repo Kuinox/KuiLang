@@ -9,14 +9,17 @@ namespace KuiLang
 {
     public static class KuiLang
     {
-        public static readonly PrecompilableDesigntimeFarkle<Ast> RootDesigntime;
+        public static readonly DesigntimeFarkle<Ast> RootDesigntime;
         public static readonly RuntimeFarkle<Ast> RootRuntime;
 
+        public static readonly DesigntimeFarkle<Statement> StatementDesignTime;
         public static readonly DesigntimeFarkle<FieldLocation> FullNameDesigntime;
         public static readonly DesigntimeFarkle<Expression> ExpressionDesigntime;
         public static readonly DesigntimeFarkle<Statement.Definition.MethodSignature> MethodSignatureDeclarationDesigntime;
         public static readonly DesigntimeFarkle<Statement.Definition.Method> MethodDeclarationDesigntime;
-        public static readonly DesigntimeFarkle<Statement.Definition.Type> TypeDeclarationDesigntime;
+        public static readonly DesigntimeFarkle<Statement.Definition.TypeDef> TypeDeclarationDesigntime;
+        public static readonly DesigntimeFarkle<Statement.Block> StatementListDesignTime;
+
 
         static DesigntimeFarkle<bool> IsLiteralPresent(string name) =>
             Nonterminal.Create($"{name} Maybe",
@@ -48,12 +51,6 @@ namespace KuiLang
                 argument.Finish((s) => new List<Statement.Definition.Argument>() { s })
             );
 
-
-
-
-
-
-
             var expressionNonterminal = Nonterminal.Create<Expression>("Expression");
             ExpressionDesigntime = expressionNonterminal;
 
@@ -65,7 +62,6 @@ namespace KuiLang
                 .Finish((xs, s) => xs.Plus(s)),
                 ExpressionDesigntime.Finish(s => new List<Expression>())
             );
-
 
             var functionCall = Nonterminal.Create("Function Call",
                 fullName.Extended()
@@ -96,22 +92,32 @@ namespace KuiLang
             );
 
             var statement = Nonterminal.Create<Statement>("Statement");
-
-            var statementList = statement.Many<Statement, List<Statement>>();
-
+            StatementDesignTime = statement;
+            var statementList = Nonterminal.Create("Statement Block", statement
+                .Many<Statement, List<Statement>>()
+                .Finish(s => new Statement.Block(s))
+            );
+            StatementListDesignTime = statementList;
             var statementScope = Nonterminal.Create("Statement Scope",
                 "{".Appended()
                     .Extend(statementList)
                     .Append("}")
-                    .AsIs()
-            );
+                    .AsIs());
+
             var statementContent = Nonterminal.Create("Statement Content",
                 ExpressionDesigntime.Finish(s => (Statement)new Statement.ExpressionStatement(s)),
                 variableDeclaration.Finish(s => (Statement)s)
             );
+
+
+            var returnStatement = Nonterminal.Create("Return Statement",
+                "return".Appended().Extend(expressionNonterminal).Finish(s => new Statement.Return(s))
+            );
+
             statement.SetProductions(
                 statementContent.Extended().Append(";").AsIs(),
-                statementScope.Finish(s => (Statement)new Statement.Block(s))
+                statementScope.Finish(s => (Statement)s),
+                MethodDeclarationDesigntime.Finish(s => (Statement)s)
             );
 
             var fieldSignature = Nonterminal.Create("Field Signature",
@@ -167,12 +173,12 @@ namespace KuiLang
                     .Extend(simpleNamePart) // type name
                     .Append("{")
                     .Extend(definition.Many<Statement.Definition, List<Statement.Definition>>())
-                    .Append("}").Finish((accesLevel, typeName, fields) => new Statement.Definition.Type(accesLevel, typeName, fields)),
+                    .Append("}").Finish((accesLevel, typeName, fields) => new Statement.Definition.TypeDef(accesLevel, typeName, fields)),
                "type".Appended()
                     .Extend(simpleNamePart) // type name
                     .Append("{")
                     .Extend(definition.Many<Statement.Definition, List<Statement.Definition>>())
-                    .Append("}").Finish((typeName, fields) => new Statement.Definition.Type(null, typeName, fields))
+                    .Append("}").Finish((typeName, fields) => new Statement.Definition.TypeDef(null, typeName, fields))
             );
             TypeDeclarationDesigntime = typeDeclaration;
 
@@ -199,8 +205,8 @@ namespace KuiLang
 
             RootDesigntime = ((DesigntimeFarkle<Ast>)TypeDeclarationDesigntime)
                 .AddBlockComment("/*", "*/")
-                .AddLineComment("//")
-                .MarkForPrecompile();
+                .AddLineComment("//");
+
             RootRuntime = RootDesigntime.Build();
         }
     }
