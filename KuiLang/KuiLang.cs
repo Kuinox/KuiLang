@@ -37,7 +37,6 @@ namespace KuiLang
                 .Finish((a, b) => a.Append(b)),
                 simpleNamePart.Finish((s) => new FieldLocation(s))
             );
-            FullNameDesigntime = fullName;
             var argument = Nonterminal.Create("Argument Declaration",
               fullName.Extended().Extend(simpleNamePart).Finish((type, argName) => new Statement.Definition.Argument(type, argName))
             );
@@ -52,15 +51,14 @@ namespace KuiLang
             );
 
             var expressionNonterminal = Nonterminal.Create<Expression>("Expression");
-            ExpressionDesigntime = expressionNonterminal;
 
             var argumentPassingList = Nonterminal.Create<List<Expression>>("Expression List");
             argumentPassingList.SetProductions(
                 argumentPassingList.Extended()
                 .Append(",")
-                .Extend(ExpressionDesigntime)
+                .Extend(expressionNonterminal)
                 .Finish((xs, s) => xs.Plus(s)),
-                ExpressionDesigntime.Finish(s => new List<Expression>())
+                expressionNonterminal.Finish(s => new List<Expression>())
             );
 
             var functionCall = Nonterminal.Create("Function Call",
@@ -74,7 +72,7 @@ namespace KuiLang
             var assignation = Nonterminal.Create("Assignation",
                     "=".Appended()
 
-                    .Extend(ExpressionDesigntime).AsIs()
+                    .Extend(expressionNonterminal).AsIs()
             );
 
             var variableDeclaration = Nonterminal.Create("Variable Declaration",
@@ -92,12 +90,10 @@ namespace KuiLang
             );
 
             var statement = Nonterminal.Create<Statement>("Statement");
-            StatementDesignTime = statement;
             var statementList = Nonterminal.Create("Statement Block", statement
                 .Many<Statement, List<Statement>>()
                 .Finish(s => new Statement.Block(s))
             );
-            StatementListDesignTime = statementList;
             var statementScope = Nonterminal.Create("Statement Scope",
                 "{".Appended()
                     .Extend(statementList)
@@ -105,21 +101,13 @@ namespace KuiLang
                     .AsIs());
 
             var statementContent = Nonterminal.Create("Statement Content",
-                ExpressionDesigntime.Finish(s => (Statement)new Statement.ExpressionStatement(s)),
+                expressionNonterminal.Finish(s => (Statement)new Statement.ExpressionStatement(s)),
                 variableDeclaration.Finish(s => (Statement)s)
             );
-
 
             var returnStatement = Nonterminal.Create("Return Statement",
                 "return".Appended().Extend(expressionNonterminal).Finish(s => new Statement.Return(s))
             );
-
-            statement.SetProductions(
-                statementContent.Extended().Append(";").AsIs(),
-                statementScope.Finish(s => (Statement)s),
-                MethodDeclarationDesigntime.Finish(s => (Statement)s)
-            );
-
             var fieldSignature = Nonterminal.Create("Field Signature",
                 fullName.Extended()
                     .Extend(fullName)
@@ -141,7 +129,6 @@ namespace KuiLang
                     )
 )
             );
-            MethodSignatureDeclarationDesigntime = methodSignature;
 
             var methodSignatureDeclaration = Nonterminal.Create("Method Signature Declaration",
                 methodSignature.Extended().Append(";").AsIs()
@@ -152,7 +139,12 @@ namespace KuiLang
                     .Extend(statementScope)
                     .Finish((a, b) => new Statement.Definition.Method(a, b))
             );
-            MethodDeclarationDesigntime = methodDeclaration;
+
+            statement.SetProductions(
+                statementContent.Extended().Append(";").AsIs(),
+                statementScope.Finish(s => (Statement)s),
+                methodDeclaration.Finish(s => (Statement)s)
+            );
 
             var fieldDeclaration = Nonterminal.Create("Field Declaration",
                 fieldSignature.Extended().Append(";").AsIs()
@@ -162,6 +154,7 @@ namespace KuiLang
                 methodDeclaration.Finish(s => (Statement.Definition)s),
                 fieldDeclaration.Finish(s => (Statement.Definition)s)
             );
+
             var interfaceFieldDeclarations = Nonterminal.Create("Interface Field Declaration",
                 fieldDeclaration.Finish(s => (Statement.Definition)s),
                 methodSignatureDeclaration.Finish(s => (Statement.Definition)s)
@@ -180,7 +173,6 @@ namespace KuiLang
                     .Extend(definition.Many<Statement.Definition, List<Statement.Definition>>())
                     .Append("}").Finish((typeName, fields) => new Statement.Definition.TypeDef(null, typeName, fields))
             );
-            TypeDeclarationDesigntime = typeDeclaration;
 
             //var interfaceDeclaration = Nonterminal.Create("Interface Declaration",
             //    fullName.Extended() // access level
@@ -203,11 +195,18 @@ namespace KuiLang
             //);
             //InterfaceOrTypeDeclarationDesignTime = interfaceOrTypeDeclaration;
 
-            RootDesigntime = ((DesigntimeFarkle<Ast>)TypeDeclarationDesigntime)
+            RootDesigntime = ((DesigntimeFarkle<Ast>)typeDeclaration)
                 .AddBlockComment("/*", "*/")
                 .AddLineComment("//");
-
             RootRuntime = RootDesigntime.Build();
+
+            StatementDesignTime = statement;
+            FullNameDesigntime = fullName;
+            ExpressionDesigntime = expressionNonterminal;
+            MethodSignatureDeclarationDesigntime = methodSignature;
+            MethodDeclarationDesigntime = methodDeclaration;
+            TypeDeclarationDesigntime = typeDeclaration;
+            StatementListDesignTime = statementList;
         }
     }
 }
