@@ -37,7 +37,7 @@ namespace KuiLang
 
         public FieldLocation SubParts => new(Parts[1..]);
 
-        public override string ToString() => string.Join(".", Parts);
+        public override string ToString() => string.Join(".", Parts.ToArray());
 
         public bool Empty => Parts.Length == 0;
 

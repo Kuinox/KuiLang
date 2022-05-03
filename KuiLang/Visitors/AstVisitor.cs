@@ -1,5 +1,6 @@
 ﻿using KuiLang.Syntax;
 using System;
+using System.Runtime.CompilerServices;
 using static KuiLang.Syntax.Ast;
 using static KuiLang.Syntax.Ast.Expression;
 using static KuiLang.Syntax.Ast.Statement;
@@ -24,8 +25,16 @@ namespace KuiLang
             VariableDeclaration variable => Visit(variable),
             VariableAssignation assignation => Visit(assignation),
             Return returnStatement => Visit(returnStatement),
+            If @if => Visit(@if),
             _ => throw new InvalidOperationException($"Unknown Statement{statement}")
         };
+
+        protected virtual T Visit(If @if)
+        {
+            Visit(@if.Condition);
+            Visit(@if.Statements);
+            return default!;
+        }
 
         protected virtual T Visit(Return returnStatement) => Visit(returnStatement.ReturnedValue!);
 
@@ -89,8 +98,43 @@ namespace KuiLang
         {
             FunctionCall functionCall => Visit(functionCall),
             Variable variable => Visit(variable),
+            Constant constant => Visit(constant),
+            Add add => Visit(add),
+            Substract sub => Visit(sub),
+            Multiply multiply => Visit(multiply),
+            Divide divide => Visit(divide),
             _ => throw new InvalidOperationException($"Unknown Statement{expression}")
         };
+
+        protected virtual T Visit(Add add)
+        {
+            Visit(add.Left);
+            Visit(add.Right);
+            return default!;
+        }
+
+        protected virtual T Visit(Substract substract)
+        {
+            Visit(substract.Left);
+            Visit(substract.Right);
+            return default!;
+        }
+
+        protected virtual T Visit(Multiply multiply)
+        {
+            Visit(multiply.Left);
+            Visit(multiply.Right);
+            return default!;
+        }
+
+        protected virtual T Visit(Divide divide)
+        {
+            Visit(divide.Left);
+            Visit(divide.Right);
+            return default!;
+        }
+
+        protected virtual T Visit(Constant constant) => default!;
 
         protected virtual T Visit(FunctionCall functionCall)
         {

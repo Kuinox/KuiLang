@@ -14,7 +14,7 @@ namespace KuiLang.Runner
     public static class ScriptHelpers
     {
         static readonly RuntimeFarkle<Ast.Statement.Block> StatementListParser = KuiLang.StatementListDesignTime.Build();
-        public static int RunScript(string scriptText)
+        public static object RunScript(string scriptText)
         {
             var res = StatementListParser.Parse(scriptText);
             if (!res.IsOk)
@@ -23,7 +23,7 @@ namespace KuiLang.Runner
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine(res.ErrorValue);
                 Console.ForegroundColor = prevColor;
-                return -1;
+                throw new InvalidOperationException(res.ErrorValue.ToString());
             }
             var statements = res.ResultValue;
             var symbolsBuilder = new SymbolTableBuilderVisitor();
@@ -31,7 +31,7 @@ namespace KuiLang.Runner
             var interpreter = new InterpreterVisitor(symbolsBuilder.Symbols);
             var val = interpreter.Visit(statements); //Thats where all the magic happens.
             Console.WriteLine($"Execution returned value: {val}");
-            return 0;
+            return val;
         }
     }
 }
