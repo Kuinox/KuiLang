@@ -7,7 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KuiLang", "KuiLang\KuiLang.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{417E366B-FF40-4EAE-97B7-597777E3E2A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KuiLang.Tests", "Tests\KuiLang.Tests\KuiLang.Tests.csproj", "{7B12DFB0-46C2-4709-BA92-7CF19EDF96D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KuiLang.Tests", "Tests\KuiLang.Tests\KuiLang.Tests.csproj", "{7B12DFB0-46C2-4709-BA92-7CF19EDF96D4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A3900F68-AB17-4587-8D36-C5EA5837C421}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

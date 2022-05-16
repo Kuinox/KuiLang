@@ -12,8 +12,8 @@ namespace KuiLang.Tests
 
         static readonly RuntimeFarkle<FieldLocation> FullNameRuntime = KuiLang.FullNameDesigntime.Build();
         static readonly RuntimeFarkle<Ast.Expression> ExpressionRuntime = KuiLang.ExpressionDesigntime.Build();
-        static readonly RuntimeFarkle<Ast.Statement.Definition.Method> MethodDeclarationRuntime = KuiLang.MethodDeclarationDesigntime.Build();
-        static readonly RuntimeFarkle<Ast.Statement.Definition.TypeDef> TypeDeclarationRuntime = KuiLang.TypeDeclarationDesigntime.Build();
+        static readonly RuntimeFarkle<Ast.Statement.Definition.MethodDeclaration> MethodDeclarationRuntime = KuiLang.MethodDeclarationDesigntime.Build();
+        static readonly RuntimeFarkle<Ast.Statement.Definition.TypeDeclaration> TypeDeclarationRuntime = KuiLang.TypeDeclarationDesigntime.Build();
         [Test]
         public void can_parse_full_name()
         {
@@ -22,19 +22,6 @@ namespace KuiLang.Tests
             res.ResultValue.Parts.ToArray().Should().BeEquivalentTo(new string[] { "Foo", "Bar", "Type" });
         }
 
-
-        //[TestCase("Bar methodName()")]
-        //[TestCase("Foo methodName()")]
-        //[TestCase("Foo.Bar methodName(AnArg arg)")]
-        //[TestCase("Foo.Bar methodName(AnArg arg, Foo anotherArg)")]
-        //[TestCase("Foo.Bar methodName(AnArg arg, Foo anotherArg1, Foo anotherArg2)")]
-        //[TestCase("Foo.Bar methodName(AnArg arg, Foo anotherArg2, Foo anotherArg3)")]
-        //public void can_parse_argument(string declaration)
-        //{
-        //    var res = MethodSignatureDeclarationRuntime.Parse(declaration);
-
-        //    res.ResultValue.Name.Should().Be("methodName");
-        //}
 
         [TestCase("void DoNothing() { }")]
         [TestCase("void DoSomething() { Something(); }")]

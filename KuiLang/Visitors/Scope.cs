@@ -23,5 +23,7 @@ namespace KuiLang.Visitors
             if (val == null) throw new InvalidOperationException("Accessing unassigned variable.");
             return val;
         }
+
+        public object? TryGetVariable(string name) => _variables.GetValueOrDefault(name);
     }
 }

@@ -1,5 +1,6 @@
-﻿using KuiLang.Semantic;
+using KuiLang.Semantic;
 using KuiLang.Syntax;
+using KuiLang.Visitors;
 using Microsoft.FSharp.Core;
 using System;
 using System.Collections.Generic;
@@ -7,17 +8,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KuiLang.Visitors
+namespace KuiLang.Interpreter
 {
-    public class InterpreterVisitor : AstVisitor<object>
+    public class InterpreterVisitor : AstVisitor<
+        object, object, object, object,
+        object, object, object, object,
+        object, object, object, object,
+        object, object, object, object,
+        object, object, object, object,
+        object>
     {
         readonly Stack<Scope> _stack = new() { new() };
-        readonly IReadOnlyDictionary<string, ISymbol> _symbols;
+        readonly IReadOnlyDictionary<string, IReadOnlyCollection<SymbolBase>> _symbols;
 
-        public InterpreterVisitor(IReadOnlyDictionary<string, ISymbol> symbols)
+        public InterpreterVisitor(IReadOnlyDictionary<string, IReadOnlyCollection<SymbolBase>> symbols)
         {
             _symbols = symbols;
         }
+
+        public override string Test() => null!;
 
         Scope CurrentScope => _stack.Peek();
 
@@ -26,6 +35,13 @@ namespace KuiLang.Visitors
             var res = base.Visit(ast);
             if (res is ReturnControlFlow rcf) return rcf.ReturnValue!;
             return default!;
+        }
+
+        }
+
+        protected override object Visit(Ast.Statement.Definition definition)
+        {
+            return default!; // we don't care of the definitions
         }
 
         protected override object Visit(Ast.Statement.VariableDeclaration variableDeclaration)
@@ -37,14 +53,14 @@ namespace KuiLang.Visitors
             return default!;
         }
 
-        protected override object Visit(Ast.Statement.VariableAssignation assignation)
+        protected override object Visit(Ast.Statement.FieldAssignation assignation)
         {
             var scope = LocateScope(assignation.VariableLocation);
             scope.SetVariable(assignation.VariableLocation.Parts.Span[^1], base.Visit(assignation));
             return default!;
         }
 
-        protected override object Visit(Ast.Expression.Variable variable)
+        protected override object Visit(Ast.Expression.FieldReference variable)
         {
             Scope scope = LocateScope(variable.VariableLocation);
             return scope.GetVariableValue(variable.VariableLocation.Parts.Span[^1]);
@@ -63,15 +79,15 @@ namespace KuiLang.Visitors
             return null!;
         }
 
-        protected override object Visit(Ast.Expression.FunctionCall functionCall)
+        protected override object Visit(Ast.Expression.MethodCall functionCall)
         {
             var newScope = new Scope();
-
-            var resolvedFunction = (MethodSymbol)ResolveSymbol(functionCall.FunctionToCall);
+            var argumentValues = functionCall.Arguments.Select(Visit).ToArray();
+            var resolvedFunction = ResolveMethodSymbol(functionCall.FunctionToCall, argumentValues);
             var argsDef = resolvedFunction.Method.Signature.Arguments;
             for (int i = 0; i < functionCall.Arguments.Count; i++)
             {
-                var value = Visit(functionCall.Arguments[i]);
+                var value = argumentValues[i];
                 newScope.AddVariable(argsDef[i].SignatureType, argsDef[i].Name);
                 newScope.SetVariable(argsDef[i].Name, value);
             }
@@ -99,7 +115,7 @@ namespace KuiLang.Visitors
             var ret = (decimal)Visit(@if.Condition);
             if (ret == 1)
             {
-                return Visit(@if.Statements);
+                return Visit(@if.TheStatement);
             }
             return default!;
         }
@@ -111,8 +127,16 @@ namespace KuiLang.Visitors
                 new ReturnControlFlow(Visit(returnStatement.ReturnedValue))
                 : new ReturnControlFlow(null);
 
-        ISymbol ResolveSymbol(FieldLocation symbolLocation)
-            => _symbols[symbolLocation.ToString()];
+        MethodSymbol ResolveMethodSymbol(FieldLocation symbolLocation, object[] arguments)
+        {
+            //var searchingPart = symbolLocation.Parts.Span[0];
+            //foreach (Scope? scope in _stack)
+            //{
+            //    scope.TryGetVariable(searchingPart)
+            //}
+            return null!;
+        }
+        //=> _symbols[symbolLocation.ToString()];
 
         Scope LocateScope(FieldLocation location)
         {

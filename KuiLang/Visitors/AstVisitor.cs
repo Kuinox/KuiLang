@@ -1,4 +1,4 @@
-﻿using KuiLang.Syntax;
+using KuiLang.Syntax;
 using System;
 using System.Runtime.CompilerServices;
 using static KuiLang.Syntax.Ast;
@@ -10,141 +10,135 @@ namespace KuiLang
 {
     public abstract class AstVisitor<T>
     {
-        public virtual T Visit(Ast ast) => ast switch
+        public virtual object Test() => null!;
+
+        public virtual object Visit( Ast ast ) => ast switch
         {
-            Statement statement => Visit(statement),
-            Expression expression => Visit(expression),
-            _ => throw new InvalidOperationException($"Unknown Ast{ast}")
+            Statement statement => Visit( statement ),
+            Expression expression => Visit( expression ),
+            _ => throw new InvalidOperationException( $"Unknown Ast{ast}" )
         };
 
-        protected virtual T Visit(Statement statement) => statement switch
+        protected virtual object Visit( Statement statement ) => statement switch
         {
-            Block block => Visit(block),
-            Definition definition => Visit(definition),
-            ExpressionStatement expression => Visit(expression),
-            VariableDeclaration variable => Visit(variable),
-            VariableAssignation assignation => Visit(assignation),
-            Return returnStatement => Visit(returnStatement),
-            If @if => Visit(@if),
-            _ => throw new InvalidOperationException($"Unknown Statement{statement}")
+            Block block => Visit( block ),
+            Definition definition => Visit( definition ),
+            ExpressionStatement expression => Visit( expression ),
+            FieldAssignation assignation => Visit( assignation ),
+            Return returnStatement => Visit( returnStatement ),
+            If @if => Visit( @if ),
+            _ => throw new InvalidOperationException( $"Unknown Statement{statement}" )
         };
 
-        protected virtual T Visit(If @if)
+        protected virtual object Visit( If @if )
         {
-            Visit(@if.Condition);
-            Visit(@if.Statements);
+            Visit( @if.Condition );
+            Visit( @if.TheStatement );
             return default!;
         }
 
-        protected virtual T Visit(Return returnStatement) => Visit(returnStatement.ReturnedValue!);
+        protected virtual object Visit( Return returnStatement )
+            => Visit( returnStatement.ReturnedValue! );
 
-        protected virtual T Visit(ExpressionStatement expressionStatement) => Visit(expressionStatement.TheExpression);
+        protected virtual object Visit( ExpressionStatement expressionStatement )
+            => Visit( expressionStatement.TheExpression );
 
-        protected virtual T Visit(VariableDeclaration variableDeclaration)
-            => variableDeclaration.InitValue != null ? Visit(variableDeclaration.InitValue) : default!;
+        protected virtual object Visit( FieldAssignation assignation )
+            => Visit( assignation.NewVariableValue );
 
-        protected virtual T Visit(VariableAssignation assignation) => Visit(assignation.NewVariableValue);
-
-        protected virtual T Visit(Block statementBlock)
+        protected virtual object Visit( Block statementBlock )
         {
-            foreach (var statement in statementBlock.Statements)
+            foreach( var statement in statementBlock.Statements )
             {
-                Visit(statement);
+                Visit( statement );
             }
             return default!;
         }
 
-        protected virtual T Visit(Definition definition) => definition switch
+        protected virtual object Visit( Definition definition ) => definition switch
         {
-            TypeDef type => Visit(type),
-            Argument argument => Visit(argument),
-            Field field => Visit(field),
-            MethodSignature methodSignature => Visit(methodSignature),
-            Method method => Visit(method),
-            _ => throw new InvalidOperationException($"Unknown Definition {definition}")
+            TypeDeclaration type => Visit( type ),
+            Parameter argument => Visit( argument ),
+            FieldDeclaration field => Visit( field ),
+            MethodDeclaration method => Visit( method ),
+            _ => throw new InvalidOperationException( $"Unknown Definition {definition}" )
         };
 
-        protected virtual T Visit(TypeDef type)
+        protected virtual object Visit( TypeDeclaration type )
         {
-            foreach (var field in type.Fields)
+            foreach( var field in type.Fields )
             {
-                Visit(field);
+                Visit( field );
             }
             return default!;
         }
 
-        protected virtual T Visit(Argument argument) => default!;
-        protected virtual T Visit(Field field) => default!;
-        protected virtual T Visit(MethodSignature methodSignature)
+        protected virtual object Visit( Parameter argument ) => default!;
+        protected virtual object Visit( FieldDeclaration field ) => default!;
+
+        protected virtual object Visit( MethodDeclaration method )
         {
-            foreach (var argument in methodSignature.Arguments)
+            foreach( var arg in method.Arguments )
             {
-                Visit(argument);
+                Visit( arg );
             }
+
+            Visit( method.TheStatement );
+
             return default!;
         }
 
-        protected virtual T Visit(Method method)
+        protected virtual object Visit( Expression expression ) => expression switch
         {
-            Visit(method.Signature);
-            foreach (var statement in method.Statements.Statements)
-            {
-                Visit(statement);
-            }
-            return default!;
-        }
-
-        protected virtual T Visit(Expression expression) => expression switch
-        {
-            FunctionCall functionCall => Visit(functionCall),
-            Variable variable => Visit(variable),
-            Constant constant => Visit(constant),
-            Add add => Visit(add),
-            Substract sub => Visit(sub),
-            Multiply multiply => Visit(multiply),
-            Divide divide => Visit(divide),
-            _ => throw new InvalidOperationException($"Unknown Statement{expression}")
+            MethodCall functionCall => Visit( functionCall ),
+            FieldReference variable => Visit( variable ),
+            Constant constant => Visit( constant ),
+            Add add => Visit( add ),
+            Substract sub => Visit( sub ),
+            Multiply multiply => Visit( multiply ),
+            Divide divide => Visit( divide ),
+            _ => throw new InvalidOperationException( $"Unknown Statement{expression}" )
         };
 
-        protected virtual T Visit(Add add)
+        protected virtual object Visit( Add add )
         {
-            Visit(add.Left);
-            Visit(add.Right);
+            Visit( add.Left );
+            Visit( add.Right );
             return default!;
         }
 
-        protected virtual T Visit(Substract substract)
+        protected virtual object Visit( Substract substract )
         {
-            Visit(substract.Left);
-            Visit(substract.Right);
+            Visit( substract.Left );
+            Visit( substract.Right );
             return default!;
         }
 
-        protected virtual T Visit(Multiply multiply)
+        protected virtual object Visit( Multiply multiply )
         {
-            Visit(multiply.Left);
-            Visit(multiply.Right);
+            Visit( multiply.Left );
+            Visit( multiply.Right );
             return default!;
         }
 
-        protected virtual T Visit(Divide divide)
+        protected virtual object Visit( Divide divide )
         {
-            Visit(divide.Left);
-            Visit(divide.Right);
+            Visit( divide.Left );
+            Visit( divide.Right );
             return default!;
         }
 
-        protected virtual T Visit(Constant constant) => default!;
+        protected virtual object Visit( Constant constant ) => default!;
 
-        protected virtual T Visit(FunctionCall functionCall)
+        protected virtual object Visit( MethodCall functionCall )
         {
-            foreach (var argument in functionCall.Arguments)
+            foreach( var argument in functionCall.Arguments )
             {
-                Visit(argument);
+                Visit( argument );
             }
             return default!;
         }
 
-        protected virtual T Visit(Variable variable) => default!;
+        protected virtual object Visit( FieldReference variable ) => default!;
     }
 }
