@@ -1,3 +1,4 @@
+using KuiLang.Compiler.Symbols;
 using KuiLang.Syntax;
 using OneOf;
 
@@ -14,6 +15,7 @@ namespace KuiLang.Semantic
 
         public string Name { get; }
         public TypeSymbol Type { get; internal set; } = null!;
+        public IExpressionSymbol? InitValue { get; internal set; }
         public Ast.Statement.Definition.FieldDeclaration SymbolAst { get; }
         public TypeSymbol Parent { get; }
     }

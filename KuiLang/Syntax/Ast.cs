@@ -19,7 +19,7 @@ namespace KuiLang.Syntax
 
 
                 public sealed record Parameter( FieldLocation SignatureType, string Name, Expression? InitValue ) : Definition( Name );
-                public record FieldDeclaration( FieldLocation SignatureType, string Name ) : Definition( Name );
+                public sealed record FieldDeclaration( FieldLocation SignatureType, string Name, Expression? InitValue ) : Definition( Name );
                 public sealed record MethodDeclaration(
                     FieldLocation ReturnType, string Name, IReadOnlyList<Parameter> Arguments,
                     Statement TheStatement
@@ -38,7 +38,7 @@ namespace KuiLang.Syntax
             ) : Statement;
 
 
-            public sealed record FieldAssignation( FieldLocation VariableLocation, Expression NewVariableValue ) : Statement;
+            public sealed record FieldAssignation( FieldLocation VariableLocation, Expression NewFieldValue ) : Statement;
 
         }
 
@@ -57,7 +57,7 @@ namespace KuiLang.Syntax
                 public sealed record Multiply( Expression Left, Expression Right ) : Operator( Left, Right );
                 public sealed record Divide( Expression Left, Expression Right ) : Operator( Left, Right );
                 public sealed record Add( Expression Left, Expression Right ) : Operator( Left, Right );
-                public sealed record Substract( Expression Left, Expression Right ) : Operator( Left, Right );
+                public sealed record Subtract( Expression Left, Expression Right ) : Operator( Left, Right );
             }
         }
     }

@@ -10,7 +10,7 @@ namespace KuiLang.Compiler
 {
     public class ResolveReferenceVisitor : SymbolVisitor<object>
     {
-        public override object Visit( MethodSymbol symbol )
+        protected override object Visit( MethodSymbol symbol )
         {
             var typeName = symbol.SymbolAst.ReturnType;
             var type = ResolveTypeSymbol( symbol.Parent, typeName);
@@ -18,7 +18,7 @@ namespace KuiLang.Compiler
             return base.Visit( symbol );
         }
 
-        public override object Visit( MethodParameterSymbol symbol )
+        protected override object Visit( MethodParameterSymbol symbol )
         {
             var typeName = symbol.SymbolAst.SignatureType;
             var type = ResolveTypeSymbol( symbol.Parent.Parent, typeName );
@@ -26,7 +26,7 @@ namespace KuiLang.Compiler
             return base.Visit( symbol );
         }
 
-        public override object Visit( FieldSymbol symbol )
+        protected override object Visit( FieldSymbol symbol )
         {
             var typeName = symbol.SymbolAst.SignatureType;
             var type = ResolveTypeSymbol( symbol.Parent, typeName );

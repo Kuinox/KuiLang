@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class ExpressionStatementSymbol : StatementSymbolBase<Ast.Statement.ExpressionStatement>, IExpressionSymbol
+    public class ExpressionStatementSymbol : StatementSymbolBase<Ast.Statement.ExpressionStatement>
     {
         public ExpressionStatementSymbol(
             SingleOrMultiStatementSymbol parent,
@@ -16,8 +16,7 @@ namespace KuiLang.Compiler.Symbols
         {
         }
 
-        public IExpressionSymbol Expression { get; internal set; } = null;
-        public TypeSymbol ReturnType => Expression.ReturnType;
+        public IExpressionSymbol Expression { get; internal set; } = null!; // POST INIT
 
     }
 }

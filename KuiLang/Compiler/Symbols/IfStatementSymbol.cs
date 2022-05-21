@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    class IfStatementSymbol : StatementSymbolBase<Ast.Statement.If>, ISymbolWithAStatement<Ast.Statement.If>
+    public class IfStatementSymbol : StatementSymbolBase<Ast.Statement.If>, ISymbolWithAStatement
     {
         public IfStatementSymbol( SingleOrMultiStatementSymbol parent, Ast.Statement.If symbolAst )
             : base( parent, symbolAst )
         {
         }
 
-        public StatementSymbolBase<Ast.Statement> Statement { get; set; } = null!;
+        public IStatementSymbol Statement { get; set; } = null!;
     }
 }

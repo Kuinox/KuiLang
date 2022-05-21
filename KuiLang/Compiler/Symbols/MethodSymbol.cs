@@ -21,7 +21,7 @@ namespace KuiLang.Compiler.Symbols
         public TypeSymbol ReturnType { get; internal set; } = null!;
         public IReadOnlyDictionary<string, MethodParameterSymbol> ParameterSymbols => _parameterSymbols;
 
-       public StatementSymbolBase<Ast.Statement> Statement { get; set; } = null!;
+       public IStatementSymbol Statement { get; set; } = null!;
 
     }
 }

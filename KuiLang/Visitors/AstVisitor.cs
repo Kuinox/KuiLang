@@ -48,7 +48,7 @@ namespace KuiLang
             => Visit( expressionStatement.TheExpression );
 
         protected virtual object Visit( FieldAssignation assignation )
-            => Visit( assignation.NewVariableValue );
+            => Visit( assignation.NewFieldValue );
 
         protected virtual object Visit( Block statementBlock )
         {
@@ -146,9 +146,9 @@ namespace KuiLang
 
         protected virtual object Visit( Number number ) => default!;
 
-        protected virtual object Visit( MethodCall functionCall )
+        protected virtual object Visit( MethodCall methodCall )
         {
-            foreach( var argument in functionCall.Arguments )
+            foreach( var argument in methodCall.Arguments )
             {
                 Visit( argument );
             }

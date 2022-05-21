@@ -19,6 +19,6 @@ namespace KuiLang.Compiler.Symbols
         public decimal Value { get; }
         public Ast.Expression.Literal.Number SymbolAst { get; }
 
-        public TypeSymbol ReturnType => TODO;
+        public TypeSymbol ReturnType => TODO; //Can be a constant type.
     }
 }
