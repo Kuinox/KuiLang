@@ -8,10 +8,8 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public abstract class ExpressionBaseSymbol<T> : SymbolBase<T> where T : Ast.Expression
+    public interface IExpressionSymbol
     {
-        public ExpressionBaseSymbol( T symbolAst ) : base( symbolAst )
-        {
-        }
+        public TypeSymbol ReturnType { get; }
     }
 }

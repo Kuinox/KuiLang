@@ -11,7 +11,7 @@ namespace KuiLang.Compiler.Symbols
 {
     class ReturnStatementSymbol : StatementSymbolBase<Ast.Statement.Return>
     {
-        public ReturnStatementSymbol( OneOf<ISymbolWithAStatement, StatementBlockSymbol> parent, Ast.Statement.Return symbolAst ) : base( parent, symbolAst )
+        public ReturnStatementSymbol( SingleOrMultiStatementSymbol parent, Ast.Statement.Return symbolAst ) : base( parent, symbolAst )
         {
         }
 

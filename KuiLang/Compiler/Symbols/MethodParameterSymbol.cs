@@ -8,13 +8,16 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class MethodParameterSymbol : SymbolBase<Ast.Statement.Definition.Parameter>
+    public class MethodParameterSymbol : ISymbol<Ast.Statement.Definition.Parameter>
     {
-        public MethodParameterSymbol( Ast.Statement.Definition.Parameter symbolAst, MethodSymbol parent ) : base( symbolAst )
+        public MethodParameterSymbol( Ast.Statement.Definition.Parameter symbolAst, MethodSymbol parent )
         {
             Name = symbolAst.Name;
+            SymbolAst = symbolAst;
             Parent = parent;
         }
+
+        public Ast.Statement.Definition.Parameter SymbolAst { get; }
         public MethodSymbol Parent { get; }
         public TypeSymbol Type { get; internal set; } = null!;
         public string Name { get; }

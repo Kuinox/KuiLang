@@ -1,3 +1,4 @@
+using KuiLang.Semantic;
 using KuiLang.Syntax;
 using OneOf;
 using System;
@@ -8,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    class IfStatementSymbol : StatementSymbolBase<Ast.Statement.If>, ISymbolWithAStatement
+    class IfStatementSymbol : StatementSymbolBase<Ast.Statement.If>, ISymbolWithAStatement<Ast.Statement.If>
     {
-        public IfStatementSymbol( OneOf<ISymbolWithAStatement, StatementBlockSymbol> parent, Ast.Statement.If symbolAst )
+        public IfStatementSymbol( SingleOrMultiStatementSymbol parent, Ast.Statement.If symbolAst )
             : base( parent, symbolAst )
         {
         }

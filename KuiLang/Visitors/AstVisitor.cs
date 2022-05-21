@@ -1,8 +1,12 @@
+using KuiLang.Compiler.Symbols;
 using KuiLang.Syntax;
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using static KuiLang.Syntax.Ast;
 using static KuiLang.Syntax.Ast.Expression;
+using static KuiLang.Syntax.Ast.Expression.Literal;
+using static KuiLang.Syntax.Ast.Expression.Operator;
 using static KuiLang.Syntax.Ast.Statement;
 using static KuiLang.Syntax.Ast.Statement.Definition;
 
@@ -92,12 +96,18 @@ namespace KuiLang
         {
             MethodCall functionCall => Visit( functionCall ),
             FieldReference variable => Visit( variable ),
-            Constant constant => Visit( constant ),
+            Literal literal => Visit( literal ),
+            Operator @operator => Visit( @operator ),
+            _ => throw new InvalidOperationException( $"Unknown Statement{expression}" )
+        };
+
+        protected virtual object Visit( Operator @operator ) => @operator switch
+        {
             Add add => Visit( add ),
             Substract sub => Visit( sub ),
             Multiply multiply => Visit( multiply ),
             Divide divide => Visit( divide ),
-            _ => throw new InvalidOperationException( $"Unknown Statement{expression}" )
+            _ => throw new InvalidOperationException( $"Unknown operator{@operator}" )
         };
 
         protected virtual object Visit( Add add )
@@ -128,7 +138,13 @@ namespace KuiLang
             return default!;
         }
 
-        protected virtual object Visit( Constant constant ) => default!;
+        protected virtual object Visit( Literal literal ) => literal switch
+        {
+            Number number => Visit( number ),
+            _ => throw new InvalidOperationException( $"Unknown literal{literal}" )
+        };
+
+        protected virtual object Visit( Number number ) => default!;
 
         protected virtual object Visit( MethodCall functionCall )
         {

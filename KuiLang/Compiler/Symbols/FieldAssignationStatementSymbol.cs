@@ -10,7 +10,7 @@ namespace KuiLang.Compiler.Symbols
 {
     class FieldAssignationStatementSymbol : StatementSymbolBase<Ast.Statement.FieldAssignation>
     {
-        public FieldAssignationStatementSymbol( OneOf<ISymbolWithAStatement, StatementBlockSymbol> parent, Ast.Statement.FieldAssignation symbolAst )
+        public FieldAssignationStatementSymbol( SingleOrMultiStatementSymbol parent, Ast.Statement.FieldAssignation symbolAst )
             : base( parent, symbolAst )
         {
         }

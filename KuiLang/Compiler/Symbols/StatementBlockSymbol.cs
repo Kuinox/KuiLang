@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class StatementBlockSymbol : StatementSymbolBase<Ast.Statement.Block>
+    public sealed class StatementBlockSymbol : StatementSymbolBase<Ast.Statement.Block>
     {
-        public StatementBlockSymbol( OneOf<ISymbolWithAStatement, StatementBlockSymbol> parent, Ast.Statement.Block ast )
+        public StatementBlockSymbol( SingleOrMultiStatementSymbol parent, Ast.Statement.Block ast )
             : base( parent, ast )
         {
         }
 
-        public List<Ast.Statement> Statements { get; } = new();
+        public List<IStatementSymbol> Statements { get; } = new();
     }
 }

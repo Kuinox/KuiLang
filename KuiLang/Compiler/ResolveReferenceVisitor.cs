@@ -41,6 +41,5 @@ namespace KuiLang.Compiler
             if( parent.Name == curr ) return parent;
             return parent.Parent.TypesSymbols[curr];
         }
-
     }
 }

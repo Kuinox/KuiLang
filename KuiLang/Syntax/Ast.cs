@@ -47,10 +47,12 @@ namespace KuiLang.Syntax
         {
             public sealed record MethodCall( FieldLocation FunctionToCall, IReadOnlyList<Expression> Arguments ) : Expression;
             public sealed record FieldReference( FieldLocation VariableLocation ) : Expression;
-            //TODO: Constant shouldn't exist, instead I should have literals: string literals, number literals, etc.
-            public sealed record Constant( object Value ) : Expression;
+            public record Literal : Expression
+            {
+                public sealed record Number( decimal Value ) : Literal();
+            }
 
-            public record Operator(Expression Left, Expression Right ) : Expression
+            public record Operator( Expression Left, Expression Right ) : Expression
             {
                 public sealed record Multiply( Expression Left, Expression Right ) : Operator( Left, Right );
                 public sealed record Divide( Expression Left, Expression Right ) : Operator( Left, Right );

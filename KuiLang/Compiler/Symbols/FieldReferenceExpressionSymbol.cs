@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class FieldReferenceExpressionSymbol : ExpressionBaseSymbol<Ast.Expression.FieldReference>
+    public class FieldReferenceExpressionSymbol : IExpressionSymbol<Ast.Expression.FieldReference>
     {
         public FieldReferenceExpressionSymbol( Ast.Expression.FieldReference symbolAst ) : base( symbolAst )
         {

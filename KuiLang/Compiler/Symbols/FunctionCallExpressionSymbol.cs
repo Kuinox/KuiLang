@@ -1,3 +1,4 @@
+using KuiLang.Semantic;
 using KuiLang.Syntax;
 using System;
 using System.Collections.Generic;
@@ -7,14 +8,18 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    class FunctionCallExpressionSymbol : ExpressionBaseSymbol<Ast.Expression.MethodCall>
+    class FunctionCallExpressionSymbol : IExpressionSymbol, ISymbol<Ast.Expression.MethodCall>
     {
-        public FunctionCallExpressionSymbol( Ast.Expression.MethodCall symbolAst ) : base( symbolAst )
+        public FunctionCallExpressionSymbol( Ast.Expression.MethodCall symbolAst )
         {
+            SymbolAst = symbolAst;
         }
 
         public MethodSymbol MethodToCall { get; set; } = null!;
 
-        public List<ExpressionBaseSymbol<Ast.Expression>> Arguments { get; } = new List<ExpressionBaseSymbol<Ast.Expression>>();
+        public List<IExpressionSymbol> Arguments { get; } = new List<IExpressionSymbol>();
+        public Ast.Expression.MethodCall SymbolAst { get; }
+
+        public TypeSymbol ReturnType => MethodToCall.ReturnType;
     }
 }
