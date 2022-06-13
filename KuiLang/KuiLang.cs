@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Farkle;
@@ -22,170 +22,168 @@ namespace KuiLang
         public static readonly DesigntimeFarkle<Statement.Block> StatementListDesignTime;
 
 
-        static DesigntimeFarkle<bool> IsLiteralPresent(string name) =>
-            Nonterminal.Create($"{name} Maybe",
-                name.Appended().FinishConstant(true),
-                ProductionBuilder.Empty.FinishConstant(false));
+        static DesigntimeFarkle<bool> IsLiteralPresent( string name ) =>
+            Nonterminal.Create( $"{name} Maybe",
+                name.Appended().FinishConstant( true ),
+                ProductionBuilder.Empty.FinishConstant( false ) );
 
-        private static decimal ToNumber(ReadOnlySpan<char> data)
-            => decimal.Parse(data, NumberStyles.AllowExponent | NumberStyles.Float, CultureInfo.InvariantCulture);
+        private static decimal ToNumber( ReadOnlySpan<char> data )
+            => decimal.Parse( data, NumberStyles.AllowExponent | NumberStyles.Float, CultureInfo.InvariantCulture );
 
         static KuiLang()
         {
-            var simpleNamePart = Terminal.Create("Namespace Part", (context, data) => data.ToString(), FromRegexString(@"\p{All Letters}(\p{All Letters}|\d)*"));
-            var fullName = Nonterminal.Create<FieldLocation>("FullName");
+            var simpleNamePart = Terminal.Create( "Namespace Part", ( context, data ) => data.ToString(), FromRegexString( @"\p{All Letters}(\p{All Letters}|\d)*" ) );
+            var fullName = Nonterminal.Create<FieldLocation>( "FullName" );
             fullName.SetProductions(
                 fullName.Extended()
-                .Append(".")
-                .Extend(simpleNamePart)
-                .Finish((a, b) => a.Append(b)),
-                simpleNamePart.Finish((s) => new FieldLocation(s))
+                .Append( "." )
+                .Extend( simpleNamePart )
+                .Finish( ( a, b ) => a.Append( b ) ),
+                simpleNamePart.Finish( ( s ) => new FieldLocation( s ) )
             );
-            var argument = Nonterminal.Create("Argument Declaration",
-              fullName.Extended().Extend(simpleNamePart).Finish((type, argName) => new Statement.Definition.ParameterDeclaration(type, argName))
+            var argument = Nonterminal.Create( "Argument Declaration",
+              fullName.Extended().Extend( simpleNamePart ).Finish( ( type, argName ) => new Statement.Definition.Parameter( type, argName, null ) )
             );
 
-            var argumentList = Nonterminal.Create<List<Statement.Definition.Parameter>>("Argument List");
+            var argumentList = Nonterminal.Create<List<Statement.Definition.Parameter>>( "Argument List" );
             argumentList.SetProductions(
                 argumentList.Extended()
-                    .Append(",")
-                    .Extend(argument)
-                    .Finish((xs, s) => xs.Plus(s)),
-                argument.Finish((s) => new List<Statement.Definition.Parameter>() { s })
+                    .Append( "," )
+                    .Extend( argument )
+                    .Finish( ( xs, s ) => xs.Plus( s ) ),
+                argument.Finish( ( s ) => new List<Statement.Definition.Parameter>() { s } )
             );
 
-            var expression = Nonterminal.Create<Expression>("Expression");
+            var expression = Nonterminal.Create<Expression>( "Expression" );
 
-            var argumentPassingList = Nonterminal.Create<List<Expression>>("Expression List");
+            var argumentPassingList = Nonterminal.Create<List<Expression>>( "Expression List" );
             argumentPassingList.SetProductions(
                 argumentPassingList.Extended()
-                .Append(",")
-                .Extend(expression)
-                .Finish((xs, s) => xs.Plus(s)),
-                expression.Finish(s => new List<Expression>() { s })
+                .Append( "," )
+                .Extend( expression )
+                .Finish( ( xs, s ) => xs.Plus( s ) ),
+                expression.Finish( s => new List<Expression>() { s } )
             );
 
-            var functionCall = Nonterminal.Create("Function Call",
+            var functionCall = Nonterminal.Create( "Function Call",
                 fullName.Extended()
-                    .Append("(")
-                    .Extend(argumentPassingList.Optional())
-                    .Append(")")
-                    .Finish((functionRef, args) => new Expression.MethodCall(functionRef, args ?? new List<Expression>()))
+                    .Append( "(" )
+                    .Extend( argumentPassingList.Optional() )
+                    .Append( ")" )
+                    .Finish( ( functionRef, args ) => new Expression.MethodCall( functionRef, args ?? new List<Expression>() ) )
             );
 
-            var assignation = Nonterminal.Create("Assignation",
+            var assignation = Nonterminal.Create( "Assignation",
                     "=".Appended()
 
-                    .Extend(expression).AsIs()
+                    .Extend( expression ).AsIs()
             );
 
-            var number = Terminal.Create("Number", (position, data) => ToNumber(data),
+            var number = Terminal.Create( "Number", ( position, data ) => ToNumber( data ),
                 Join(
-                    Literal('-').Optional(),
-                    Literal('0').Or(OneOf("123456789").And(OneOf(PredefinedSets.Number).ZeroOrMore())),
-                    Literal('.').And(OneOf(PredefinedSets.Number).AtLeast(1)).Optional(),
+                    Literal( '-' ).Optional(),
+                    Literal( '0' ).Or( Regex.OneOf( "123456789" ).And( Regex.OneOf( PredefinedSets.Number ).ZeroOrMore() ) ),
+                    Literal( '.' ).And( Regex.OneOf( PredefinedSets.Number ).AtLeast( 1 ) ).Optional(),
                     Join(
-                        OneOf("eE"),
-                        OneOf("+-").Optional(),
-                        OneOf(PredefinedSets.Number).AtLeast(1)).Optional()));
+                        Regex.OneOf( "eE" ),
+                        Regex.OneOf( "+-" ).Optional(),
+                        Regex.OneOf( PredefinedSets.Number ).AtLeast( 1 ) ).Optional() ) );
 
-            var variableAssign = Nonterminal.Create("Variable Assignation",
-                fullName.Extended().Extend(assignation).Finish((a, b) => new Statement.FieldAssignation(a, b)));
+            var variableAssign = Nonterminal.Create( "Variable Assignation",
+                fullName.Extended().Extend( assignation ).Finish( ( a, b ) => new Statement.FieldAssignation( a, b ) ) );
 
             var opScope = new OperatorScope(
-              new LeftAssociative("+", "-"),
-              new LeftAssociative("*", "/"));
+              new LeftAssociative( "+", "-" ),
+              new LeftAssociative( "*", "/" ) );
 
-            var operators = Nonterminal.Create("Operators",
-                expression.Extended().Append("*").Extend(expression).Finish<Expression>((left, right) => new Expression.Multiply(left, right)),
-                expression.Extended().Append("/").Extend(expression).Finish<Expression>((left, right) => new Expression.Divide(left, right)),
-                expression.Extended().Append("+").Extend(expression).Finish<Expression>((left, right) => new Expression.Add(left, right)),
-                expression.Extended().Append("-").Extend(expression).Finish<Expression>((left, right) => new Expression.Substract(left, right))
-            ).WithOperatorScope(opScope);
+            var operators = Nonterminal.Create( "Operators",
+                expression.Extended().Append( "*" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.Operator.Multiply( left, right ) ),
+                expression.Extended().Append( "/" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.Operator.Divide( left, right ) ),
+                expression.Extended().Append( "+" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.Operator.Add( left, right ) ),
+                expression.Extended().Append( "-" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.Operator.Subtract( left, right ) )
+            ).WithOperatorScope( opScope );
 
             expression.SetProductions(
                 functionCall.AsIs<Expression>(),
-                fullName.Finish<FieldLocation, Expression>(s => new Expression.FieldReference(s)),
-                number.Finish<decimal, Expression>(s => new Expression.Constant(s)),
+                fullName.Finish<FieldLocation, Expression>( s => new Expression.FieldReference( s ) ),
+                number.Finish<decimal, Expression>( s => new Expression.Literal.Number( s ) ),
                 operators.AsIs()
             );
 
 
-            var statement = Nonterminal.Create<Statement>("Statement");
-            var statementList = Nonterminal.Create("Statement List", statement
+            var statement = Nonterminal.Create<Statement>( "Statement" );
+            var statementList = Nonterminal.Create( "Statement List", statement
                 .Many<Statement, List<Statement>>()
-                .Finish(s => new Statement.Block(s))
+                .Finish( s => new Statement.Block( s ) )
             );
-            var statementScope = Nonterminal.Create("Statement Scope",
+            var statementScope = Nonterminal.Create( "Statement Scope",
                 "{".Appended()
-                    .Extend(statementList)
-                    .Append("}")
-                    .AsIs());
+                    .Extend( statementList )
+                    .Append( "}" )
+                    .AsIs() );
 
-            var returnStatement = Nonterminal.Create("Return Statement",
-                "return".Appended().Extend(expression).Finish(s => new Statement.Return(s))
+            var returnStatement = Nonterminal.Create( "Return Statement",
+                "return".Appended().Extend( expression ).Finish( s => new Statement.Return( s ) )
             );
 
-            var ifStatement = Nonterminal.Create("If Statement",
+            var ifStatement = Nonterminal.Create( "If Statement",
                 "if".Appended()
-                    .Append("(")
-                    .Extend(expression)
-                    .Append(")")
-                    .Extend(statement)
-                    .Finish<Statement>((condition, statements) => new Statement.If(condition, statements))
+                    .Append( "(" )
+                    .Extend( expression )
+                    .Append( ")" )
+                    .Extend( statement )
+                    .Finish<Statement>( ( condition, statements ) => new Statement.If( condition, statements ) )
             );
 
 
-            var methodDeclaration = Nonterminal.Create("Method Declaration",
+            var methodDeclaration = Nonterminal.Create( "Method Declaration",
                 fullName.Extended()
-                    .Extend(simpleNamePart)
-                    .Append("(")
-                    .Extend(argumentList.Optional())
-                    .Append(")")
-                    .Extend(statementScope)
-                    .Finish((typeName, methodName, args, statements)
+                    .Extend( simpleNamePart )
+                    .Append( "(" )
+                    .Extend( argumentList.Optional() )
+                    .Append( ")" )
+                    .Extend( statementScope )
+                    .Finish( ( typeName, methodName, args, statements )
                         => new Statement.Definition.MethodDeclaration(
-                            new Statement.Definition.MethodSignature(
-                                new Statement.Definition.Field(
-                                    new Statement.Definition.ParameterDeclaration(typeName, methodName)
-                                ), args ?? new()
-                            ),
+                            typeName,
+                            methodName,
+                            args ?? new List<Statement.Definition.Parameter>(),
                             statements
                         )
                     )
             );
 
-            var variableDeclaration = Nonterminal.Create("Variable Declaration",
-                fullName.Extended().Extend(simpleNamePart)
-                .Extend(assignation.Optional())
-                .Finish((typeName, fieldName, exprVal) => new Statement.VariableDeclaration(typeName, fieldName, exprVal))
+            var variableDeclaration = Nonterminal.Create( "Variable Declaration",
+                fullName.Extended().Extend( simpleNamePart )
+                .Extend( assignation.Optional() )
+                .Finish( ( typeName, fieldName, exprVal ) => new Statement.Statement.Definition.FieldDeclaration( typeName, fieldName, exprVal ) )
             );
 
 
 
-            var fieldDeclaration = Nonterminal.Create("Field Declaration",
+            var fieldDeclaration = Nonterminal.Create( "Field Declaration",
                 fullName.Extended()
-                .Extend(simpleNamePart).Append(";").Finish(
-                    (typeName, fieldName) => new Statement.Definition.Field(new Statement.Definition.ParameterDeclaration(typeName, fieldName))
+                .Extend( simpleNamePart ).Append( ";" ).Finish(
+                    ( typeName, fieldName ) => new Statement.Definition.FieldDeclaration( typeName, fieldName, null )
                 )
             );
 
 
 
-            var definition = Nonterminal.Create<Statement.Definition>("Method or Field Declaration List");
+            var definition = Nonterminal.Create<Statement.Definition>( "Method or Field Declaration List" );
             var definitionBlock =
-                Nonterminal.Create("Definition Block",
+                Nonterminal.Create( "Definition Block",
                     "{".Appended()
-                        .Extend(definition.Many<Statement.Definition, List<Statement.Definition>>())
-                        .Append("}")
+                        .Extend( definition.Many<Statement.Definition, List<Statement.Definition>>() )
+                        .Append( "}" )
                         .AsIs()
             );
 
-            var typeDeclaration = Nonterminal.Create("Type Declaration",
+            var typeDeclaration = Nonterminal.Create( "Type Declaration",
                "type".Appended()
-                    .Extend(simpleNamePart) // type name
-                    .Extend(definitionBlock)
-                    .Finish((typeName, fields) => new Statement.Definition.TypeDeclaration(typeName, fields))
+                    .Extend( simpleNamePart ) // type name
+                    .Extend( definitionBlock )
+                    .Finish( ( typeName, fields ) => new Statement.Definition.TypeDeclaration( typeName, fields ) )
             );
             definition.SetProductions(
                 methodDeclaration.AsIs<Statement.Definition>(),
@@ -194,9 +192,9 @@ namespace KuiLang
             );
 
             statement.SetProductions(
-                expression.Extended().Append(";").Finish<Statement>(s => new Statement.ExpressionStatement(s)),
-                variableDeclaration.Extended().Append(";").Finish<Statement>(s => s),
-                returnStatement.Extended().Append(";").Finish<Statement>(s => s),
+                functionCall.Extended().Append( ";" ).Finish<Statement>( s => new Statement.MethodCallStatement( s ) ),
+                variableDeclaration.Extended().Append( ";" ).Finish<Statement>( s => s ),
+                returnStatement.Extended().Append( ";" ).Finish<Statement>( s => s ),
                 ifStatement.AsIs(),
                 statementScope.AsIs<Statement>(),
                 definition.AsIs<Statement>()
@@ -225,8 +223,8 @@ namespace KuiLang
             //InterfaceOrTypeDeclarationDesignTime = interfaceOrTypeDeclaration;
 
             RootDesigntime = ((DesigntimeFarkle<Ast>)statementList)
-                .AddBlockComment("/*", "*/")
-                .AddLineComment("//")
+                .AddBlockComment( "/*", "*/" )
+                .AddLineComment( "//" )
                 .MarkForPrecompile();
             RootRuntime = RootDesigntime.Build();
 

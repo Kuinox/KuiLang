@@ -9,18 +9,23 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Semantic
 {
-    public class TypeSymbol : SymbolBase<Ast.Statement.Definition.TypeDeclaration>
+    public class TypeSymbol : ISymbol
     {
         readonly Dictionary<string, MethodSymbol> _methods = new();
         readonly Dictionary<string, FieldSymbol> _fields = new();
 
-        public TypeSymbol( ProgramRootSymbol parent, Ast.Statement.Definition.TypeDeclaration typeDef ) : base( typeDef )
+        public TypeSymbol( ProgramRootSymbol parent, Ast.Statement.Definition.TypeDeclaration SymbolAst )
         {
             Parent = parent;
-            Name = typeDef.Name;
+            this.SymbolAst = SymbolAst;
+            Name = SymbolAst.Name;
         }
 
         public ProgramRootSymbol Parent { get; }
+
+        ISymbol? ISymbol.Parent => Parent;
+
+        public Ast.Statement.Definition.TypeDeclaration SymbolAst { get; }
         public string Name { get; }
 
         public IReadOnlyDictionary<string, MethodSymbol> Methods => _methods;

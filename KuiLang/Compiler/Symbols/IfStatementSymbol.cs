@@ -16,6 +16,7 @@ namespace KuiLang.Compiler.Symbols
         {
         }
 
+        public IExpressionSymbol Condition { get; set; } = null!;
         public IStatementSymbol Statement { get; set; } = null!;
     }
 }

@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using KuiLang.Runner;
 using NUnit.Framework;
 using System;
@@ -14,7 +14,7 @@ namespace KuiLang.Tests
         [Test]
         public void ReturnTest()
         {
-            ScriptHelpers.RunScript("return 1;").Should().Be(1);
+            ScriptHelpers.RunScript( "return 1;" ).Should().Be( 1 );
         }
 
         [Test]
@@ -23,7 +23,7 @@ namespace KuiLang.Tests
             ScriptHelpers.RunScript(
 @"number foo = 42;
 return 42;"
-            ).Should().Be(42);
+            ).Should().Be( 42 );
         }
 
         [Test]
@@ -33,25 +33,25 @@ return 42;"
 @"
 number aFunction() { return 12; }
 return aFunction();"
-            ).Should().Be(12);
+            ).Should().Be( 12 );
         }
 
         [Test]
         public void OperatorTest()
         {
-            ScriptHelpers.RunScript(@"return 12*4;").Should().Be(48);
+            ScriptHelpers.RunScript( @"return 12*4;" ).Should().Be( 48 );
         }
 
         [Test]
         public void IfTest()
         {
-            ScriptHelpers.RunScript(@"if(1) { return 2; } return 1;").Should().Be(2);
+            ScriptHelpers.RunScript( @"if(1) { return 2; } return 1;" ).Should().Be( 2 );
         }
 
-        [TestCase(2, 2, 4)]
-        [TestCase(2, 8, 256)]
-        [TestCase(2, 16, ushort.MaxValue + 1)]
-        public void Power(decimal x, decimal y, decimal z)
+        [TestCase( 2, 2, 4 )]
+        [TestCase( 2, 8, 256 )]
+        [TestCase( 2, 16, ushort.MaxValue + 1 )]
+        public void Power( decimal x, decimal y, decimal z )
         {
             ScriptHelpers.RunScript(
 $@"
@@ -62,7 +62,7 @@ number Pow(number x, number y)
 }}
 return Pow({x},{y});
 "
-).Should().Be(z);
+).Should().Be( z );
         }
 
         [Test]
@@ -74,7 +74,7 @@ type Foo {
     
 }
 Foo();
-");
+" );
         }
     }
 }

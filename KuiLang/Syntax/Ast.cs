@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static KuiLang.Syntax.Ast.Expression;
 
 namespace KuiLang.Syntax
 {
@@ -26,7 +28,7 @@ namespace KuiLang.Syntax
                 ) : Definition( Name );
             }
 
-            public sealed record ExpressionStatement( Expression TheExpression ) : Statement;
+            public sealed record MethodCallStatement( MethodCall MethodCallExpression ) : Statement;
 
             public sealed record Return(
                 Expression? ReturnedValue

@@ -9,24 +9,25 @@ namespace KuiLang.Compiler.Symbols
     {
         SingleOrMultiStatementSymbol Parent { get; }
     }
-    public abstract class StatementSymbolBase<T> : IStatementSymbol, ISymbol<T> where T : Ast.Statement
+    public abstract class StatementSymbolBase<T> : IStatementSymbol, ISymbol where T : Ast.Statement
     {
         public StatementSymbolBase( SingleOrMultiStatementSymbol parent, T symbolAst )
         {
             Parent = parent;
             SymbolAst = symbolAst;
-            if( parent.IsT0 )
+            if( parent.IsSingle )
             {
-                parent.AsT0.Statement = this;
+                parent.AsSingle.Statement = this;
             }
-            if( parent.IsT1 )
+            if( parent.IsBlock )
             {
-                parent.AsT1.Statements.Add( this );
+                parent.AsBlock.Statements.Add( this );
             }
         }
-
+        ISymbol? ISymbol.Parent => Parent.Value;
         public SingleOrMultiStatementSymbol Parent { get; }
 
         public T SymbolAst { get; }
+
     }
 }

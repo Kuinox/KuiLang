@@ -12,7 +12,7 @@ namespace KuiLang.Compiler
 {
     class ResolveOrderedSymbols : SymbolVisitor<object>
     {
-        protected override TypeSymbol Visit( IExpressionSymbol statement ) => (TypeSymbol) base.Visit( statement );
+        protected override TypeSymbol Visit( IExpressionSymbol statement ) => (TypeSymbol)base.Visit( statement );
         protected override TypeSymbol Visit( AddExpressionSymbol symbol )
         {
             var typeLeft = Visit( symbol.Left );
@@ -54,5 +54,8 @@ namespace KuiLang.Compiler
         protected override object Visit( MethodCallExpressionSymbol symbol ) => symbol.ReturnType;
 
         protected override object Visit( FieldReferenceExpressionSymbol symbol ) => symbol.ReturnType;
+
+     
+
     }
 }

@@ -8,18 +8,20 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class MethodCallExpressionSymbol : IExpressionSymbol, ISymbol<Ast.Expression.MethodCall>
+    public class MethodCallExpressionSymbol : IExpressionSymbol, ISymbol
     {
-        public MethodCallExpressionSymbol( Ast.Expression.MethodCall symbolAst, IReadOnlyList<IExpressionSymbol> arguments)
+        public MethodCallExpressionSymbol(ISymbol parent,  Ast.Expression.MethodCall symbolAst)
         {
+            Parent = parent;
             SymbolAst = symbolAst;
-            Arguments = arguments;
         }
 
         public Ast.Expression.MethodCall SymbolAst { get; }
-        public IReadOnlyList<IExpressionSymbol> Arguments { get; }
-        public MethodSymbol TargetMethod { get; internal set; } = null!;
+        public IReadOnlyList<IExpressionSymbol> Arguments { get; internal set; }
+        public MethodSymbol TargetMethod { get; internal set; } = null!; // resolve member step.
 
         public TypeSymbol ReturnType => TargetMethod.ReturnType;
+
+        public ISymbol Parent { get; }
     }
 }

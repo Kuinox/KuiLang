@@ -1,7 +1,8 @@
-﻿using Farkle;
+using Farkle;
 using Farkle.Builder;
+using KuiLang.Compiler;
+using KuiLang.Interpreter;
 using KuiLang.Syntax;
-using KuiLang.Visitors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,23 +15,23 @@ namespace KuiLang.Runner
     public static class ScriptHelpers
     {
         static readonly RuntimeFarkle<Ast.Statement.Block> StatementListParser = KuiLang.StatementListDesignTime.Build();
-        public static object RunScript(string scriptText)
+        public static object RunScript( string scriptText )
         {
-            var res = StatementListParser.Parse(scriptText);
-            if (!res.IsOk)
+            var res = StatementListParser.Parse( scriptText );
+            if( !res.IsOk )
             {
                 var prevColor = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Error.WriteLine(res.ErrorValue);
+                Console.Error.WriteLine( res.ErrorValue );
                 Console.ForegroundColor = prevColor;
-                throw new InvalidOperationException(res.ErrorValue.ToString());
+                throw new InvalidOperationException( res.ErrorValue.ToString() );
             }
             var statements = res.ResultValue;
-            var symbolsBuilder = new SymbolTableBuilderVisitor();
-            symbolsBuilder.Visit(statements);
-            var interpreter = new InterpreterVisitor(symbolsBuilder.Symbols);
-            var val = interpreter.Visit(statements); //Thats where all the magic happens.
-            Console.WriteLine($"Execution returned value: {val}");
+            var symbolsBuilder = new SymbolTreeBuilder( new Diagnostics.DiagnosticChannel() );
+            var rootSymbol = symbolsBuilder.Visit( statements );
+            var interpreter = new InterpreterVisitor();
+            var val = interpreter.Visit( rootSymbol ); //Thats where all the magic happens.
+            Console.WriteLine( $"Execution returned value: {val}" );
             return val;
         }
     }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler
 {
-    public class ProgramRootSymbol : ISymbol<Ast>
+    public class ProgramRootSymbol : ISymbol
     {
         readonly Dictionary<string, TypeSymbol> _typesSymbols = new();
 
@@ -17,9 +17,12 @@ namespace KuiLang.Compiler
             SymbolAst = symbolAst;
         }
 
+        public Ast SymbolAst { get; }
+
+
         public IReadOnlyDictionary<string, TypeSymbol> TypesSymbols => _typesSymbols;
 
-        public Ast SymbolAst { get; }
+        public ISymbol? Parent => null;
 
         public void Add( TypeSymbol symbol ) => _typesSymbols.Add( symbol.Name, symbol );
     }

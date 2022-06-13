@@ -3,17 +3,17 @@ using KuiLang.Syntax;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public abstract class OperatorExpressionBaseSymbol<T> : IExpressionSymbol, ISymbol<T> where T : Ast.Expression.Operator
+    public abstract class OperatorExpressionBaseSymbol<T> : IExpressionSymbol, ISymbol where T : Ast.Expression.Operator
     {
-        public OperatorExpressionBaseSymbol( IExpressionSymbol left, IExpressionSymbol right, T symbolAst )
+        public OperatorExpressionBaseSymbol(ISymbol parent, T symbolAst )
         {
-            Left = left;
-            Right = right;
+            Parent = parent;
             SymbolAst = symbolAst;
         }
 
-        public IExpressionSymbol Left { get; }
-        public IExpressionSymbol Right { get; }
+        public ISymbol Parent { get; }
+        public IExpressionSymbol Left { get; internal set; } = null!;
+        public IExpressionSymbol Right { get; internal set; } = null!;
         public T SymbolAst { get; }
 
         public TypeSymbol ReturnType { get; internal set; } = null!;
@@ -22,28 +22,28 @@ namespace KuiLang.Compiler.Symbols
 
     public class MultiplyExpressionSymbol : OperatorExpressionBaseSymbol<Ast.Expression.Operator.Multiply>
     {
-        public MultiplyExpressionSymbol( IExpressionSymbol left, IExpressionSymbol right, Ast.Expression.Operator.Multiply symbolAst ) : base( left, right, symbolAst )
+        public MultiplyExpressionSymbol( ISymbol parent, Ast.Expression.Operator.Multiply symbolAst ) : base( parent, symbolAst )
         {
         }
     }
 
     public class DivideExpressionSymbol : OperatorExpressionBaseSymbol<Ast.Expression.Operator.Divide>
     {
-        public DivideExpressionSymbol( IExpressionSymbol left, IExpressionSymbol right, Ast.Expression.Operator.Divide symbolAst ) : base( left, right, symbolAst )
+        public DivideExpressionSymbol( ISymbol parent, Ast.Expression.Operator.Divide symbolAst ) : base( parent, symbolAst )
         {
         }
     }
 
     public class AddExpressionSymbol : OperatorExpressionBaseSymbol<Ast.Expression.Operator.Add>
     {
-        public AddExpressionSymbol( IExpressionSymbol left, IExpressionSymbol right, Ast.Expression.Operator.Add symbolAst ) : base( left, right, symbolAst )
+        public AddExpressionSymbol( ISymbol parent, Ast.Expression.Operator.Add symbolAst ) : base( parent, symbolAst )
         {
         }
     }
 
-    public class SubstractExpressionSymbol : OperatorExpressionBaseSymbol<Ast.Expression.Operator.Substract>
+    public class SubtractExpressionSymbol : OperatorExpressionBaseSymbol<Ast.Expression.Operator.Subtract>
     {
-        public SubstractExpressionSymbol( IExpressionSymbol left, IExpressionSymbol right, Ast.Expression.Operator.Substract symbolAst ) : base( left, right, symbolAst )
+        public SubtractExpressionSymbol( ISymbol parent, Ast.Expression.Operator.Subtract symbolAst ) : base( parent, symbolAst )
         {
         }
     }

@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class FieldReferenceExpressionSymbol : IExpressionSymbol, ISymbol
+    public class VariableReferenceExpressionSymbol : IExpressionSymbol, ISymbol
     {
-        public FieldReferenceExpressionSymbol( ISymbol parent, Ast.Expression.FieldReference symbolAst )
+        public VariableReferenceExpressionSymbol( ISymbol parent, Ast.Expression.FieldReference symbolAst )
         {
             Parent = parent;
             SymbolAst = symbolAst;
         }
 
-        public FieldSymbol Field { get; internal set; } = null!;
+        public VariableSymbol Field { get; internal set; } = null!;
         public Ast.Expression.FieldReference SymbolAst { get; }
         public TypeSymbol ReturnType { get; internal set; } = null!;
         public ISymbol? Parent { get; }

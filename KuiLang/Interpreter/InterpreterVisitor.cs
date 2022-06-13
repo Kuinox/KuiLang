@@ -1,11 +1,12 @@
 using KuiLang.Compiler;
+using KuiLang.Compiler.Symbols;
 using KuiLang.Semantic;
 using KuiLang.Syntax;
-using KuiLang.Visitors;
 using Microsoft.FSharp.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,14 +14,12 @@ namespace KuiLang.Interpreter
 {
     public class InterpreterVisitor : SymbolVisitor<object>
     {
-        //readonly Stack<Scope> _stack = new() { new() };
-        //readonly IReadOnlyDictionary<string, IReadOnlyCollection<SymbolBase>> _symbols;
-
+        readonly Stack<Dictionary<ISymbol, object>> _stack = new();
         public InterpreterVisitor()
         {
         }
 
-        //Scope CurrentScope => _stack.Peek();
+        Dictionary<ISymbol, object> Current => _stack.Peek();
 
         public override object Visit( ProgramRootSymbol ast )
         {
@@ -28,71 +27,68 @@ namespace KuiLang.Interpreter
             if( res is ReturnControlFlow rcf ) return rcf.ReturnValue!;
             return default!;
         }
-
-        protected override object Visit( FieldSymbol symbol )
+        protected override object Visit( VariableSymbol variableDeclaration )
         {
-
+            Current.Add( variableDeclaration, variableDeclaration.InitValue != null ? Visit( variableDeclaration.InitValue ) : null! );
+            return base.Visit( variableDeclaration );
         }
 
-        protected override object Visit( Ast.Statement.VariableDeclaration variableDeclaration )
+        protected override object Visit( FieldSymbol variableDeclaration )
         {
-            CurrentScope.AddVariable( variableDeclaration.Type, variableDeclaration.Name );
-            CurrentScope.SetVariable( variableDeclaration.Name,
-                base.Visit( variableDeclaration )
-            );
+            Current.Add( variableDeclaration, variableDeclaration.InitValue != null ? Visit( variableDeclaration.InitValue ) : null! );
+            return base.Visit( variableDeclaration );
+        }
+
+        protected override object Visit( FieldAssignationStatementSymbol symbol )
+        {
+            var scope = LocateSymbolScope( symbol.AssignedField );
+            scope[symbol.AssignedField] = Visit( symbol.NewFieldValue );
+            return default!; // assignement is a statement.
+            // I don't want 'if(thing = true)' errors happening.
+        }
+
+        protected override object Visit( VariableAssignationStatementSymbol symbol )
+        {
+            var scope = LocateSymbolScope( symbol.AssignedField );
+            scope[symbol.AssignedField] = Visit( symbol.NewFieldValue );
             return default!;
         }
 
-        protected override object Visit( Ast.Statement.FieldAssignation assignation )
+
+        protected override object Visit( FieldReferenceExpressionSymbol variable )
+            => LocateSymbolScope( variable.Field )[variable.Field];
+
+        protected override object Visit( VariableReferenceExpressionSymbol variable )
+            => LocateSymbolScope( variable.Field )[variable.Field];
+
+        protected override object Visit( NumberLiteralSymbol constant ) => constant.Value;
+
+        protected override object Visit( AddExpressionSymbol add ) => (decimal)Visit( add.Left ) + (decimal)Visit( add.Right );
+        protected override object Visit( SubtractExpressionSymbol add ) => (decimal)Visit( add.Left ) - (decimal)Visit( add.Right );
+        protected override object Visit( MultiplyExpressionSymbol add ) => (decimal)Visit( add.Left ) * (decimal)Visit( add.Right );
+        protected override object Visit( DivideExpressionSymbol add ) => (decimal)Visit( add.Left ) / (decimal)Visit( add.Right );
+
+        protected override object Visit( MethodCallExpressionSymbol functionCall )
         {
-            var scope = LocateScope( assignation.VariableLocation );
-            scope.SetVariable( assignation.VariableLocation.Parts.Span[^1], base.Visit( assignation ) );
-            return default!;
-        }
-
-        protected override object Visit( Ast.Expression.FieldReference variable )
-        {
-            Scope scope = LocateScope( variable.VariableLocation );
-            return scope.GetVariableValue( variable.VariableLocation.Parts.Span[^1] );
-        }
-
-        protected override object Visit( Ast.Expression.Constant constant ) => constant.Value;
-
-        protected override object Visit( Ast.Expression.Add add ) => (decimal)Visit( add.Left ) + (decimal)Visit( add.Right );
-        protected override object Visit( Ast.Expression.Subtract add ) => (decimal)Visit( add.Left ) - (decimal)Visit( add.Right );
-        protected override object Visit( Ast.Expression.Multiply add ) => (decimal)Visit( add.Left ) * (decimal)Visit( add.Right );
-        protected override object Visit( Ast.Expression.Divide add ) => (decimal)Visit( add.Left ) / (decimal)Visit( add.Right );
-
-        protected override object Visit( Ast.Statement.ExpressionStatement expressionStatement )
-        {
-            base.Visit( expressionStatement.TheExpression );
-            return null!;
-        }
-
-        protected override object Visit( Ast.Expression.MethodCall functionCall )
-        {
-            var newScope = new Scope();
-            var argumentValues = functionCall.Arguments.Select( Visit ).ToArray();
-            var resolvedFunction = ResolveMethodSymbol( functionCall.FunctionToCall, argumentValues );
-            var argsDef = resolvedFunction.Method.Signature.Arguments;
+            var newScope = new Dictionary<ISymbol, object>();
             for( int i = 0; i < functionCall.Arguments.Count; i++ )
             {
-                var value = argumentValues[i];
-                newScope.AddVariable( argsDef[i].SignatureType, argsDef[i].Name );
-                newScope.SetVariable( argsDef[i].Name, value );
+                var expressionValue = functionCall.Arguments[i];
+                var parameter = functionCall.TargetMethod.ParameterSymbols[i];
+                newScope[parameter.Value] = Visit( expressionValue );
             }
 
             _stack.Push( newScope );
 
-            var val = Visit( resolvedFunction.Method.Statements );
+            var val = Visit( functionCall.TargetMethod.Statement );
             if( val is ReturnControlFlow rcf ) return rcf.ReturnValue!;
             return default!;
         }
 
 
-        protected override object Visit( Ast.Statement.Block statementBlock )
+        protected override object Visit( StatementBlockSymbol block )
         {
-            foreach( var statement in statementBlock.Statements )
+            foreach( var statement in block.Statements )
             {
                 var val = Visit( statement );
                 if( val is ReturnControlFlow returning ) return returning;
@@ -100,38 +96,30 @@ namespace KuiLang.Interpreter
             return null!;
         }
 
-        protected override object Visit( Ast.Statement.If @if )
+        protected override object Visit( IfStatementSymbol @if )
         {
             var ret = (decimal)Visit( @if.Condition );
             if( ret == 1 )
             {
-                return Visit( @if.TheStatement );
+                return Visit( @if.Statement );
             }
             return default!;
         }
 
         record ControlFlow();
         record ReturnControlFlow( object? ReturnValue ) : ControlFlow;
-        protected override object Visit( Ast.Statement.Return returnStatement )
+        protected override object Visit( ReturnStatementSymbol returnStatement )
             => returnStatement.ReturnedValue != null ?
                 new ReturnControlFlow( Visit( returnStatement.ReturnedValue ) )
                 : new ReturnControlFlow( null );
 
-        MethodSymbol ResolveMethodSymbol( FieldLocation symbolLocation, object[] arguments )
+        Dictionary<ISymbol, object> LocateSymbolScope( ISymbol symbol )
         {
-            //var searchingPart = symbolLocation.Parts.Span[0];
-            //foreach (Scope? scope in _stack)
-            //{
-            //    scope.TryGetVariable(searchingPart)
-            //}
-            return null!;
-        }
-        //=> _symbols[symbolLocation.ToString()];
-
-        Scope LocateScope( FieldLocation location )
-        {
-            if( location.Parts.Length > 1 ) throw new NotImplementedException();
-            return CurrentScope;
+            foreach( var item in _stack )
+            {
+                if( item.ContainsKey( symbol ) ) return item;
+            }
+            throw new InvalidOperationException();
         }
     }
 }

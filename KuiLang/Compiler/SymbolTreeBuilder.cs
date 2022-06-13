@@ -2,7 +2,6 @@ using KuiLang.Compiler.Symbols;
 using KuiLang.Diagnostics;
 using KuiLang.Semantic;
 using KuiLang.Syntax;
-using System;
 using System.Linq;
 using static KuiLang.Syntax.Ast.Expression;
 using static KuiLang.Syntax.Ast.Expression.Literal;
@@ -10,15 +9,15 @@ using static KuiLang.Syntax.Ast.Statement.Definition;
 
 namespace KuiLang.Compiler
 {
-    public class SymbolTableBuilderVisitor : AstVisitor<object>
+    public class SymbolTreeBuilder : AstVisitor<object>
     {
         readonly DiagnosticChannel _diagnostics;
-        public SymbolTableBuilderVisitor( DiagnosticChannel diagnostics )
+        public SymbolTreeBuilder( DiagnosticChannel diagnostics )
         {
             _diagnostics = diagnostics;
         }
 
-        ISymbol<Ast> _current = null!;
+        ISymbol _current = null!;
 
         public override ProgramRootSymbol Visit( Ast ast )
         {
@@ -36,9 +35,9 @@ namespace KuiLang.Compiler
             var current = (TypeSymbol)_current;
             var symbol = new MethodSymbol( current, method );
             current.Add( symbol );
-            _current = (ISymbol<Ast>)symbol;
+            _current = symbol;
             base.Visit( method );
-            _current = (ISymbol<Ast>)symbol.Parent;
+            _current = symbol.Parent;
             return default!;
         }
 
@@ -47,7 +46,7 @@ namespace KuiLang.Compiler
             var current = (ProgramRootSymbol)_current;
             var symbol = new TypeSymbol( current, type );
             current.Add( symbol );
-            _current = (ISymbol<Ast>)symbol;
+            _current = symbol;
             base.Visit( type );
             _current = symbol.Parent;
             return default!;
@@ -59,26 +58,28 @@ namespace KuiLang.Compiler
             {
                 var symbol = new FieldSymbol( field, type );
                 type.Add( symbol );
-                _current = (ISymbol<Ast>)symbol;
+                _current = symbol;
                 symbol.InitValue = field.InitValue != null ? Visit( field.InitValue ) : null;
-                _current = (ISymbol<Ast>)symbol.Parent;
-                return default!;
+                _current = symbol.Parent;
             }
 
             if( _current is ISymbolWithAStatement singleStatement )
             {
                 _diagnostics.EmitDiagnostic( Diagnostic.FieldSingleStatement( field ) );
-                var symbol = new VariableDeclarationSymbol( SingleOrMultiStatementSymbol.From( singleStatement ), null!, field );
+                var symbol = new VariableSymbol( SingleOrMultiStatementSymbol.From( singleStatement ), null!, field );
                 singleStatement.Statement = symbol;
-                _current = (ISymbol<Ast>)symbol;
+                _current = symbol;
                 symbol.InitValue = field.InitValue != null ? Visit( field.InitValue ) : null;
-                _current = (ISymbol<Ast>)symbol.Parent;
-                return default!;
+                _current = symbol.Parent.Value;
             }
-
-            var block = _current as StatementBlockSymbol;
-
-            base.Visit( field );
+            if( _current is StatementBlockSymbol block )
+            {
+                var symbol = new VariableSymbol( SingleOrMultiStatementSymbol.From( block ), block, field );
+                block.Statements.Add( symbol );
+                _current = symbol;
+                symbol.InitValue = field.InitValue != null ? Visit( field.InitValue ) : null;
+                _current = symbol.Parent.Value;
+            }
             return default!;
         }
 
@@ -96,7 +97,7 @@ namespace KuiLang.Compiler
                 assignation
             );
             var prev = _current;
-            _current = (ISymbol<Ast>)symbol;
+            _current = symbol;
             symbol.NewFieldValue = Visit( assignation.NewFieldValue );
             base.Visit( assignation );
             _current = prev;
@@ -107,7 +108,7 @@ namespace KuiLang.Compiler
         {
             var symbol = new IfStatementSymbol( SingleOrMultiStatementSymbol.From( _current ), @if );
             var prev = _current;
-            _current = (ISymbol<Ast>)symbol;
+            _current = symbol;
             base.Visit( @if );
             _current = prev;
             return default!;
@@ -117,19 +118,18 @@ namespace KuiLang.Compiler
         {
             var symbol = new ReturnStatementSymbol( SingleOrMultiStatementSymbol.From( _current ), returnStatement );
             var prev = _current;
-            _current = (ISymbol<Ast>)symbol;
-            base.Visit( returnStatement );
+            _current = symbol;
+            symbol.ReturnedValue = returnStatement.ReturnedValue != null ? Visit( returnStatement.ReturnedValue ) : null;
             _current = prev;
             return default!;
         }
 
-
-        protected override object Visit( Ast.Statement.ExpressionStatement expressionStatement )
+        protected override object Visit( Ast.Statement.MethodCallStatement methodCallStatement )
         {
-            var symbol = new ExpressionStatementSymbol( SingleOrMultiStatementSymbol.From( _current ), expressionStatement );
+            var symbol = new MethodCallStatementSymbol( SingleOrMultiStatementSymbol.From( _current ), methodCallStatement );
             var prev = _current;
-            _current = (ISymbol<Ast>)symbol;
-            symbol.Expression = Visit( expressionStatement.TheExpression );
+            _current = symbol;
+            symbol.MethodCallExpression = Visit( methodCallStatement.MethodCallExpression );
             _current = prev;
             return default!;
         }
@@ -138,18 +138,64 @@ namespace KuiLang.Compiler
 
         protected override IExpressionSymbol Visit( Ast.Expression expression ) => (IExpressionSymbol)base.Visit( expression );
 
-        protected override MethodCallExpressionSymbol Visit( MethodCall methodCall ) => new( methodCall, methodCall.Arguments.Select( Visit ).ToList() );
+        protected override MethodCallExpressionSymbol Visit( MethodCall methodCall )
+        {
+            var prev = _current;
+            var expr = new MethodCallExpressionSymbol( _current, methodCall );
+            _current = expr;
+            expr.Arguments = methodCall.Arguments.Select( Visit ).ToList();
+            _current = prev;
+            return expr;
+        }
 
-        protected override FieldReferenceExpressionSymbol Visit( FieldReference variable ) => new( variable );
+        protected override FieldReferenceExpressionSymbol Visit( FieldReference variable )
+            => new FieldReferenceExpressionSymbol( _current, variable );
 
         protected override IExpressionSymbol Visit( Literal literal ) => (IExpressionSymbol)base.Visit( literal );
-        protected override NumberLiteralSymbol Visit( Number constant ) => new( constant );
+        protected override NumberLiteralSymbol Visit( Number constant ) => new( _current, constant );
 
-        protected override IExpressionSymbol Visit( Operator @operator ) => (IExpressionSymbol)base.Visit( @operator );
+        protected override AddExpressionSymbol Visit( Operator.Add add )
+        {
+            var prev = _current;
+            var expr = new AddExpressionSymbol( _current, add);
+            _current = expr;
+            expr.Left = Visit( add.Left );
+            expr.Right = Visit( add.Right );
+            _current = prev;
+            return expr;
+        }
 
-        protected override AddExpressionSymbol Visit( Operator.Add add ) => new( Visit( add.Left ), Visit( add.Right ), add );
-        protected override DivideExpressionSymbol Visit( Operator.Divide divide ) => new( Visit( divide.Left ), Visit( divide.Right ), divide );
-        protected override MultiplyExpressionSymbol Visit( Operator.Multiply multiply ) => new( Visit( multiply.Left ), Visit( multiply.Right ), multiply );
-        protected override SubtractExpressionSymbol Visit( Operator.Subtract subtract ) => new( Visit( subtract.Left ), Visit( subtract.Right ), subtract );
+        protected override DivideExpressionSymbol Visit( Operator.Divide divide )
+        {
+            var prev = _current;
+            var expr = new DivideExpressionSymbol( _current, divide );
+            _current = expr;
+            expr.Left = Visit( divide.Left );
+            expr.Right = Visit( divide.Right );
+            _current = prev;
+            return expr;
+        }
+
+        protected override MultiplyExpressionSymbol Visit( Operator.Multiply multiply )
+        {
+            var prev = _current;
+            var expr = new MultiplyExpressionSymbol( _current, multiply );
+            _current = expr;
+            expr.Left = Visit( multiply.Left );
+            expr.Right = Visit( multiply.Right );
+            _current = prev;
+            return expr;
+        }
+
+        protected override SubtractExpressionSymbol Visit( Operator.Subtract subtract )
+        {
+            var prev = _current;
+            var expr = new SubtractExpressionSymbol( _current, subtract );
+            _current = expr;
+            expr.Left = Visit( subtract.Left );
+            expr.Right = Visit( subtract.Right );
+            _current = prev;
+            return expr;
+        }
     }
 }

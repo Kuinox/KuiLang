@@ -1,20 +1,31 @@
-﻿using OneOf;
+using OneOf;
+using System.Diagnostics.CodeAnalysis;
 
 namespace KuiLang.Diagnostics
 {
     /// <summary>
     /// Simple specialisation of <see cref="OneOfBase{,}"/>  to allow
     /// </summary>
-    [GenerateOneOf]
-    public partial class SourceOrSourcePath : OneOfBase<string, string>
+    public partial class SourceOrSourcePath
     {
-        public string Source => AsT0;
-        public string SourcePath => AsT1;
+        [MemberNotNullWhen( true, nameof( Source ) )]
+        [MemberNotNullWhen( false, nameof( SourcePath ) )]
 
-        public static SourceOrSourcePath FromSourcePath(string path)
-            => new(OneOf<string, string>.FromT1(path));
+        public bool IsRawSource { get; }
+        public string? Source { get; }
+        public string? SourcePath { get; }
 
-        public static SourceOrSourcePath FromSource(string source)
-            => new(OneOf<string, string>.FromT0(source));
+        public SourceOrSourcePath( bool isRawSource, string str )
+        {
+            IsRawSource = isRawSource;
+            if( isRawSource )
+            {
+                Source = str;
+            }
+            else
+            {
+                Source = str;
+            }
+        }
     }
 }

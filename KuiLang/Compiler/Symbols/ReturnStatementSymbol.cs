@@ -11,12 +11,11 @@ namespace KuiLang.Compiler.Symbols
 {
     public class ReturnStatementSymbol : StatementSymbolBase<Ast.Statement.Return>
     {
-        public ReturnStatementSymbol( IExpressionSymbol? returnedValue, SingleOrMultiStatementSymbol parent, Ast.Statement.Return symbolAst ) : base( parent, symbolAst )
+        public ReturnStatementSymbol( SingleOrMultiStatementSymbol parent, Ast.Statement.Return symbolAst ) : base( parent, symbolAst )
         {
-            ReturnedValue = returnedValue;
         }
 
-        public IExpressionSymbol? ReturnedValue { get; }
+        public IExpressionSymbol? ReturnedValue { get; internal set; }
         public TypeSymbol ReturnType { get; internal set; } = null!;
     }
 }

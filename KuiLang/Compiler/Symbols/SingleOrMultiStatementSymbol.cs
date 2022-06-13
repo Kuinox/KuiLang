@@ -5,22 +5,19 @@ using System;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class SingleOrMultiStatementSymbol : OneOfBase<ISymbolWithAStatement, StatementBlockSymbol>
+    public class SingleOrMultiStatementSymbol
     {
-        protected SingleOrMultiStatementSymbol( OneOf<ISymbolWithAStatement, StatementBlockSymbol> input ) : base( input )
+        SingleOrMultiStatementSymbol( ISymbol value )
         {
+            Value = value;
         }
+        public ISymbol Value { get; }
 
-        public static SingleOrMultiStatementSymbol From( ISymbolWithAStatement symbol )
-            => new( OneOf<ISymbolWithAStatement, StatementBlockSymbol>.FromT0( symbol ) );
-        public static SingleOrMultiStatementSymbol From( StatementBlockSymbol symbol )
-            => new( OneOf<ISymbolWithAStatement, StatementBlockSymbol>.FromT1( symbol ) );
+        public static SingleOrMultiStatementSymbol From( ISymbol symbol ) => new( symbol );
 
-        public static SingleOrMultiStatementSymbol From<T>( ISymbol<T> symbol ) where T : Ast
-        {
-            if( symbol is StatementBlockSymbol block ) return From( block );
-            if( symbol is ISymbolWithAStatement statement ) return From( statement );
-            throw new InvalidCastException();
-        }
+        public ISymbolWithAStatement AsSingle => (ISymbolWithAStatement)Value;
+        public bool IsSingle => Value is ISymbolWithAStatement;
+        public StatementBlockSymbol AsBlock => (StatementBlockSymbol)Value;
+        public bool IsBlock => Value is StatementBlockSymbol;
     }
 }

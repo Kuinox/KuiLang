@@ -1,9 +1,18 @@
 
 using FluentAssertions;
 using NUnit.Framework;
+//using Farkle;
+//using Farkle.Builder;
+//using KuiLang.Syntax;
+using System.Text.Json;
+using System.Text;
+using System;
+using System.Threading;
+using System.Linq;
+using System.Text.Json.Serialization;
 using Farkle;
-using Farkle.Builder;
 using KuiLang.Syntax;
+using Farkle.Builder;
 
 namespace KuiLang.Tests
 {
@@ -18,18 +27,18 @@ namespace KuiLang.Tests
         public void can_parse_full_name()
         {
             var fullname = @"Foo.Bar.Type";
-            var res = FullNameRuntime.Parse(fullname);
-            res.ResultValue.Parts.ToArray().Should().BeEquivalentTo(new string[] { "Foo", "Bar", "Type" });
+            var res = FullNameRuntime.Parse( fullname );
+            res.ResultValue.Parts.ToArray().Should().BeEquivalentTo( new string[] { "Foo", "Bar", "Type" } );
         }
 
 
-        [TestCase("void DoNothing() { }")]
-        [TestCase("void DoSomething() { Something(); }")]
-        public void can_parse_method(string method)
+        [TestCase( "void DoNothing() { }" )]
+        [TestCase( "void DoSomething() { Something(); }" )]
+        public void can_parse_method( string method )
         {
-            var res = MethodDeclarationRuntime.Parse(method);
+            var res = MethodDeclarationRuntime.Parse( method );
             res.IsOk.Should().BeTrue();
-            res.ResultValue.Signature.Name.Should().Contain("Do");
+            //res.ResultValue.Signature.Name.Should().Contain( "Do" );
         }
 
         [TestCase(
@@ -41,10 +50,10 @@ namespace KuiLang.Tests
         doThings();
     }
 
-}")]
-        public void can_parse_type(string type)
+}" )]
+        public void can_parse_type( string type )
         {
-            var res = TypeDeclarationRuntime.Parse(type);
+            var res = TypeDeclarationRuntime.Parse( type );
             res.IsOk.Should().BeTrue();
         }
     }

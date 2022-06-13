@@ -27,12 +27,18 @@ namespace KuiLang
         {
             Block block => Visit( block ),
             Definition definition => Visit( definition ),
-            ExpressionStatement expression => Visit( expression ),
             FieldAssignation assignation => Visit( assignation ),
             Return returnStatement => Visit( returnStatement ),
             If @if => Visit( @if ),
+            MethodCallStatement methodCallStatement => Visit( methodCallStatement ),
             _ => throw new InvalidOperationException( $"Unknown Statement{statement}" )
         };
+
+        protected virtual object Visit( MethodCallStatement statement )
+        {
+            Visit( statement.MethodCallExpression );
+            return default!;
+        }
 
         protected virtual object Visit( If @if )
         {
@@ -43,9 +49,6 @@ namespace KuiLang
 
         protected virtual object Visit( Return returnStatement )
             => Visit( returnStatement.ReturnedValue! );
-
-        protected virtual object Visit( ExpressionStatement expressionStatement )
-            => Visit( expressionStatement.TheExpression );
 
         protected virtual object Visit( FieldAssignation assignation )
             => Visit( assignation.NewFieldValue );
@@ -104,7 +107,7 @@ namespace KuiLang
         protected virtual object Visit( Operator @operator ) => @operator switch
         {
             Add add => Visit( add ),
-            Substract sub => Visit( sub ),
+            Subtract sub => Visit( sub ),
             Multiply multiply => Visit( multiply ),
             Divide divide => Visit( divide ),
             _ => throw new InvalidOperationException( $"Unknown operator{@operator}" )
@@ -117,10 +120,10 @@ namespace KuiLang
             return default!;
         }
 
-        protected virtual object Visit( Substract substract )
+        protected virtual object Visit( Subtract subtract )
         {
-            Visit( substract.Left );
-            Visit( substract.Right );
+            Visit( subtract.Left );
+            Visit( subtract.Right );
             return default!;
         }
 
