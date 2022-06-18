@@ -37,7 +37,7 @@ And something we know well does that: SQL Databases.
 In SQL DBs, you write your schema structure, queries, and the DB engine implement it.  
 You painlessly write highparalised code, doing async IO, that can run and adapt without any work, from your tiny laptop to your production clusters of machines with hundreds of cores available.  
 
-Sadly, SQL has a lot of issues, [but a lot are due to the language itself], not declarative programming.(https://www.scattered-thoughts.net/writing/against-sql).  
+Sadly, SQL has a lot of issues, [but a lot are due to the language itself](https://www.scattered-thoughts.net/writing/against-sql), not declarative programming.  
 
 Finally, software thats require high performance begin to adopt more and more a database-like architecture.  
 
