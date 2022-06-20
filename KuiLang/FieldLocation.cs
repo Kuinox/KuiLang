@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace KuiLang
 {
-    public class FieldLocation
+    public struct FieldLocation
     {
 
         public FieldLocation() => Parts = Array.Empty<string>();
@@ -36,7 +36,8 @@ namespace KuiLang
         }
 
         public FieldLocation SubParts => new(Parts[1..]);
-
+        public FieldLocation ParentLocation => new( Parts[..1] );
+        public string FieldName => Parts.Span[^1];
         public override string ToString() => string.Join(".", Parts.ToArray());
 
         public bool Empty => Parts.Length == 0;

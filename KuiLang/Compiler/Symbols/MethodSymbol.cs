@@ -6,23 +6,22 @@ namespace KuiLang.Compiler.Symbols
 {
     public class MethodSymbol : ISymbol, ISymbolWithAStatement
     {
-        readonly List<KeyValuePair<string, MethodParameterSymbol>> _parameterSymbols = new();
 
-        public MethodSymbol( TypeSymbol parent, Ast.Statement.Definition.MethodDeclaration symbolAst )
+        public MethodSymbol( ISymbolWithMethods parent, Ast.Statement.Definition.MethodDeclaration ast )
         {
-            Name = symbolAst.Name;
+            Name = ast.Name;
             Parent = parent;
-            SymbolAst = symbolAst;
+            Ast = ast;
         }
 
-        public TypeSymbol Parent { get; }
-        public Ast.Statement.Definition.MethodDeclaration SymbolAst { get; }
+        public ISymbolWithMethods Parent { get; }
+        public Ast.Statement.Definition.MethodDeclaration Ast { get; }
         public string Name { get; }
         public TypeSymbol ReturnType { get; internal set; } = null!;
-        public IReadOnlyList<KeyValuePair<string, MethodParameterSymbol>> ParameterSymbols => _parameterSymbols;
+        public List<KeyValuePair<string, MethodParameterSymbol>> ParameterSymbols { get; } = new();
 
-        public IStatementSymbol Statement { get; set; } = null!;
+        public StatementSymbol Statement { get; set; } = null!;
 
-        ISymbol? ISymbol.Parent => Parent;
+        ISymbol? ISymbol.Parent => Parent.Parent;
     }
 }

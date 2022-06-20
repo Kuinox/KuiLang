@@ -2,6 +2,8 @@ using KuiLang.Compiler.Symbols;
 using KuiLang.Diagnostics;
 using KuiLang.Semantic;
 using KuiLang.Syntax;
+using System;
+using System.Diagnostics.SymbolStore;
 using System.Linq;
 using static KuiLang.Syntax.Ast.Expression;
 using static KuiLang.Syntax.Ast.Expression.Literal;
@@ -32,12 +34,23 @@ namespace KuiLang.Compiler
 
         protected override object Visit( MethodDeclaration method )
         {
-            var current = (TypeSymbol)_current;
+            var current = _current switch
+            {
+                ISymbolWithMethods methodHolder => methodHolder,
+                StatementBlockSymbol block when block.Parent is ProgramRootSymbol root => root,
+                _=> throw new InvalidOperationException("Unknown method parent")
+            };
             var symbol = new MethodSymbol( current, method );
-            current.Add( symbol );
+            current.Methods.Add( symbol.Name, symbol );
             _current = symbol;
             base.Visit( method );
             _current = symbol.Parent;
+            return default!;
+        }
+
+        protected override object Visit( Parameter ast )
+        {
+            new MethodParameterSymbol( ast.Name, ast, (MethodSymbol)_current );
             return default!;
         }
 
@@ -56,44 +69,44 @@ namespace KuiLang.Compiler
         {
             if( _current is TypeSymbol type )
             {
-                var symbol = new FieldSymbol( field, type );
-                type.Add( symbol );
-                _current = symbol;
-                symbol.InitValue = field.InitValue != null ? Visit( field.InitValue ) : null;
-                _current = symbol.Parent;
+                var fieldSymbol = new FieldSymbol( field, type );
+                type.Fields.Add( fieldSymbol.Name, fieldSymbol );
+                _current = fieldSymbol;
+                fieldSymbol.InitValue = field.InitValue != null ? Visit( field.InitValue ) : null;
+                _current = fieldSymbol.Parent;
+                return default!;
             }
+            var symbol = new VariableSymbol( _current, null!, field );
+            _current = symbol;
+            symbol.InitValue = field.InitValue != null ? Visit( field.InitValue ) : null;
+            _current = symbol.Parent!;
 
             if( _current is ISymbolWithAStatement singleStatement )
             {
                 _diagnostics.EmitDiagnostic( Diagnostic.FieldSingleStatement( field ) );
-                var symbol = new VariableSymbol( SingleOrMultiStatementSymbol.From( singleStatement ), null!, field );
-                singleStatement.Statement = symbol;
-                _current = symbol;
-                symbol.InitValue = field.InitValue != null ? Visit( field.InitValue ) : null;
-                _current = symbol.Parent.Value;
-            }
-            if( _current is StatementBlockSymbol block )
-            {
-                var symbol = new VariableSymbol( SingleOrMultiStatementSymbol.From( block ), block, field );
-                block.Statements.Add( symbol );
-                _current = symbol;
-                symbol.InitValue = field.InitValue != null ? Visit( field.InitValue ) : null;
-                _current = symbol.Parent.Value;
             }
             return default!;
         }
 
         // Statements:
 
-        protected override object Visit( Ast.Statement.Block statementBlock )
+        protected override object Visit( Ast.Statement.Block ast )
         {
-            return base.Visit( statementBlock );
+            var symbol = new StatementBlockSymbol( _current, ast );
+            _current = symbol;
+            var res = base.Visit( ast );
+            _current = symbol.Parent!;
+            return res;
+        }
+
+        protected override object Visit( Ast.Statement statement )
+        {
+            return base.Visit( statement );
         }
 
         protected override object Visit( Ast.Statement.FieldAssignation assignation )
         {
-            var symbol = new FieldAssignationStatementSymbol(
-                SingleOrMultiStatementSymbol.From( _current ),
+            var symbol = new FieldAssignationStatementSymbol( (StatementSymbol)_current,
                 assignation
             );
             var prev = _current;
@@ -106,17 +119,18 @@ namespace KuiLang.Compiler
 
         protected override object Visit( Ast.Statement.If @if )
         {
-            var symbol = new IfStatementSymbol( SingleOrMultiStatementSymbol.From( _current ), @if );
+            var symbol = new IfStatementSymbol( (StatementSymbol)_current, @if );
             var prev = _current;
             _current = symbol;
-            base.Visit( @if );
+            symbol.Condition = Visit( @if.Condition );
+            var res = Visit( @if.TheStatement );
             _current = prev;
-            return default!;
+            return res;
         }
 
         protected override object Visit( Ast.Statement.Return returnStatement )
         {
-            var symbol = new ReturnStatementSymbol( SingleOrMultiStatementSymbol.From( _current ), returnStatement );
+            var symbol = new ReturnStatementSymbol( _current, returnStatement );
             var prev = _current;
             _current = symbol;
             symbol.ReturnedValue = returnStatement.ReturnedValue != null ? Visit( returnStatement.ReturnedValue ) : null;
@@ -126,7 +140,7 @@ namespace KuiLang.Compiler
 
         protected override object Visit( Ast.Statement.MethodCallStatement methodCallStatement )
         {
-            var symbol = new MethodCallStatementSymbol( SingleOrMultiStatementSymbol.From( _current ), methodCallStatement );
+            var symbol = new MethodCallStatementSymbol( _current, methodCallStatement );
             var prev = _current;
             _current = symbol;
             symbol.MethodCallExpression = Visit( methodCallStatement.MethodCallExpression );
@@ -149,7 +163,7 @@ namespace KuiLang.Compiler
         }
 
         protected override FieldReferenceExpressionSymbol Visit( FieldReference variable )
-            => new FieldReferenceExpressionSymbol( _current, variable );
+            => new( _current, variable );
 
         protected override IExpressionSymbol Visit( Literal literal ) => (IExpressionSymbol)base.Visit( literal );
         protected override NumberLiteralSymbol Visit( Number constant ) => new( _current, constant );
@@ -157,7 +171,7 @@ namespace KuiLang.Compiler
         protected override AddExpressionSymbol Visit( Operator.Add add )
         {
             var prev = _current;
-            var expr = new AddExpressionSymbol( _current, add);
+            var expr = new AddExpressionSymbol( _current, add );
             _current = expr;
             expr.Left = Visit( add.Left );
             expr.Right = Visit( add.Right );

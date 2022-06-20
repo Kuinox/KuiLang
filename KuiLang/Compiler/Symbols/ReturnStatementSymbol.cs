@@ -9,13 +9,16 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class ReturnStatementSymbol : StatementSymbolBase<Ast.Statement.Return>
+    public class ReturnStatementSymbol : StatementSymbol
     {
-        public ReturnStatementSymbol( SingleOrMultiStatementSymbol parent, Ast.Statement.Return symbolAst ) : base( parent, symbolAst )
+        public ReturnStatementSymbol( ISymbol parent, Ast.Statement.Return ast )
+            : base( parent )
         {
+            Ast = ast;
         }
 
         public IExpressionSymbol? ReturnedValue { get; internal set; }
         public TypeSymbol ReturnType { get; internal set; } = null!;
+        public Ast.Statement.Return Ast { get; }
     }
 }

@@ -10,14 +10,14 @@ namespace KuiLang.Compiler.Symbols
 {
     public class FieldReferenceExpressionSymbol : IExpressionSymbol, ISymbol
     {
-        public FieldReferenceExpressionSymbol( ISymbol parent, Ast.Expression.FieldReference symbolAst )
+        public FieldReferenceExpressionSymbol( ISymbol parent, Ast.Expression.FieldReference ast )
         {
             Parent = parent;
-            SymbolAst = symbolAst;
+            Ast = ast;
         }
 
         public FieldSymbol Field { get; internal set; } = null!;
-        public Ast.Expression.FieldReference SymbolAst { get; }
+        public Ast.Expression.FieldReference Ast { get; }
         public TypeSymbol ReturnType { get; internal set; } = null!;
         public ISymbol? Parent { get; }
     }

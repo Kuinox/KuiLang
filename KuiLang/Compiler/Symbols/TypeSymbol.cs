@@ -9,31 +9,26 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Semantic
 {
-    public class TypeSymbol : ISymbol
+    public class TypeSymbol : ISymbol, ISymbolWithMethods
     {
-        readonly Dictionary<string, MethodSymbol> _methods = new();
-        readonly Dictionary<string, FieldSymbol> _fields = new();
-
-        public TypeSymbol( ProgramRootSymbol parent, Ast.Statement.Definition.TypeDeclaration SymbolAst )
+        public TypeSymbol( ProgramRootSymbol parent, Ast.Statement.Definition.TypeDeclaration ast )
         {
             Parent = parent;
-            this.SymbolAst = SymbolAst;
-            Name = SymbolAst.Name;
+            Ast = ast;
+            Name = ast.Name;
         }
 
         public ProgramRootSymbol Parent { get; }
 
         ISymbol? ISymbol.Parent => Parent;
 
-        public Ast.Statement.Definition.TypeDeclaration SymbolAst { get; }
+        public Ast.Statement.Definition.TypeDeclaration Ast { get; }
         public string Name { get; }
 
-        public IReadOnlyDictionary<string, MethodSymbol> Methods => _methods;
+        public Dictionary<string, MethodSymbol> Methods { get; } = new();
 
-        public IReadOnlyDictionary<string, FieldSymbol> Fields => _fields;
+        public Dictionary<string, FieldSymbol> Fields { get; } = new();
 
-        public void Add( MethodSymbol symbol ) => _methods.Add( symbol.Name, symbol );
 
-        public void Add( FieldSymbol symbol ) => _fields.Add( symbol.Name, symbol );
     }
 }

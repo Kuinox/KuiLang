@@ -44,7 +44,6 @@ namespace KuiLang.Tests
         [TestCase(
 @"type Foo
 {
-    number localField;
     void Test()
     {
         doThings();

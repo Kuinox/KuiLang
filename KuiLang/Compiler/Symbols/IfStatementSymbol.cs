@@ -9,14 +9,17 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class IfStatementSymbol : StatementSymbolBase<Ast.Statement.If>, ISymbolWithAStatement
+    public class IfStatementSymbol : StatementSymbol, ISymbolWithAStatement
     {
-        public IfStatementSymbol( SingleOrMultiStatementSymbol parent, Ast.Statement.If symbolAst )
-            : base( parent, symbolAst )
+        public IfStatementSymbol( StatementSymbol parent, Ast.Statement.If symbolAst )
+            : base( parent )
         {
+            SymbolAst = symbolAst;
         }
 
         public IExpressionSymbol Condition { get; set; } = null!;
-        public IStatementSymbol Statement { get; set; } = null!;
+        public StatementSymbol Statement { get; set; } = null!;
+
+        public Ast.Statement.If SymbolAst { get; }
     }
 }

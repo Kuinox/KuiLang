@@ -1,5 +1,6 @@
 using KuiLang.Compiler;
 using KuiLang.Compiler.Symbols;
+using KuiLang.Diagnostics;
 using KuiLang.Semantic;
 using KuiLang.Syntax;
 using Microsoft.FSharp.Core;
@@ -15,15 +16,20 @@ namespace KuiLang.Interpreter
     public class InterpreterVisitor : SymbolVisitor<object>
     {
         readonly Stack<Dictionary<ISymbol, object>> _stack = new();
-        public InterpreterVisitor()
+        readonly DiagnosticChannel _diagnostics;
+
+        public InterpreterVisitor(DiagnosticChannel diagnostics)
         {
+            _diagnostics = diagnostics;
         }
 
         Dictionary<ISymbol, object> Current => _stack.Peek();
 
-        public override object Visit( ProgramRootSymbol ast )
+        public override object Visit( ProgramRootSymbol root )
         {
-            var res = base.Visit( ast );
+            _stack.Push( new Dictionary<ISymbol, object>() );
+            var res = base.Visit( root );
+            _stack.Pop();
             if( res is ReturnControlFlow rcf ) return rcf.ReturnValue!;
             return default!;
         }
@@ -115,6 +121,7 @@ namespace KuiLang.Interpreter
 
         Dictionary<ISymbol, object> LocateSymbolScope( ISymbol symbol )
         {
+            if( symbol is null ) throw new ArgumentNullException( nameof( symbol ) );
             foreach( var item in _stack )
             {
                 if( item.ContainsKey( symbol ) ) return item;

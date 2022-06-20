@@ -10,16 +10,16 @@ namespace KuiLang.Compiler.Symbols
 {
     public class MethodParameterSymbol : ISymbol
     {
-        public MethodParameterSymbol( TypeSymbol type, string name, Ast.Statement.Definition.Parameter symbolAst, MethodSymbol parent )
+        public MethodParameterSymbol( string name, Ast.Statement.Definition.Parameter symbolAst, MethodSymbol parent )
         {
-            SymbolAst = symbolAst;
+            Ast = symbolAst;
             Parent = parent;
-            Type = type;
+            parent.ParameterSymbols.Add( new KeyValuePair<string, MethodParameterSymbol>( name, this ) );
             Name = name;
         }
-        public TypeSymbol Type { get; internal set; } = null!; // Ordrered Resolution pass.
+        public TypeSymbol Type { get; internal set; } = null!;
         public string Name { get; }
-        public Ast.Statement.Definition.Parameter SymbolAst { get; }
+        public Ast.Statement.Definition.Parameter Ast { get; }
         public MethodSymbol Parent { get; }
 
         ISymbol? ISymbol.Parent => Parent;

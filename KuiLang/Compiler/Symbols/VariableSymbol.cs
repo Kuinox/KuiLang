@@ -3,19 +3,21 @@ using KuiLang.Syntax;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class VariableSymbol : StatementSymbolBase<Ast.Statement.Definition.FieldDeclaration>
+    public class VariableSymbol : StatementSymbol
     {
         public VariableSymbol(
-            SingleOrMultiStatementSymbol parent,
+            ISymbol parent,
             StatementBlockSymbol statementScope,
-            Ast.Statement.Definition.FieldDeclaration symbolAst ) : base( parent, symbolAst )
+            Ast.Statement.Definition.FieldDeclaration ast ) :base(parent)
         {
             StatementScope = statementScope;
+            Ast = ast;
         }
 
         public IExpressionSymbol? InitValue { get; internal set; } = null!;
 
         public TypeSymbol Type { get; internal set; } = null!; // Ordrered Resolution pass.
         public StatementBlockSymbol StatementScope { get; }
+        public Ast.Statement.Definition.FieldDeclaration Ast { get; }
     }
 }

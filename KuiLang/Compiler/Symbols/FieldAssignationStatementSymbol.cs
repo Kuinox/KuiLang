@@ -9,14 +9,16 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class FieldAssignationStatementSymbol : StatementSymbolBase<Ast.Statement.FieldAssignation>
+    public class FieldAssignationStatementSymbol : StatementSymbol
     {
-        public FieldAssignationStatementSymbol( SingleOrMultiStatementSymbol parent, Ast.Statement.FieldAssignation symbolAst )
-            : base( parent, symbolAst )
+        public FieldAssignationStatementSymbol( StatementSymbol parent, Ast.Statement.FieldAssignation ast )
+            : base( parent )
         {
+            Ast = ast;
         }
 
         public IExpressionSymbol NewFieldValue { get; internal set; } = null!;
         public FieldSymbol AssignedField { get; internal set; } = null!;
+        public Ast.Statement.FieldAssignation Ast { get; }
     }
 }

@@ -27,9 +27,15 @@ namespace KuiLang.Runner
                 throw new InvalidOperationException( res.ErrorValue.ToString() );
             }
             var statements = res.ResultValue;
-            var symbolsBuilder = new SymbolTreeBuilder( new Diagnostics.DiagnosticChannel() );
+            var diagnostics = new Diagnostics.DiagnosticChannel();
+            var symbolsBuilder = new SymbolTreeBuilder( diagnostics );
+            var resolver = new ResolveMemberTypeVisitor( diagnostics );
+            var orderedResolver = new ResolveOrderedSymbols( diagnostics );
+            var interpreter = new InterpreterVisitor( diagnostics );
+
             var rootSymbol = symbolsBuilder.Visit( statements );
-            var interpreter = new InterpreterVisitor();
+            resolver.Visit( rootSymbol );
+            orderedResolver.Visit( rootSymbol );
             var val = interpreter.Visit( rootSymbol ); //Thats where all the magic happens.
             Console.WriteLine( $"Execution returned value: {val}" );
             return val;

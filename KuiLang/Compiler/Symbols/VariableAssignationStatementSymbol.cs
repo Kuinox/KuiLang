@@ -8,14 +8,16 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class VariableAssignationStatementSymbol : StatementSymbolBase<Ast.Statement.FieldAssignation>
+    public class VariableAssignationStatementSymbol : StatementSymbol
     {
-        public VariableAssignationStatementSymbol( SingleOrMultiStatementSymbol parent, Ast.Statement.FieldAssignation symbolAst )
-            : base( parent, symbolAst )
+        public VariableAssignationStatementSymbol( ISymbol parent, Ast.Statement.FieldAssignation ast )
+            : base( parent )
         {
+            Ast = ast;
         }
 
         public IExpressionSymbol NewFieldValue { get; internal set; } = null!;
         public VariableSymbol AssignedField { get; internal set; } = null!;
+        public Ast.Statement.FieldAssignation Ast { get; }
     }
 }

@@ -1,4 +1,5 @@
 using KuiLang.Compiler.Symbols;
+using KuiLang.Diagnostics;
 using KuiLang.Semantic;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,13 @@ namespace KuiLang.Compiler
 {
     class ResolveOrderedSymbols : SymbolVisitor<object>
     {
+        DiagnosticChannel _diagnostics;
+
+        public ResolveOrderedSymbols( DiagnosticChannel diagnostics )
+        {
+            _diagnostics = diagnostics;
+        }
+
         protected override TypeSymbol Visit( IExpressionSymbol statement ) => (TypeSymbol)base.Visit( statement );
         protected override TypeSymbol Visit( AddExpressionSymbol symbol )
         {
@@ -53,9 +61,10 @@ namespace KuiLang.Compiler
 
         protected override object Visit( MethodCallExpressionSymbol symbol ) => symbol.ReturnType;
 
-        protected override object Visit( FieldReferenceExpressionSymbol symbol ) => symbol.ReturnType;
-
-     
-
+        protected override object Visit( FieldReferenceExpressionSymbol symbol )
+        {
+            symbol.Field = TODO;
+            return symbol.ReturnType;
+        }
     }
 }

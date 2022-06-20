@@ -26,7 +26,7 @@ namespace KuiLang
         protected virtual object Visit( Statement statement ) => statement switch
         {
             Block block => Visit( block ),
-            Definition definition => Visit( definition ),
+            Definition definition => Visit(definition),
             FieldAssignation assignation => Visit( assignation ),
             Return returnStatement => Visit( returnStatement ),
             If @if => Visit( @if ),
@@ -80,7 +80,7 @@ namespace KuiLang
             return default!;
         }
 
-        protected virtual object Visit( Parameter argument ) => default!;
+        protected virtual object Visit( Parameter parameter ) => default!;
         protected virtual object Visit( FieldDeclaration field ) => default!;
 
         protected virtual object Visit( MethodDeclaration method )

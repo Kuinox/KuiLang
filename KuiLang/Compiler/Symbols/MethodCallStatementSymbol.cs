@@ -8,15 +8,17 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class MethodCallStatementSymbol : StatementSymbolBase<Ast.Statement.MethodCallStatement>
+    public class MethodCallStatementSymbol : StatementSymbol
     {
-        public MethodCallStatementSymbol(
-            SingleOrMultiStatementSymbol parent,
-            Ast.Statement.MethodCallStatement symbolAst ): base(parent, symbolAst)
+        public MethodCallStatementSymbol( ISymbol parent,
+            Ast.Statement.MethodCallStatement ast )
+            : base( parent )
         {
+            Ast = ast;
         }
 
         public MethodCallExpressionSymbol MethodCallExpression { get; internal set; } = null!; // POST INIT
 
+        public Ast.Statement.MethodCallStatement Ast { get; }
     }
 }

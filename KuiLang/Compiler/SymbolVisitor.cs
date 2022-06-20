@@ -17,7 +17,7 @@ namespace KuiLang.Compiler
             {
                 Visit( type );
             }
-            return default!;
+            return Visit( symbol.Statement );
         }
 
         protected virtual T Visit( TypeSymbol symbol )
@@ -49,7 +49,7 @@ namespace KuiLang.Compiler
 
         protected virtual T Visit( MethodParameterSymbol symbol ) => default!;
 
-        protected virtual T Visit( IStatementSymbol symbolBase ) => symbolBase switch
+        protected virtual T Visit( StatementSymbol symbolBase ) => symbolBase switch
         {
             MethodCallStatementSymbol s => Visit( s ),
             FieldAssignationStatementSymbol s => Visit( s ),

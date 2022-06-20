@@ -1,3 +1,4 @@
+using KuiLang.Semantic;
 using KuiLang.Syntax;
 using OneOf;
 using System;
@@ -8,13 +9,15 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public sealed class StatementBlockSymbol : StatementSymbolBase<Ast.Statement.Block>
+    public sealed class StatementBlockSymbol : StatementSymbol
     {
-        public StatementBlockSymbol( SingleOrMultiStatementSymbol parent, Ast.Statement.Block ast )
-            : base( parent, ast )
+        public StatementBlockSymbol( ISymbol parent, Ast.Statement.Block? ast )
+            : base( parent )
         {
+            Ast = ast;
         }
 
-        public List<IStatementSymbol> Statements { get; } = new();
+        public List<StatementSymbol> Statements { get; } = new();
+        public Ast.Statement.Block? Ast { get; }
     }
 }
