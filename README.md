@@ -37,7 +37,7 @@ And something we know well does that: SQL Databases.
 In SQL DBs, you write your schema structure, queries, and the DB engine implement it.  
 You painlessly write highparalised code, doing async IO, that can run and adapt without any work, from your tiny laptop to your production clusters of machines with hundreds of cores available.  
 
-Sadly, SQL has a lot of issues, [but a lot are due to the language itself], not declarative programming.(https://www.scattered-thoughts.net/writing/against-sql).  
+Sadly, SQL has a lot of issues, [but a lot are due to the language itself](https://www.scattered-thoughts.net/writing/against-sql), not declarative programming.  
 
 Finally, software thats require high performance begin to adopt more and more a database-like architecture.  
 
@@ -50,9 +50,8 @@ Compilers start to be query based: https://rustc-dev-guide.rust-lang.org/query.h
 *This is a plan, it's currently not implemented*  
 Ideally, the source could would be compiled to an intermediate language (still declarative).
 This would avoid costly source code parsing in runtime.  
-Ideally, the engine run a pass on the final app to pre-generate & optimise(PGO) things before the first real run.
 
-The runtime is like a JIT, except because it's up to the runtime to choose how to implement the program, Profile Guided Optimisation will be very important (like statistics in SQL DBs), to choose the right data structures and algorithms.   
+The runtime is like a JIT, except it's internal will look more like a DB engine. 
 
 Because the optimiser does the job of implementing the program, the problems of async IO, and maybe, lot of the concurrency issues would be gone.  
 This also make it possible to offload work to something else than the CPU, like another machine, even if the code was not designed for it, the implementation can do whatever it want.
