@@ -17,7 +17,7 @@ namespace KuiLang.Compiler.Symbols
             Ast = ast;
         }
 
-        public IExpressionSymbol? ReturnedValue { get; internal set; }
+        public IExpression? ReturnedValue { get; internal set; }
         public TypeSymbol ReturnType { get; internal set; } = null!;
         public Ast.Statement.Return Ast { get; }
     }

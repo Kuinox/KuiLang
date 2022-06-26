@@ -17,7 +17,7 @@ namespace KuiLang.Compiler.Symbols
             parent.ParameterSymbols.Add( new KeyValuePair<string, MethodParameterSymbol>( name, this ) );
             Name = name;
         }
-        public TypeSymbol Type { get; internal set; } = null!;
+        public TypeSymbol ReturnType { get; internal set; } = null!;
         public string Name { get; }
         public Ast.Statement.Definition.Parameter Ast { get; }
         public MethodSymbol Parent { get; }

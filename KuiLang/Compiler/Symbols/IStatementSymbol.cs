@@ -7,9 +7,9 @@ namespace KuiLang.Compiler.Symbols
 {
     public abstract class StatementSymbol : ISymbol
     {
-        public ISymbol? Parent { get; }
+        public ISymbol Parent { get; }
 
-        public StatementSymbol( ISymbol? parent )
+        public StatementSymbol( ISymbol parent )
         {
             Parent = parent;
             if(parent is ProgramRootSymbol root)

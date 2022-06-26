@@ -3,7 +3,7 @@ using KuiLang.Syntax;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public abstract class OperatorExpressionBaseSymbol<T> : IExpressionSymbol, ISymbol where T : Ast.Expression.Operator
+    public abstract class OperatorExpressionBaseSymbol<T> : IExpression, ISymbol where T : Ast.Expression.Operator
     {
         public OperatorExpressionBaseSymbol(ISymbol parent, T symbolAst )
         {
@@ -12,8 +12,8 @@ namespace KuiLang.Compiler.Symbols
         }
 
         public ISymbol Parent { get; }
-        public IExpressionSymbol Left { get; internal set; } = null!;
-        public IExpressionSymbol Right { get; internal set; } = null!;
+        public IExpression Left { get; internal set; } = null!;
+        public IExpression Right { get; internal set; } = null!;
         public T SymbolAst { get; }
 
         public TypeSymbol ReturnType { get; internal set; } = null!;

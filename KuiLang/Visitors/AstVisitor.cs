@@ -98,7 +98,7 @@ namespace KuiLang
         protected virtual object Visit( Expression expression ) => expression switch
         {
             MethodCall functionCall => Visit( functionCall ),
-            FieldReference variable => Visit( variable ),
+            IdentifierValue variable => Visit( variable ),
             Literal literal => Visit( literal ),
             Operator @operator => Visit( @operator ),
             _ => throw new InvalidOperationException( $"Unknown Statement{expression}" )
@@ -158,6 +158,6 @@ namespace KuiLang
             return default!;
         }
 
-        protected virtual object Visit( FieldReference variable ) => default!;
+        protected virtual object Visit( IdentifierValue variable ) => default!;
     }
 }

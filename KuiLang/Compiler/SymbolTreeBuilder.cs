@@ -150,7 +150,7 @@ namespace KuiLang.Compiler
 
         // Expressions:
 
-        protected override IExpressionSymbol Visit( Ast.Expression expression ) => (IExpressionSymbol)base.Visit( expression );
+        protected override IExpression Visit( Ast.Expression expression ) => (IExpression)base.Visit( expression );
 
         protected override MethodCallExpressionSymbol Visit( MethodCall methodCall )
         {
@@ -162,10 +162,10 @@ namespace KuiLang.Compiler
             return expr;
         }
 
-        protected override FieldReferenceExpressionSymbol Visit( FieldReference variable )
+        protected override IdentifierValueExpressionSymbol Visit( IdentifierValue variable )
             => new( _current, variable );
 
-        protected override IExpressionSymbol Visit( Literal literal ) => (IExpressionSymbol)base.Visit( literal );
+        protected override IExpression Visit( Literal literal ) => (IExpression)base.Visit( literal );
         protected override NumberLiteralSymbol Visit( Number constant ) => new( _current, constant );
 
         protected override AddExpressionSymbol Visit( Operator.Add add )

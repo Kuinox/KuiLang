@@ -15,7 +15,7 @@ namespace KuiLang
         public static readonly RuntimeFarkle<Ast> RootRuntime;
 
         public static readonly DesigntimeFarkle<Statement> StatementDesignTime;
-        public static readonly DesigntimeFarkle<FieldLocation> FullNameDesigntime;
+        public static readonly DesigntimeFarkle<Identifier> FullNameDesigntime;
         public static readonly DesigntimeFarkle<Expression> ExpressionDesigntime;
         public static readonly DesigntimeFarkle<Statement.Definition.MethodDeclaration> MethodDeclarationDesigntime;
         public static readonly DesigntimeFarkle<Statement.Definition.TypeDeclaration> TypeDeclarationDesigntime;
@@ -33,13 +33,13 @@ namespace KuiLang
         static KuiLang()
         {
             var simpleNamePart = Terminal.Create( "Namespace Part", ( context, data ) => data.ToString(), FromRegexString( @"\p{All Letters}(\p{All Letters}|\d)*" ) );
-            var fullName = Nonterminal.Create<FieldLocation>( "FullName" );
+            var fullName = Nonterminal.Create<Identifier>( "FullName" );
             fullName.SetProductions(
                 fullName.Extended()
                 .Append( "." )
                 .Extend( simpleNamePart )
                 .Finish( ( a, b ) => a.Append( b ) ),
-                simpleNamePart.Finish( ( s ) => new FieldLocation( s ) )
+                simpleNamePart.Finish( ( s ) => new Identifier( s ) )
             );
             var argument = Nonterminal.Create( "Argument Declaration",
               fullName.Extended().Extend( simpleNamePart ).Finish( ( type, argName ) => new Statement.Definition.Parameter( type, argName, null ) )
@@ -105,7 +105,7 @@ namespace KuiLang
 
             expression.SetProductions(
                 functionCall.AsIs<Expression>(),
-                fullName.Finish<FieldLocation, Expression>( s => new Expression.FieldReference( s ) ),
+                fullName.Finish<Identifier, Expression>( s => new Expression.IdentifierValue( s ) ),
                 number.Finish<decimal, Expression>( s => new Expression.Literal.Number( s ) ),
                 operators.AsIs()
             );

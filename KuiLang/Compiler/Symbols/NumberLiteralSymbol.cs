@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class NumberLiteralSymbol : ISymbol, IExpressionSymbol
+    public class NumberLiteralSymbol : ISymbol, IExpression
     {
         public NumberLiteralSymbol( ISymbol parent, Ast.Expression.Literal.Number symbolAst )
         {

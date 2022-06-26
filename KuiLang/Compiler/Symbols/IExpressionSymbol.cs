@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public interface IExpressionSymbol
+    public interface IExpression
     {
         public TypeSymbol ReturnType { get; }
+        ISymbol Parent { get; }
+
     }
 }

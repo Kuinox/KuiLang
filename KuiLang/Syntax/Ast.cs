@@ -20,10 +20,10 @@ namespace KuiLang.Syntax
                 IReadOnlyList<Definition> Fields ) : Definition( Name );
 
 
-                public sealed record Parameter( FieldLocation SignatureType, string Name, Expression? InitValue ) : Definition( Name );
-                public sealed record FieldDeclaration( FieldLocation SignatureType, string Name, Expression? InitValue ) : Definition( Name );
+                public sealed record Parameter( Identifier TypeIdentifier, string Name, Expression? InitValue ) : Definition( Name );
+                public sealed record FieldDeclaration( Identifier TypeIdentifier, string Name, Expression? InitValue ) : Definition( Name );
                 public sealed record MethodDeclaration(
-                    FieldLocation ReturnType, string Name, IReadOnlyList<Parameter> Arguments,
+                    Identifier ReturnTypeIdentifier, string Name, IReadOnlyList<Parameter> Arguments,
                     Statement TheStatement
                 ) : Definition( Name );
             }
@@ -40,15 +40,15 @@ namespace KuiLang.Syntax
             ) : Statement;
 
 
-            public sealed record FieldAssignation( FieldLocation VariableLocation, Expression NewFieldValue ) : Statement;
+            public sealed record FieldAssignation( Identifier VariableLocation, Expression NewFieldValue ) : Statement;
 
         }
 
 
         public abstract record Expression : Ast
         {
-            public sealed record MethodCall( FieldLocation FunctionToCall, IReadOnlyList<Expression> Arguments ) : Expression;
-            public sealed record FieldReference( FieldLocation VariableLocation ) : Expression;
+            public sealed record MethodCall( Identifier FunctionIdentifier, IReadOnlyList<Expression> Arguments ) : Expression;
+            public sealed record IdentifierValue( Identifier Identifier ) : Expression;
             public record Literal : Expression
             {
                 public sealed record Number( decimal Value ) : Literal();

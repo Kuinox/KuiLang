@@ -82,21 +82,19 @@ namespace KuiLang.Compiler
             return default!;
         }
 
-        protected virtual T Visit( IExpressionSymbol symbolBase ) => symbolBase switch
+        protected virtual T Visit( IExpression symbolBase ) => symbolBase switch
         {
-            FieldReferenceExpressionSymbol s => Visit( s ),
-            VariableReferenceExpressionSymbol s => Visit( s ),
+            IdentifierValueExpressionSymbol s => Visit( s ),
             MethodCallExpressionSymbol s => Visit( s ),
             NumberLiteralSymbol s => Visit( s ),
             MultiplyExpressionSymbol s => Visit( s ),
             DivideExpressionSymbol s => Visit( s ),
-            AddExpressionSymbol s => Visit( (IExpressionSymbol)s ),
+            AddExpressionSymbol s => Visit( (IExpression)s ),
             SubtractExpressionSymbol s => Visit( s ),
             _ => throw new ArgumentException( $"Unknown expression symbol {symbolBase}" )
         };
 
-        protected virtual T Visit( FieldReferenceExpressionSymbol symbol ) => default!;
-        protected virtual T Visit( VariableReferenceExpressionSymbol symbol ) => default!;
+        protected virtual T Visit( IdentifierValueExpressionSymbol symbol ) => default!;
         protected virtual T Visit( MethodCallExpressionSymbol symbol )
         {
             foreach( var arg in symbol.Arguments )

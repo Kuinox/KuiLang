@@ -19,7 +19,7 @@ namespace KuiLang.Tests
     public class ParseTests
     {
 
-        static readonly RuntimeFarkle<FieldLocation> FullNameRuntime = KuiLang.FullNameDesigntime.Build();
+        static readonly RuntimeFarkle<Identifier> FullNameRuntime = KuiLang.FullNameDesigntime.Build();
         static readonly RuntimeFarkle<Ast.Expression> ExpressionRuntime = KuiLang.ExpressionDesigntime.Build();
         static readonly RuntimeFarkle<Ast.Statement.Definition.MethodDeclaration> MethodDeclarationRuntime = KuiLang.MethodDeclarationDesigntime.Build();
         static readonly RuntimeFarkle<Ast.Statement.Definition.TypeDeclaration> TypeDeclarationRuntime = KuiLang.TypeDeclarationDesigntime.Build();
