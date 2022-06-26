@@ -18,7 +18,7 @@ namespace KuiLang.Interpreter
         readonly Stack<Dictionary<ISymbol, object>> _stack = new();
         readonly DiagnosticChannel _diagnostics;
 
-        public InterpreterVisitor(DiagnosticChannel diagnostics)
+        public InterpreterVisitor( DiagnosticChannel diagnostics )
         {
             _diagnostics = diagnostics;
         }
@@ -28,7 +28,7 @@ namespace KuiLang.Interpreter
         public override object Visit( ProgramRootSymbol root )
         {
             _stack.Push( new Dictionary<ISymbol, object>() );
-            var res = base.Visit( root );
+            var res = Visit( root.Statement );
             _stack.Pop();
             if( res is ReturnControlFlow rcf ) return rcf.ReturnValue!;
             return default!;
@@ -60,11 +60,7 @@ namespace KuiLang.Interpreter
             return default!;
         }
 
-
-        protected override object Visit( FieldReferenceExpressionSymbol variable )
-            => LocateSymbolScope( variable.Field )[variable.Field];
-
-        protected override object Visit( VariableReferenceExpressionSymbol variable )
+        protected override object Visit( IdentifierValueExpressionSymbol variable )
             => LocateSymbolScope( variable.Field )[variable.Field];
 
         protected override object Visit( NumberLiteralSymbol constant ) => constant.Value;

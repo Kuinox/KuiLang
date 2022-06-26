@@ -20,10 +20,16 @@ namespace KuiLang.Compiler
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public static StatementSymbol FindContainingStatement( this IExpression symbol )
+        public static StatementSymbol GetContainingStatement( this IExpression symbol )
         {
             var parent = symbol.Parent;
-            return parent is IExpression expr ? FindContainingStatement( expr ) : (StatementSymbol)parent;
+            return parent is IExpression expr ? GetContainingStatement( expr ) : (StatementSymbol)parent;
+        }
+
+        public static MethodSymbol GetContainingMethod( this ISymbol symbol )
+        {
+            if( symbol.Parent is MethodSymbol method ) return method;
+            return GetContainingMethod( symbol.Parent! );
         }
 
         public static TypeSymbol FindType( this ProgramRootSymbol root, Identifier typeIdentifier )
@@ -75,7 +81,7 @@ namespace KuiLang.Compiler
         public static MethodSymbol FindMethod( this ISymbol symbol, Identifier methodIdentifier )
         {
             //first we must crawl up to the type def.
-            var hasMethods = ResolveType( symbol );
+            var hasMethods = FindMethodContainer( symbol );
             if( methodIdentifier.Parts.Length == 1 )
             {
                 return hasMethods.Methods[methodIdentifier.Parts.Span[0]];
@@ -85,10 +91,10 @@ namespace KuiLang.Compiler
 
             return targetedType.Methods[methodIdentifier.Name];
 
-            static ISymbolWithMethods ResolveType( ISymbol symbol )
+            static ISymbolWithMethods FindMethodContainer( ISymbol symbol )
             {
                 if( symbol.Parent is ISymbolWithMethods parent ) return parent;
-                return ResolveType( symbol.Parent! );
+                return FindMethodContainer( symbol.Parent! );
             }
         }
 
@@ -97,9 +103,14 @@ namespace KuiLang.Compiler
         {
             if( identifier.Parts.Length == 1 ) //if there is multiple it must be a field.
             {
-                var statement = symbol.FindContainingStatement();
-                var varDec = (VariableSymbol)statement.CrawlStatements( ( s ) => s is VariableSymbol v && v.Name == identifier.Name )!;
+                var statement = symbol.GetContainingStatement();
+                var varDec = (VariableSymbol)statement.CrawlStatements( ( s ) => s is VariableSymbol v && v.Name == identifier.Name, true )!;
                 if( varDec is not null ) return varDec;
+                var method = symbol.GetContainingMethod();
+                foreach( var parameter in method.ParameterSymbols )
+                {
+                    if( parameter.Key == identifier.Name ) return parameter.Value;
+                }
             }
             var type = symbol.FindType( identifier.ParentLocation );
             return type.Fields[identifier.Name];
@@ -113,14 +124,14 @@ namespace KuiLang.Compiler
             var idx = block.Statements.IndexOf( symbol );
             if( backward )
             {
-                for( int i = idx - 1; i >= 0; i++ )
+                for( int i = idx - 1; i >= 0; i-- )
                 {
                     if( crawler( block.Statements[i] ) ) return block.Statements[i];
                 }
             }
             else
             {
-                for( int i = idx; idx < block.Statements.Count; i++ )
+                for( int i = idx; i < block.Statements.Count; i++ )
                 {
                     if( crawler( block.Statements[i] ) ) return block.Statements[i];
                 }

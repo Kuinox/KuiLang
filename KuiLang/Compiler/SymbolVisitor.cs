@@ -17,6 +17,10 @@ namespace KuiLang.Compiler
             {
                 Visit( type );
             }
+            foreach( var method in symbol.Methods.Values )
+            {
+                Visit( method );
+            }
             return Visit( symbol.Statement );
         }
 
@@ -65,7 +69,13 @@ namespace KuiLang.Compiler
         protected virtual T Visit( MethodCallStatementSymbol statement ) => Visit( statement.MethodCallExpression );
         protected virtual T Visit( FieldAssignationStatementSymbol statement ) => Visit( statement.NewFieldValue );
         protected virtual T Visit( ReturnStatementSymbol statement ) => statement.ReturnedValue != null ? Visit( statement.ReturnedValue ) : default!;
-        protected virtual T Visit( IfStatementSymbol statement ) => Visit( statement.Statement );
+        protected virtual T Visit( IfStatementSymbol statement )
+        {
+            Visit( statement.Condition );
+            Visit( statement.Statement );
+            return default!;
+        }
+
         protected virtual T Visit( VariableSymbol variableDeclaration )
         {
             if( variableDeclaration.InitValue != null ) Visit( variableDeclaration.InitValue );

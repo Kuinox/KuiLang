@@ -1,6 +1,7 @@
 using KuiLang.Semantic;
 using KuiLang.Syntax;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace KuiLang.Compiler.Symbols
 {
@@ -9,6 +10,7 @@ namespace KuiLang.Compiler.Symbols
 
         public MethodSymbol( ISymbolWithMethods parent, Ast.Statement.Definition.MethodDeclaration ast )
         {
+            Debug.Assert( parent is not null );
             Name = ast.Name;
             Parent = parent;
             Ast = ast;
@@ -22,6 +24,6 @@ namespace KuiLang.Compiler.Symbols
 
         public StatementSymbol Statement { get; set; } = null!;
 
-        ISymbol? ISymbol.Parent => Parent.Parent;
+        ISymbol? ISymbol.Parent => Parent;
     }
 }

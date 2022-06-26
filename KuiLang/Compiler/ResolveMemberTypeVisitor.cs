@@ -21,7 +21,7 @@ namespace KuiLang.Compiler
 
         protected override object Visit( MethodParameterSymbol symbol )
         {
-            symbol.ReturnType = symbol.Parent.FindType( symbol.Ast.TypeIdentifier );
+            symbol.Type = symbol.Parent.FindType( symbol.Ast.TypeIdentifier );
             return base.Visit( symbol );
         }
 
@@ -39,7 +39,7 @@ namespace KuiLang.Compiler
 
         protected override object Visit( MethodCallExpressionSymbol symbol )
         {
-            symbol.TargetMethod = symbol.FindMethod( symbol.SymbolAst.FunctionIdentifier );
+            symbol.TargetMethod = symbol.FindMethod( symbol.Ast.FunctionIdentifier );
             return base.Visit( symbol );
         }
 

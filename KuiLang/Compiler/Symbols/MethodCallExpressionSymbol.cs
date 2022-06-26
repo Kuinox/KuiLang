@@ -13,10 +13,10 @@ namespace KuiLang.Compiler.Symbols
         public MethodCallExpressionSymbol(ISymbol parent,  Ast.Expression.MethodCall symbolAst)
         {
             Parent = parent;
-            SymbolAst = symbolAst;
+            Ast = symbolAst;
         }
 
-        public Ast.Expression.MethodCall SymbolAst { get; }
+        public Ast.Expression.MethodCall Ast { get; }
         public IReadOnlyList<IExpression> Arguments { get; internal set; } = null!;
         public MethodSymbol TargetMethod { get; internal set; } = null!; // resolve member step.
 

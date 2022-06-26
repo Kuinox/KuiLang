@@ -25,7 +25,7 @@ namespace KuiLang.Compiler
         {
             var typeLeft = Visit( symbol.Left );
             var typeRight = Visit( symbol.Right );
-            if( typeLeft != typeRight ) throw new InvalidProgramException();
+            if( typeLeft != typeRight ) throw new InvalidOperationException();
             symbol.ReturnType = typeLeft;
             return typeLeft;
         }
@@ -34,7 +34,7 @@ namespace KuiLang.Compiler
         {
             var typeLeft = Visit( symbol.Left );
             var typeRight = Visit( symbol.Right );
-            if( typeLeft != typeRight ) throw new InvalidProgramException();
+            if( typeLeft != typeRight ) throw new InvalidOperationException();
             symbol.ReturnType = typeLeft;
             return typeLeft;
         }
@@ -43,7 +43,7 @@ namespace KuiLang.Compiler
         {
             var typeLeft = Visit( symbol.Left );
             var typeRight = Visit( symbol.Right );
-            if( typeLeft != typeRight ) throw new InvalidProgramException();
+            if( typeLeft != typeRight ) throw new InvalidOperationException();
             symbol.ReturnType = typeLeft;
             return typeLeft;
         }
@@ -52,7 +52,7 @@ namespace KuiLang.Compiler
         {
             var typeLeft = Visit( symbol.Left );
             var typeRight = Visit( symbol.Right );
-            if( typeLeft != typeRight ) throw new InvalidProgramException();
+            if( typeLeft != typeRight ) throw new InvalidOperationException();
             symbol.ReturnType = typeLeft;
             return typeLeft;
         }
@@ -60,6 +60,8 @@ namespace KuiLang.Compiler
         protected override object Visit( NumberLiteralSymbol numberLiteral ) => numberLiteral.ReturnType;
 
         protected override object Visit( MethodCallExpressionSymbol symbol ) => symbol.ReturnType;
-    
+
+        protected override object Visit( IdentifierValueExpressionSymbol symbol ) => symbol.ReturnType;
+
     }
 }
