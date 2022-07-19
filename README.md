@@ -24,7 +24,7 @@ number sum(numbers: number[]){
 ```
 
 There, by accident, you specified that:  
-- The numbers are in a contiguous espace of memory.  
+- The numbers are in a contiguous space of memory.  
 - You must loop, in order on the numbers.  
 - You must loop sequentially on the numbers.  
 
