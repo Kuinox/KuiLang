@@ -21,6 +21,6 @@ namespace KuiLang.Compiler.Symbols
         public ISymbol Parent { get; }
         public Ast.Expression.Literal.Number SymbolAst { get; }
 
-        public TypeSymbol ReturnType => null; //Can be a constant type.
+        public TypeSymbol ReturnType => HardcodedSymbols.NumberType;
     }
 }

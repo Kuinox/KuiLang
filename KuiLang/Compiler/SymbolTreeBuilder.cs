@@ -3,11 +3,12 @@ using KuiLang.Diagnostics;
 using KuiLang.Semantic;
 using KuiLang.Syntax;
 using System;
-using System.Diagnostics.SymbolStore;
 using System.Linq;
 using static KuiLang.Syntax.Ast.Expression;
 using static KuiLang.Syntax.Ast.Expression.Literal;
+using static KuiLang.Syntax.Ast.Expression.FuncCall;
 using static KuiLang.Syntax.Ast.Statement.Definition;
+using static KuiLang.Syntax.Ast.Statement.Definition.Typed;
 
 namespace KuiLang.Compiler
 {
@@ -25,6 +26,7 @@ namespace KuiLang.Compiler
         {
             var root = new ProgramRootSymbol( ast );
             _current = root;
+            root.Add( HardcodedSymbols.NumberType );
             base.Visit( ast );
             _current = null!;
             return root;
@@ -32,13 +34,13 @@ namespace KuiLang.Compiler
 
         // Definitions :
 
-        protected override object Visit( MethodDeclaration method )
+        protected override object Visit( Method method )
         {
             var current = _current switch
             {
                 ISymbolWithMethods methodHolder => methodHolder,
                 StatementBlockSymbol block when block.Parent is ProgramRootSymbol root => root,
-                _=> throw new InvalidOperationException("Unknown method parent")
+                _ => throw new InvalidOperationException( "Unknown method parent" )
             };
             var symbol = new MethodSymbol( current, method );
             current.Methods.Add( symbol.Name, symbol );
@@ -50,13 +52,17 @@ namespace KuiLang.Compiler
 
         protected override object Visit( Parameter ast )
         {
-            new MethodParameterSymbol( ast.Name, ast, (MethodSymbol)_current );
+            var curr = (MethodSymbol)_current;
+            var symbol = new MethodParameterSymbol( ast, curr );
+
+            curr.ParameterSymbols.Add( ast.Name, symbol );
+
             return default!;
         }
 
-        protected override object Visit( TypeDeclaration type )
+        protected override object Visit( Ast.Statement.Definition.Type type )
         {
-            var current = (ProgramRootSymbol)_current;
+            var current = (ProgramRootSymbol)_current.Parent!;
             var symbol = new TypeSymbol( current, type );
             current.Add( symbol );
             _current = symbol;
@@ -65,7 +71,7 @@ namespace KuiLang.Compiler
             return default!;
         }
 
-        protected override object Visit( FieldDeclaration field )
+        protected override object Visit( Field field )
         {
             if( _current is TypeSymbol type )
             {
@@ -104,13 +110,17 @@ namespace KuiLang.Compiler
             return base.Visit( statement );
         }
 
+
         protected override object Visit( Ast.Statement.FieldAssignation assignation )
         {
-            var symbol = new FieldAssignationStatementSymbol( (StatementSymbol)_current,
+            var symbol = new FieldAssignationStatementSymbol
+            (
+                (StatementSymbol)_current,
                 assignation
             );
             var prev = _current;
             _current = symbol;
+            symbol.FieldOwner = (IdentifierValueExpressionSymbol)Visit( assignation.FieldSelector );
             symbol.NewFieldValue = Visit( assignation.NewFieldValue );
             base.Visit( assignation );
             _current = prev;
@@ -152,10 +162,10 @@ namespace KuiLang.Compiler
 
         protected override IExpression Visit( Ast.Expression expression ) => (IExpression)base.Visit( expression );
 
-        protected override MethodCallExpressionSymbol Visit( MethodCall methodCall )
+        protected override FunctionCallExpressionSymbol Visit( FuncCall methodCall )
         {
             var prev = _current;
-            var expr = new MethodCallExpressionSymbol( _current, methodCall );
+            var expr = new FunctionCallExpressionSymbol( _current, methodCall );
             _current = expr;
             expr.Arguments = methodCall.Arguments.Select( Visit ).ToList();
             _current = prev;
@@ -168,48 +178,20 @@ namespace KuiLang.Compiler
         protected override IExpression Visit( Literal literal ) => (IExpression)base.Visit( literal );
         protected override NumberLiteralSymbol Visit( Number constant ) => new( _current, constant );
 
-        protected override AddExpressionSymbol Visit( Operator.Add add )
+
+        protected override FunctionCallExpressionSymbol Visit( Operator @operator )
         {
             var prev = _current;
-            var expr = new AddExpressionSymbol( _current, add );
+            var expr = new FunctionCallExpressionSymbol( _current, @operator );
+            Visit( @operator.Left );
             _current = expr;
-            expr.Left = Visit( add.Left );
-            expr.Right = Visit( add.Right );
+            expr.Arguments = new[]
+            {
+                Visit( @operator.Right )
+            };
             _current = prev;
             return expr;
         }
 
-        protected override DivideExpressionSymbol Visit( Operator.Divide divide )
-        {
-            var prev = _current;
-            var expr = new DivideExpressionSymbol( _current, divide );
-            _current = expr;
-            expr.Left = Visit( divide.Left );
-            expr.Right = Visit( divide.Right );
-            _current = prev;
-            return expr;
-        }
-
-        protected override MultiplyExpressionSymbol Visit( Operator.Multiply multiply )
-        {
-            var prev = _current;
-            var expr = new MultiplyExpressionSymbol( _current, multiply );
-            _current = expr;
-            expr.Left = Visit( multiply.Left );
-            expr.Right = Visit( multiply.Right );
-            _current = prev;
-            return expr;
-        }
-
-        protected override SubtractExpressionSymbol Visit( Operator.Subtract subtract )
-        {
-            var prev = _current;
-            var expr = new SubtractExpressionSymbol( _current, subtract );
-            _current = expr;
-            expr.Left = Visit( subtract.Left );
-            expr.Right = Visit( subtract.Right );
-            _current = prev;
-            return expr;
-        }
     }
 }

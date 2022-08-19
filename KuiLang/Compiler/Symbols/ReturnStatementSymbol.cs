@@ -11,7 +11,7 @@ namespace KuiLang.Compiler.Symbols
 {
     public class ReturnStatementSymbol : StatementSymbol
     {
-        public ReturnStatementSymbol( ISymbol parent, Ast.Statement.Return ast )
+        public ReturnStatementSymbol( ISymbol parent, Ast.Statement.Return? ast )
             : base( parent )
         {
             Ast = ast;
@@ -19,6 +19,6 @@ namespace KuiLang.Compiler.Symbols
 
         public IExpression? ReturnedValue { get; internal set; }
         public TypeSymbol ReturnType { get; internal set; } = null!;
-        public Ast.Statement.Return Ast { get; }
+        public Ast.Statement.Return? Ast { get; }
     }
 }

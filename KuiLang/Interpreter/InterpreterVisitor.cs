@@ -25,7 +25,7 @@ namespace KuiLang.Interpreter
 
         Dictionary<ISymbol, object> Current => _stack.Peek();
 
-        public override object Visit( ProgramRootSymbol root )
+        public override RuntimeObject Visit( ProgramRootSymbol root )
         {
             _stack.Push( new Dictionary<ISymbol, object>() );
             var res = Visit( root.Statement );
@@ -53,37 +53,34 @@ namespace KuiLang.Interpreter
             // I don't want 'if(thing = true)' errors happening.
         }
 
-        protected override object Visit( VariableAssignationStatementSymbol symbol )
-        {
-            var scope = LocateSymbolScope( symbol.AssignedField );
-            scope[symbol.AssignedField] = Visit( symbol.NewFieldValue );
-            return default!;
-        }
+        protected override RuntimeObject Visit( IExpression symbolBase ) => (RuntimeObject)base.Visit( symbolBase );
+
+        protected override object Visit( InstantiateObjectExpression symbol )
+            => new RuntimeObject( symbol.ReturnType );
 
         protected override object Visit( IdentifierValueExpressionSymbol variable )
             => LocateSymbolScope( variable.Field )[variable.Field];
 
-        protected override object Visit( NumberLiteralSymbol constant ) => constant.Value;
+        protected override object Visit( NumberLiteralSymbol constant )
+        {
+            var obj = new RuntimeObject( HardcodedSymbols.NumberType );
+            obj.Fields.Add( HardcodedSymbols.NumberValueField, constant.Value );
+            return obj;
+        }
 
-        protected override object Visit( AddExpressionSymbol add ) => (decimal)Visit( add.Left ) + (decimal)Visit( add.Right );
-        protected override object Visit( SubtractExpressionSymbol add ) => (decimal)Visit( add.Left ) - (decimal)Visit( add.Right );
-        protected override object Visit( MultiplyExpressionSymbol add ) => (decimal)Visit( add.Left ) * (decimal)Visit( add.Right );
-        protected override object Visit( DivideExpressionSymbol add ) => (decimal)Visit( add.Left ) / (decimal)Visit( add.Right );
-
-        protected override object Visit( MethodCallExpressionSymbol functionCall )
+        protected override RuntimeObject Visit( FunctionCallExpressionSymbol functionCall )
         {
             var newScope = new Dictionary<ISymbol, object>();
-            for( int i = 0; i < functionCall.Arguments.Count; i++ )
+            int i = 0;
+            foreach( var parameter in functionCall.TargetMethod.ParameterSymbols )
             {
-                var expressionValue = functionCall.Arguments[i];
-                var parameter = functionCall.TargetMethod.ParameterSymbols[i];
+                var expressionValue = functionCall.Arguments[i++];
                 newScope[parameter.Value] = Visit( expressionValue );
             }
-
             _stack.Push( newScope );
 
             var val = Visit( functionCall.TargetMethod.Statement );
-            if( val is ReturnControlFlow rcf ) return rcf.ReturnValue!;
+            if( val is ReturnControlFlow rcf ) return (RuntimeObject)rcf.ReturnValue!;
             return default!;
         }
 
@@ -100,8 +97,9 @@ namespace KuiLang.Interpreter
 
         protected override object Visit( IfStatementSymbol @if )
         {
-            var ret = (decimal)Visit( @if.Condition );
-            if( ret == 1 )
+            var ret = Visit( @if.Condition );
+
+            if( (decimal)ret.Fields[HardcodedSymbols.NumberValueField] == 1 )
             {
                 return Visit( @if.Statement );
             }
@@ -109,7 +107,7 @@ namespace KuiLang.Interpreter
         }
 
         record ControlFlow();
-        record ReturnControlFlow( object? ReturnValue ) : ControlFlow;
+        record ReturnControlFlow( RuntimeObject? ReturnValue ) : ControlFlow;
         protected override object Visit( ReturnStatementSymbol returnStatement )
             => returnStatement.ReturnedValue != null ?
                 new ReturnControlFlow( Visit( returnStatement.ReturnedValue ) )

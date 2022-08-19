@@ -5,10 +5,10 @@ using System.Diagnostics;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class MethodSymbol : ISymbol, ISymbolWithAStatement
+    public class MethodSymbol : IMethodSymbol, ISymbolWithAStatement
     {
 
-        public MethodSymbol( ISymbolWithMethods parent, Ast.Statement.Definition.MethodDeclaration ast )
+        public MethodSymbol( ISymbolWithMethods parent, Ast.Statement.Definition.Typed.Method ast )
         {
             Debug.Assert( parent is not null );
             Name = ast.Name;
@@ -17,10 +17,10 @@ namespace KuiLang.Compiler.Symbols
         }
 
         public ISymbolWithMethods Parent { get; }
-        public Ast.Statement.Definition.MethodDeclaration Ast { get; }
+        public Ast.Statement.Definition.Typed.Method? Ast { get; }
         public string Name { get; }
         public TypeSymbol ReturnType { get; internal set; } = null!;
-        public List<KeyValuePair<string, MethodParameterSymbol>> ParameterSymbols { get; } = new();
+        public OrderedDictionary<string, MethodParameterSymbol> ParameterSymbols { get; } = new();
 
         public StatementSymbol Statement { get; set; } = null!;
 

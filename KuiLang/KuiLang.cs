@@ -17,8 +17,8 @@ namespace KuiLang
         public static readonly DesigntimeFarkle<Statement> StatementDesignTime;
         public static readonly DesigntimeFarkle<Identifier> FullNameDesigntime;
         public static readonly DesigntimeFarkle<Expression> ExpressionDesigntime;
-        public static readonly DesigntimeFarkle<Statement.Definition.MethodDeclaration> MethodDeclarationDesigntime;
-        public static readonly DesigntimeFarkle<Statement.Definition.TypeDeclaration> TypeDeclarationDesigntime;
+        public static readonly DesigntimeFarkle<Statement.Definition.Typed.Method> MethodDeclarationDesigntime;
+        public static readonly DesigntimeFarkle<Statement.Definition.Type> TypeDeclarationDesigntime;
         public static readonly DesigntimeFarkle<Statement.Block> StatementListDesignTime;
 
 
@@ -42,16 +42,16 @@ namespace KuiLang
                 simpleNamePart.Finish( ( s ) => new Identifier( s ) )
             );
             var argument = Nonterminal.Create( "Argument Declaration",
-              fullName.Extended().Extend( simpleNamePart ).Finish( ( type, argName ) => new Statement.Definition.Parameter( type, argName, null ) )
+              fullName.Extended().Extend( simpleNamePart ).Finish( ( type, argName ) => new Statement.Definition.Typed.Parameter( type, argName, null ) )
             );
 
-            var argumentList = Nonterminal.Create<List<Statement.Definition.Parameter>>( "Argument List" );
+            var argumentList = Nonterminal.Create<List<Statement.Definition.Typed.Parameter>>( "Argument List" );
             argumentList.SetProductions(
                 argumentList.Extended()
                     .Append( "," )
                     .Extend( argument )
                     .Finish( ( xs, s ) => xs.Plus( s ) ),
-                argument.Finish( ( s ) => new List<Statement.Definition.Parameter>() { s } )
+                argument.Finish( ( s ) => new List<Statement.Definition.Typed.Parameter>() { s } )
             );
 
             var expression = Nonterminal.Create<Expression>( "Expression" );
@@ -65,12 +65,24 @@ namespace KuiLang
                 expression.Finish( s => new List<Expression>() { s } )
             );
 
-            var functionCall = Nonterminal.Create( "Function Call",
-                fullName.Extended()
+            var functionCall =
+                Nonterminal.Create( "Method Call",
+                simpleNamePart.Extended()
                     .Append( "(" )
                     .Extend( argumentPassingList.Optional() )
                     .Append( ")" )
-                    .Finish( ( functionRef, args ) => new Expression.MethodCall( functionRef, args ?? new List<Expression>() ) )
+                    .Finish( ( functionName, args ) => new Expression.FuncCall( functionName, args ?? new List<Expression>() ) )
+            );
+
+            var methodCall = Nonterminal.Create( "Method Call",
+                expression.Extended()
+                    .Append( "." )
+                    .Extend( simpleNamePart )
+                    .Append( "(" )
+                    .Extend( argumentPassingList.Optional() )
+                    .Append( ")" )
+                    .Finish( ( expr, funcName, args ) =>
+                    new Expression.FuncCall.MethodCall( expr, funcName, args ?? new List<Expression>() ) )
             );
 
             var assignation = Nonterminal.Create( "Assignation",
@@ -90,17 +102,17 @@ namespace KuiLang
                         Regex.OneOf( PredefinedSets.Number ).AtLeast( 1 ) ).Optional() ) );
 
             var variableAssign = Nonterminal.Create( "Variable Assignation",
-                fullName.Extended().Extend( assignation ).Finish( ( a, b ) => new Statement.FieldAssignation( a, b ) ) );
+                expression.Extended().Extend( assignation ).Finish( ( a, b ) => new Statement.FieldAssignation( a, b ) ) );
 
             var opScope = new OperatorScope(
               new LeftAssociative( "+", "-" ),
               new LeftAssociative( "*", "/" ) );
 
             var operators = Nonterminal.Create( "Operators",
-                expression.Extended().Append( "*" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.Operator.Multiply( left, right ) ),
-                expression.Extended().Append( "/" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.Operator.Divide( left, right ) ),
-                expression.Extended().Append( "+" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.Operator.Add( left, right ) ),
-                expression.Extended().Append( "-" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.Operator.Subtract( left, right ) )
+                expression.Extended().Append( "*" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.Operator.Multiply( left, right ) ),
+                expression.Extended().Append( "/" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.Operator.Divide( left, right ) ),
+                expression.Extended().Append( "+" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.Operator.Add( left, right ) ),
+                expression.Extended().Append( "-" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.Operator.Subtract( left, right ) )
             ).WithOperatorScope( opScope );
 
             expression.SetProductions(
@@ -144,10 +156,10 @@ namespace KuiLang
                     .Append( ")" )
                     .Extend( statementScope )
                     .Finish( ( typeName, methodName, args, statements )
-                        => new Statement.Definition.MethodDeclaration(
+                        => new Statement.Definition.Typed.Method(
                             typeName,
                             methodName,
-                            args ?? new List<Statement.Definition.Parameter>(),
+                            args ?? new List<Statement.Definition.Typed.Parameter>(),
                             statements
                         )
                     )
@@ -156,7 +168,7 @@ namespace KuiLang
             var variableDeclaration = Nonterminal.Create( "Variable Declaration",
                 fullName.Extended().Extend( simpleNamePart )
                 .Extend( assignation.Optional() )
-                .Finish( ( typeName, fieldName, exprVal ) => new Statement.Statement.Definition.FieldDeclaration( typeName, fieldName, exprVal ) )
+                .Finish( ( typeName, fieldName, exprVal ) => new Statement.Definition.Typed.Field( typeName, fieldName, exprVal ) )
             );
 
 
@@ -164,7 +176,7 @@ namespace KuiLang
             var fieldDeclaration = Nonterminal.Create( "Field Declaration",
                 fullName.Extended()
                 .Extend( simpleNamePart ).Append( ";" ).Finish(
-                    ( typeName, fieldName ) => new Statement.Definition.FieldDeclaration( typeName, fieldName, null )
+                    ( typeName, fieldName ) => new Statement.Definition.Typed.Field( typeName, fieldName, null )
                 )
             );
 
@@ -183,7 +195,7 @@ namespace KuiLang
                "type".Appended()
                     .Extend( simpleNamePart ) // type name
                     .Extend( definitionBlock )
-                    .Finish( ( typeName, fields ) => new Statement.Definition.TypeDeclaration( typeName, fields ) )
+                    .Finish( ( typeName, fields ) => new Statement.Definition.Type( typeName, fields ) )
             );
             definition.SetProductions(
                 methodDeclaration.AsIs<Statement.Definition>(),

@@ -15,7 +15,7 @@ namespace KuiLang.Runner
     public static class ScriptHelpers
     {
         static readonly RuntimeFarkle<Ast.Statement.Block> StatementListParser = KuiLang.StatementListDesignTime.Build();
-        public static object RunScript( string scriptText )
+        public static RuntimeObject RunScript( string scriptText )
         {
             var res = StatementListParser.Parse( scriptText );
             if( !res.IsOk )
@@ -40,5 +40,8 @@ namespace KuiLang.Runner
             Console.WriteLine( $"Execution returned value: {val}" );
             return val;
         }
+
+        public static decimal AsNumber( this RuntimeObject @this )
+            => (decimal)@this.Fields[HardcodedSymbols.NumberValueField];
     }
 }

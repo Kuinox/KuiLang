@@ -6,9 +6,11 @@ using System.Runtime.CompilerServices;
 using static KuiLang.Syntax.Ast;
 using static KuiLang.Syntax.Ast.Expression;
 using static KuiLang.Syntax.Ast.Expression.Literal;
-using static KuiLang.Syntax.Ast.Expression.Operator;
+using static KuiLang.Syntax.Ast.Expression.FuncCall;
+using static KuiLang.Syntax.Ast.Expression.FuncCall.Operator;
 using static KuiLang.Syntax.Ast.Statement;
 using static KuiLang.Syntax.Ast.Statement.Definition;
+using static KuiLang.Syntax.Ast.Statement.Definition.Typed;
 
 namespace KuiLang
 {
@@ -26,7 +28,7 @@ namespace KuiLang
         protected virtual object Visit( Statement statement ) => statement switch
         {
             Block block => Visit( block ),
-            Definition definition => Visit(definition),
+            Definition definition => Visit( definition ),
             FieldAssignation assignation => Visit( assignation ),
             Return returnStatement => Visit( returnStatement ),
             If @if => Visit( @if ),
@@ -64,14 +66,20 @@ namespace KuiLang
 
         protected virtual object Visit( Definition definition ) => definition switch
         {
-            TypeDeclaration type => Visit( type ),
-            Parameter argument => Visit( argument ),
-            FieldDeclaration field => Visit( field ),
-            MethodDeclaration method => Visit( method ),
+            Definition.Type type => Visit( type ),
+            Typed type => Visit( type ),
             _ => throw new InvalidOperationException( $"Unknown Definition {definition}" )
         };
 
-        protected virtual object Visit( TypeDeclaration type )
+        protected virtual object Visit( Typed typedDef ) => typedDef switch
+        {
+            Parameter argument => Visit( argument ),
+            Field field => Visit( field ),
+            Method method => Visit( method ),
+            _ => throw new InvalidOperationException( $"Unknown Typed Definition {typedDef}" )
+        };
+
+        protected virtual object Visit( Definition.Type type )
         {
             foreach( var field in type.Fields )
             {
@@ -81,9 +89,9 @@ namespace KuiLang
         }
 
         protected virtual object Visit( Parameter parameter ) => default!;
-        protected virtual object Visit( FieldDeclaration field ) => default!;
+        protected virtual object Visit( Field field ) => default!;
 
-        protected virtual object Visit( MethodDeclaration method )
+        protected virtual object Visit( Method method )
         {
             foreach( var arg in method.Arguments )
             {
@@ -97,49 +105,12 @@ namespace KuiLang
 
         protected virtual object Visit( Expression expression ) => expression switch
         {
-            MethodCall functionCall => Visit( functionCall ),
+            FuncCall functionCall => Visit( functionCall ),
             IdentifierValue variable => Visit( variable ),
             Literal literal => Visit( literal ),
-            Operator @operator => Visit( @operator ),
             _ => throw new InvalidOperationException( $"Unknown Statement{expression}" )
         };
 
-        protected virtual object Visit( Operator @operator ) => @operator switch
-        {
-            Add add => Visit( add ),
-            Subtract sub => Visit( sub ),
-            Multiply multiply => Visit( multiply ),
-            Divide divide => Visit( divide ),
-            _ => throw new InvalidOperationException( $"Unknown operator{@operator}" )
-        };
-
-        protected virtual object Visit( Add add )
-        {
-            Visit( add.Left );
-            Visit( add.Right );
-            return default!;
-        }
-
-        protected virtual object Visit( Subtract subtract )
-        {
-            Visit( subtract.Left );
-            Visit( subtract.Right );
-            return default!;
-        }
-
-        protected virtual object Visit( Multiply multiply )
-        {
-            Visit( multiply.Left );
-            Visit( multiply.Right );
-            return default!;
-        }
-
-        protected virtual object Visit( Divide divide )
-        {
-            Visit( divide.Left );
-            Visit( divide.Right );
-            return default!;
-        }
 
         protected virtual object Visit( Literal literal ) => literal switch
         {
@@ -149,14 +120,21 @@ namespace KuiLang
 
         protected virtual object Visit( Number number ) => default!;
 
-        protected virtual object Visit( MethodCall methodCall )
+        protected virtual object Visit( FuncCall funcCall )
         {
-            foreach( var argument in methodCall.Arguments )
+            if( funcCall is MethodCall m ) return Visit( m );
+            if( funcCall is Operator s ) Visit( s );
+
+            foreach( var argument in funcCall.Arguments )
             {
                 Visit( argument );
             }
             return default!;
         }
+
+        protected virtual object Visit( MethodCall methodCall ) => Visit( methodCall.Target );
+
+        protected virtual object Visit( Operator @operator ) => default!;
 
         protected virtual object Visit( IdentifierValue variable ) => default!;
     }

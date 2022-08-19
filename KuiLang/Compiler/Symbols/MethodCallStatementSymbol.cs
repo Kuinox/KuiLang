@@ -17,7 +17,7 @@ namespace KuiLang.Compiler.Symbols
             Ast = ast;
         }
 
-        public MethodCallExpressionSymbol MethodCallExpression { get; internal set; } = null!; // POST INIT
+        public FunctionCallExpressionSymbol MethodCallExpression { get; internal set; } = null!; // POST INIT
 
         public Ast.Statement.MethodCallStatement Ast { get; }
     }

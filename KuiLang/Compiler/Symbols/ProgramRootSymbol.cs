@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler
 {
-    public class ProgramRootSymbol : ISymbol, ISymbolWithAStatement, ISymbolWithMethods
+    public class ProgramRootSymbol : ISymbol, ISymbolWithAStatement, ISymbolWithMethods, IMethodSymbol
     {
         readonly Dictionary<string, TypeSymbol> _typesSymbols = new();
 
@@ -30,7 +30,9 @@ namespace KuiLang.Compiler
             get => Statement;
             set => throw new NotSupportedException();
         }
-        public ISymbol? Parent => null;
+        public ISymbol? Parent => throw new InvalidOperationException("Cannot access root parent.");
+
+        public OrderedDictionary<string, MethodParameterSymbol> ParameterSymbols { get; } = new();
 
         public void Add( TypeSymbol symbol ) => _typesSymbols.Add( symbol.Name, symbol );
     }

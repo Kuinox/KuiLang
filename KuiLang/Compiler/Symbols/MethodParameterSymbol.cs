@@ -11,16 +11,14 @@ namespace KuiLang.Compiler.Symbols
 {
     public class MethodParameterSymbol : ITypedSymbol
     {
-        public MethodParameterSymbol( string name, Ast.Statement.Definition.Parameter symbolAst, MethodSymbol parent )
+        public MethodParameterSymbol( Ast.Statement.Definition.Typed.Parameter ast, MethodSymbol parent )
         {
-            Ast = symbolAst;
+            Debug.Assert( ast is not null );
+            Ast = ast;
             Parent = parent;
-            parent.ParameterSymbols.Add( new KeyValuePair<string, MethodParameterSymbol>( name, this ) );
-            Name = name;
         }
         public TypeSymbol Type { get; internal set; } = null!;
-        public string Name { get; }
-        public Ast.Statement.Definition.Parameter Ast { get; }
+        public Ast.Statement.Definition.Typed.Parameter Ast { get; }
         public MethodSymbol Parent { get; }
 
         ISymbol? ISymbol.Parent => Parent;

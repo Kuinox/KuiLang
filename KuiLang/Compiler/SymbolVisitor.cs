@@ -57,12 +57,10 @@ namespace KuiLang.Compiler
         {
             MethodCallStatementSymbol s => Visit( s ),
             FieldAssignationStatementSymbol s => Visit( s ),
-            VariableAssignationStatementSymbol s => Visit( s ),
             ReturnStatementSymbol s => Visit( s ),
             StatementBlockSymbol s => Visit( s ),
             IfStatementSymbol s => Visit( s ),
             VariableSymbol s => Visit( s ),
-            
             _ => throw new ArgumentException( $"Unknown statement symbol{symbolBase}." )
         };
 
@@ -81,8 +79,6 @@ namespace KuiLang.Compiler
             if( variableDeclaration.InitValue != null ) Visit( variableDeclaration.InitValue );
             return default!;
         }
-        protected virtual T Visit( VariableAssignationStatementSymbol symbol ) => Visit( symbol.NewFieldValue );
-
         protected virtual T Visit( StatementBlockSymbol statement )
         {
             foreach( var item in statement.Statements )
@@ -95,17 +91,16 @@ namespace KuiLang.Compiler
         protected virtual T Visit( IExpression symbolBase ) => symbolBase switch
         {
             IdentifierValueExpressionSymbol s => Visit( s ),
-            MethodCallExpressionSymbol s => Visit( s ),
+            FunctionCallExpressionSymbol s => Visit( s ),
             NumberLiteralSymbol s => Visit( s ),
-            MultiplyExpressionSymbol s => Visit( s ),
-            DivideExpressionSymbol s => Visit( s ),
-            AddExpressionSymbol s => Visit( (IExpression)s ),
-            SubtractExpressionSymbol s => Visit( s ),
+            HardcodedExpressionsSymbol s => Visit( s ),
+            InstantiateObjectExpression s => Visit( s ),
             _ => throw new ArgumentException( $"Unknown expression symbol {symbolBase}" )
         };
 
+        protected virtual T Visit( InstantiateObjectExpression symbol ) => default!;
         protected virtual T Visit( IdentifierValueExpressionSymbol symbol ) => default!;
-        protected virtual T Visit( MethodCallExpressionSymbol symbol )
+        protected virtual T Visit( FunctionCallExpressionSymbol symbol )
         {
             foreach( var arg in symbol.Arguments )
             {
@@ -115,30 +110,19 @@ namespace KuiLang.Compiler
         }
 
         protected virtual T Visit( NumberLiteralSymbol numberLiteral ) => default!;
-        protected virtual T Visit( MultiplyExpressionSymbol multiply )
-        {
-            Visit( multiply.Left );
-            Visit( multiply.Right );
-            return default!;
-        }
-        protected virtual T Visit( DivideExpressionSymbol divide )
-        {
-            Visit( divide.Left );
-            Visit( divide.Right );
-            return default!;
-        }
-        protected virtual T Visit( AddExpressionSymbol add )
-        {
-            Visit( add.Left );
-            Visit( add.Right );
-            return default!;
-        }
 
-        protected virtual T Visit( SubtractExpressionSymbol multiply )
+        protected virtual T Visit( HardcodedExpressionsSymbol symbol ) => symbol switch
         {
-            Visit( multiply.Left );
-            Visit( multiply.Right );
-            return default!;
-        }
+            HardcodedExpressionsSymbol.NumberAddSymbol s => Visit( s ),
+            HardcodedExpressionsSymbol.NumberSubstractSymbol s => Visit( s ),
+            HardcodedExpressionsSymbol.NumberMultiplySymbol s => Visit( s ),
+            HardcodedExpressionsSymbol.NumberDivideSymbol s => Visit( s ),
+            _ => throw new InvalidOperationException( "Unknown symbol." )
+        };
+
+        protected virtual T Visit( HardcodedExpressionsSymbol.NumberAddSymbol symbol ) => default!;
+        protected virtual T Visit( HardcodedExpressionsSymbol.NumberSubstractSymbol symbol ) => default!;
+        protected virtual T Visit( HardcodedExpressionsSymbol.NumberMultiplySymbol symbol ) => default!;
+        protected virtual T Visit( HardcodedExpressionsSymbol.NumberDivideSymbol symbol ) => default!;
     }
 }

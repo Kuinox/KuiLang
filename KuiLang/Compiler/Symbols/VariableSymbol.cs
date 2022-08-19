@@ -8,7 +8,7 @@ namespace KuiLang.Compiler.Symbols
         public VariableSymbol(
             ISymbol parent,
             StatementBlockSymbol statementScope,
-            Ast.Statement.Definition.FieldDeclaration ast ) : base( parent )
+            Ast.Statement.Definition.Typed.Field ast ) : base( parent )
         {
             StatementScope = statementScope;
             Ast = ast;
@@ -18,6 +18,6 @@ namespace KuiLang.Compiler.Symbols
         public string Name => Ast.Name;
         public TypeSymbol Type { get; internal set; } = null!; // Ordrered Resolution pass.
         public StatementBlockSymbol StatementScope { get; }
-        public Ast.Statement.Definition.FieldDeclaration Ast { get; }
+        public Ast.Statement.Definition.Typed.Field Ast { get; }
     }
 }
