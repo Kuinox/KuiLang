@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class InstantiateObjectExpression : IExpression
+    public class InstantiateObjectExpression : IExpressionSymbol
     {
         public InstantiateObjectExpression( ReturnStatementSymbol parent )
         {

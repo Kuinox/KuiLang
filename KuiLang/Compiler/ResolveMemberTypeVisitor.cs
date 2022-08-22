@@ -35,7 +35,7 @@ namespace KuiLang.Compiler
             var res = base.Visit( symbol );//after this, all fields types should be resolved.
 
             foreach( var item in symbol.Fields.Select( s => new MethodParameterSymbol(
-                new Ast.Statement.Definition.Typed.Parameter( s.Value.Ast.TypeIdentifier, s.Value.Ast.Name, s.Value.Ast.InitValue),
+                new Ast.Statement.Definition.Typed.Parameter( s.Value.Ast.TypeIdentifier, s.Value.Ast.Name, s.Value.Ast.InitValue ),
                 ctor )
             ) )
             {
@@ -65,47 +65,43 @@ namespace KuiLang.Compiler
         protected override object Visit( VariableSymbol symbol )
         {
             var type = symbol.FindType( symbol.Ast.TypeIdentifier );
-            if( type == null ) _diagnostics.EmitDiagnostic( new Diagnostic( Severity.Error, null, $"Could not resolve type {symbol.Ast.TypeIdentifier}.", null ) );
+            if( type == null ) _diagnostics.Error( $"Could not resolve type {symbol.Ast.TypeIdentifier}." );
             symbol.Type = type!;
             return base.Visit( symbol );
         }
 
+        protected override object Visit( MethodCallExpressionSymbol symbol )
+        {
+            var ret = base.Visit( symbol );
+            var returnType = symbol.CallTarget.ReturnType;
+            var method = returnType.Methods[symbol.Ast.Name];
+            if( method == null ) _diagnostics.Error( $"Could not resolve method {symbol.Ast}." );
+            symbol.TargetMethod = method!;
+            return ret;
+        }
+
         protected override object Visit( FunctionCallExpressionSymbol symbol )
         {
-            if( symbol.Parent is StatementSymbol statement )
+            var holder = symbol.GetContainingMethodHolder();
+
+            holder.Methods.TryGetValue( symbol.Ast.Name, out var localMethod );
+            if( localMethod == null )
             {
-                // Local method or constructor.
-                var methodsHolder = statement.GetContainingMethodHolder();
-                methodsHolder.Methods.TryGetValue( symbol.Ast.Name, out var localMethod );
-                if( localMethod == null )
+                var targetType = symbol.FindType( new Identifier( symbol.Ast.Name ) );
+                if( targetType == null )
                 {
-                    var targetType = symbol.FindType( new Identifier( symbol.Ast.Name ) );
-                    if( targetType == null )
+                    _diagnostics.EmitDiagnostic( new Diagnostic( Severity.Error, null, $"Could not find a function or type named {symbol.Ast.Name}", null ) );
+                }
+                else
+                {
+                    localMethod = targetType?.Constructor;
+                    if( localMethod == null )
                     {
-                        _diagnostics.EmitDiagnostic( new Diagnostic( Severity.Error, null, $"Could not find a function or type named {symbol.Ast.Name}", null ) );
-                    }
-                    else
-                    {
-                        localMethod = targetType?.Constructor;
-                        if( localMethod == null )
-                        {
-                            _diagnostics.EmitDiagnostic( new Diagnostic( Severity.Error, null, $"Type {targetType} does not have a constructor.", null ) );
-                        }
+                        _diagnostics.EmitDiagnostic( new Diagnostic( Severity.Error, null, $"Type {targetType} does not have a constructor.", null ) );
                     }
                 }
-                symbol.TargetMethod = localMethod!;
             }
-            else if( symbol.Parent is IExpression expression )
-            {
-                var returnType = expression.ReturnType;
-                var method = returnType.Methods[symbol.Ast.Name];
-                if( method == null ) _diagnostics.EmitDiagnostic( new Diagnostic( Severity.Error, null, $"Could not resolve method {symbol.Ast}.", null ) );
-                symbol.TargetMethod = method!;
-            }
-            else
-            {
-                throw new InvalidOperationException();
-            }
+            symbol.TargetMethod = localMethod!;
             return base.Visit( symbol );
         }
 

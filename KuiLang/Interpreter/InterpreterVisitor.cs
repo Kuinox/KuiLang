@@ -53,13 +53,19 @@ namespace KuiLang.Interpreter
             // I don't want 'if(thing = true)' errors happening.
         }
 
-        protected override RuntimeObject Visit( IExpression symbolBase ) => (RuntimeObject)base.Visit( symbolBase );
+        protected override RuntimeObject Visit( IExpressionSymbol symbolBase ) => (RuntimeObject)base.Visit( symbolBase );
 
         protected override object Visit( InstantiateObjectExpression symbol )
             => new RuntimeObject( symbol.ReturnType );
 
         protected override object Visit( IdentifierValueExpressionSymbol variable )
-            => LocateSymbolScope( variable.Field )[variable.Field];
+        {
+            var scope = LocateSymbolScope( variable.Field );
+            bool res = scope.TryGetValue( variable.Field, out var val );
+            if( !res ) throw new InvalidOperationException("Runtime error: Couldn't retrieve value.");
+            if( val == null ) throw new InvalidOperationException( "Runtime error: uninitialized value was accessed." );
+            return val!;
+        }
 
         protected override object Visit( NumberLiteralSymbol constant )
         {
@@ -80,6 +86,22 @@ namespace KuiLang.Interpreter
             _stack.Push( newScope );
 
             var val = Visit( functionCall.TargetMethod.Statement );
+            if( val is ReturnControlFlow rcf ) return (RuntimeObject)rcf.ReturnValue!;
+            return default!;
+        }
+
+        protected override RuntimeObject Visit( MethodCallExpressionSymbol methodCall )
+        {
+            var newScope = new Dictionary<ISymbol, object>();
+            int i = 0;
+            foreach( var parameter in methodCall.TargetMethod.ParameterSymbols )
+            {
+                var expressionValue = methodCall.Arguments[i++];
+                newScope[parameter.Value] = Visit( expressionValue );
+            }
+            _stack.Push( newScope );
+
+            var val = Visit( methodCall.TargetMethod.Statement );
             if( val is ReturnControlFlow rcf ) return (RuntimeObject)rcf.ReturnValue!;
             return default!;
         }
@@ -106,12 +128,66 @@ namespace KuiLang.Interpreter
             return default!;
         }
 
+        protected override RuntimeObject Visit( HardcodedExpressionsSymbol.NumberAddSymbol symbol )
+        {
+            var left = (decimal)GetMethodObjectScope()[HardcodedSymbols.NumberValueField];
+            var right = (decimal)_stack.Peek()[HardcodedSymbols.NumberValueField];
+            return new RuntimeObject( HardcodedSymbols.NumberType )
+            {
+                Fields =
+                {
+                    {HardcodedSymbols.NumberValueField, left+right }
+                }
+            };
+        }
+
+        protected override RuntimeObject Visit( HardcodedExpressionsSymbol.NumberDivideSymbol symbol )
+        {
+            var left = (decimal)GetMethodObjectScope()[HardcodedSymbols.NumberValueField];
+            var right = (decimal)_stack.Peek()[HardcodedSymbols.NumberValueField];
+            return new RuntimeObject( HardcodedSymbols.NumberType )
+            {
+                Fields =
+                {
+                    {HardcodedSymbols.NumberValueField, left/right }
+                }
+            };
+        }
+
+        protected override RuntimeObject Visit( HardcodedExpressionsSymbol.NumberMultiplySymbol symbol )
+        {
+            var left = (decimal)GetMethodObjectScope()[HardcodedSymbols.NumberValueField];
+            var right = (decimal)_stack.Peek()[HardcodedSymbols.NumberValueField];
+            return new RuntimeObject( HardcodedSymbols.NumberType )
+            {
+                Fields =
+                {
+                    {HardcodedSymbols.NumberValueField, left*right }
+                }
+            };
+        }
+
+        protected override RuntimeObject Visit( HardcodedExpressionsSymbol.NumberSubstractSymbol symbol )
+        {
+            var left = (decimal)GetMethodObjectScope()[HardcodedSymbols.NumberValueField];
+            var right = (decimal)_stack.Peek()[HardcodedSymbols.NumberValueField];
+            return new RuntimeObject( HardcodedSymbols.NumberType )
+            {
+                Fields =
+                {
+                    {HardcodedSymbols.NumberValueField, left-right }
+                }
+            };
+        }
+
         record ControlFlow();
         record ReturnControlFlow( RuntimeObject? ReturnValue ) : ControlFlow;
         protected override object Visit( ReturnStatementSymbol returnStatement )
             => returnStatement.ReturnedValue != null ?
                 new ReturnControlFlow( Visit( returnStatement.ReturnedValue ) )
                 : new ReturnControlFlow( null );
+
+        Dictionary<ISymbol, object> GetMethodObjectScope() => _stack.ToArray()[^2];
 
         Dictionary<ISymbol, object> LocateSymbolScope( ISymbol symbol )
         {

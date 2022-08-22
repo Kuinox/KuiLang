@@ -20,7 +20,7 @@ namespace KuiLang.Compiler
             _diagnostics = diagnostics;
         }
 
-        protected override TypeSymbol Visit( IExpression statement ) => (TypeSymbol)base.Visit( statement );
+        protected override TypeSymbol Visit( IExpressionSymbol statement ) => (TypeSymbol)base.Visit( statement );
 
         protected override object Visit( NumberLiteralSymbol numberLiteral ) => numberLiteral.ReturnType;
 

@@ -148,26 +148,38 @@ namespace KuiLang.Compiler
             return default!;
         }
 
-        protected override object Visit( Ast.Statement.MethodCallStatement methodCallStatement )
+        protected override object Visit( Ast.Statement.ExpressionStatement expressionStatement )
         {
-            var symbol = new MethodCallStatementSymbol( _current, methodCallStatement );
+            var symbol = new ExpressionStatementSymbol( _current );
             var prev = _current;
             _current = symbol;
-            symbol.MethodCallExpression = Visit( methodCallStatement.MethodCallExpression );
+            symbol.Expression = Visit( expressionStatement.TheExpression );
             _current = prev;
             return default!;
         }
 
         // Expressions:
 
-        protected override IExpression Visit( Ast.Expression expression ) => (IExpression)base.Visit( expression );
+        protected override IExpressionSymbol Visit( Ast.Expression expression ) => (IExpressionSymbol)base.Visit( expression );
 
-        protected override FunctionCallExpressionSymbol Visit( FuncCall methodCall )
+        protected virtual MethodCallExpressionSymbol VisitMethod( MethodCall funcCall )
         {
+            var target = Visit( funcCall.Target );
             var prev = _current;
-            var expr = new FunctionCallExpressionSymbol( _current, methodCall );
+            var expr = new MethodCallExpressionSymbol( _current, target, funcCall );
             _current = expr;
-            expr.Arguments = methodCall.Arguments.Select( Visit ).ToList();
+            expr.Arguments = funcCall.Arguments.Select( Visit ).ToList();
+            _current = prev;
+            return expr;
+        }
+
+        protected override IExpressionSymbol Visit( FuncCall funcCall )
+        {
+            if( funcCall is MethodCall m ) return VisitMethod( m );
+            var prev = _current;
+            var expr = new FunctionCallExpressionSymbol( _current, funcCall );
+            _current = expr;
+            expr.Arguments = funcCall.Arguments.Select( Visit ).ToList();
             _current = prev;
             return expr;
         }
@@ -175,20 +187,16 @@ namespace KuiLang.Compiler
         protected override IdentifierValueExpressionSymbol Visit( IdentifierValue variable )
             => new( _current, variable );
 
-        protected override IExpression Visit( Literal literal ) => (IExpression)base.Visit( literal );
+        protected override IExpressionSymbol Visit( Literal literal ) => (IExpressionSymbol)base.Visit( literal );
         protected override NumberLiteralSymbol Visit( Number constant ) => new( _current, constant );
 
 
-        protected override FunctionCallExpressionSymbol Visit( Operator @operator )
+        protected override FunctionCallExpressionSymbol Visit( MethodCall method )
         {
             var prev = _current;
-            var expr = new FunctionCallExpressionSymbol( _current, @operator );
-            Visit( @operator.Left );
+            var expr = new FunctionCallExpressionSymbol( _current, method );
             _current = expr;
-            expr.Arguments = new[]
-            {
-                Visit( @operator.Right )
-            };
+            expr.Arguments = method.Arguments.Select( Visit ).ToList();
             _current = prev;
             return expr;
         }

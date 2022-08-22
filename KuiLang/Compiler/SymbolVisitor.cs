@@ -55,7 +55,7 @@ namespace KuiLang.Compiler
 
         protected virtual T Visit( StatementSymbol symbolBase ) => symbolBase switch
         {
-            MethodCallStatementSymbol s => Visit( s ),
+            ExpressionStatementSymbol s => Visit( s ),
             FieldAssignationStatementSymbol s => Visit( s ),
             ReturnStatementSymbol s => Visit( s ),
             StatementBlockSymbol s => Visit( s ),
@@ -64,7 +64,7 @@ namespace KuiLang.Compiler
             _ => throw new ArgumentException( $"Unknown statement symbol{symbolBase}." )
         };
 
-        protected virtual T Visit( MethodCallStatementSymbol statement ) => Visit( statement.MethodCallExpression );
+        protected virtual T Visit( ExpressionStatementSymbol s ) => Visit( s.Expression );
         protected virtual T Visit( FieldAssignationStatementSymbol statement ) => Visit( statement.NewFieldValue );
         protected virtual T Visit( ReturnStatementSymbol statement ) => statement.ReturnedValue != null ? Visit( statement.ReturnedValue ) : default!;
         protected virtual T Visit( IfStatementSymbol statement )
@@ -88,10 +88,11 @@ namespace KuiLang.Compiler
             return default!;
         }
 
-        protected virtual T Visit( IExpression symbolBase ) => symbolBase switch
+        protected virtual T Visit( IExpressionSymbol symbolBase ) => symbolBase switch
         {
             IdentifierValueExpressionSymbol s => Visit( s ),
             FunctionCallExpressionSymbol s => Visit( s ),
+            MethodCallExpressionSymbol s => Visit( s ),
             NumberLiteralSymbol s => Visit( s ),
             HardcodedExpressionsSymbol s => Visit( s ),
             InstantiateObjectExpression s => Visit( s ),
@@ -102,6 +103,16 @@ namespace KuiLang.Compiler
         protected virtual T Visit( IdentifierValueExpressionSymbol symbol ) => default!;
         protected virtual T Visit( FunctionCallExpressionSymbol symbol )
         {
+            foreach( var arg in symbol.Arguments )
+            {
+                Visit( arg );
+            }
+            return default!;
+        }
+
+        protected virtual T Visit( MethodCallExpressionSymbol symbol )
+        {
+            Visit( symbol.CallTarget );
             foreach( var arg in symbol.Arguments )
             {
                 Visit( arg );

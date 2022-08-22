@@ -17,7 +17,7 @@ namespace KuiLang.Compiler.Symbols
             Ast = ast;
         }
 
-        public IExpression NewFieldValue { get; internal set; } = null!;
+        public IExpressionSymbol NewFieldValue { get; internal set; } = null!;
         public FieldSymbol AssignedField { get; internal set; } = null!;
         public IdentifierValueExpressionSymbol FieldOwner { get; internal set; } = null!;
         public Ast.Statement.FieldAssignation Ast { get; }

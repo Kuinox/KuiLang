@@ -28,19 +28,18 @@ namespace KuiLang
             NumberType.Methods.Add( substract.Name, substract );
             NumberType.Methods.Add( multiply.Name, multiply );
             NumberType.Methods.Add( divide.Name, divide );
-
         }
+
         public static readonly string NumberName = "number";
         public static readonly Identifier NumberIdentifier = new( NumberName );
 
         static MethodSymbol OperatorBuilder(
             string methodName,
-            Func<ReturnStatementSymbol, IExpression> funcBuilder
+            Func<ReturnStatementSymbol, IExpressionSymbol> funcBuilder
         )
         {
             var method = new MethodSymbol( NumberType, new Ast.Statement.Definition.Typed.Method(NumberIdentifier, methodName, new Ast.Statement.Definition.Typed.Parameter[]
             {
-                new Ast.Statement.Definition.Typed.Parameter(NumberIdentifier, "left", null ),
                 new Ast.Statement.Definition.Typed.Parameter(NumberIdentifier, "right", null )
             }, null ) )
             {

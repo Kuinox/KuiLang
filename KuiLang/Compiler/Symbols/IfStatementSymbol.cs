@@ -17,7 +17,7 @@ namespace KuiLang.Compiler.Symbols
             SymbolAst = symbolAst;
         }
 
-        public IExpression Condition { get; set; } = null!;
+        public IExpressionSymbol Condition { get; set; } = null!;
         public StatementSymbol Statement { get; set; } = null!;
 
         public Ast.Statement.If SymbolAst { get; }

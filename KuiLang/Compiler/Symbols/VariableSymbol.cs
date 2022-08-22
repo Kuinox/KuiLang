@@ -14,7 +14,7 @@ namespace KuiLang.Compiler.Symbols
             Ast = ast;
         }
 
-        public IExpression? InitValue { get; internal set; } = null!;
+        public IExpressionSymbol? InitValue { get; internal set; } = null!;
         public string Name => Ast.Name;
         public TypeSymbol Type { get; internal set; } = null!; // Ordrered Resolution pass.
         public StatementBlockSymbol StatementScope { get; }

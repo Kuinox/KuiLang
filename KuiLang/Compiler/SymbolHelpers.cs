@@ -21,10 +21,10 @@ namespace KuiLang.Compiler
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public static StatementSymbol GetContainingStatement( this IExpression symbol )
+        public static StatementSymbol GetContainingStatement( this IExpressionSymbol symbol )
         {
             var parent = symbol.Parent;
-            return parent is IExpression expr ?
+            return parent is IExpressionSymbol expr ?
                 GetContainingStatement( expr ) : (StatementSymbol)parent;
         }
 

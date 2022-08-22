@@ -109,10 +109,10 @@ namespace KuiLang
               new LeftAssociative( "*", "/" ) );
 
             var operators = Nonterminal.Create( "Operators",
-                expression.Extended().Append( "*" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.Operator.Multiply( left, right ) ),
-                expression.Extended().Append( "/" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.Operator.Divide( left, right ) ),
-                expression.Extended().Append( "+" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.Operator.Add( left, right ) ),
-                expression.Extended().Append( "-" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.Operator.Subtract( left, right ) )
+                expression.Extended().Append( "*" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.MethodCall.Operator.Multiply( left, right ) ),
+                expression.Extended().Append( "/" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.MethodCall.Operator.Divide( left, right ) ),
+                expression.Extended().Append( "+" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.MethodCall.Operator.Add( left, right ) ),
+                expression.Extended().Append( "-" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.MethodCall.Operator.Subtract( left, right ) )
             ).WithOperatorScope( opScope );
 
             expression.SetProductions(
@@ -203,8 +203,12 @@ namespace KuiLang
                 typeDeclaration.AsIs<Statement.Definition>()
             );
 
+            var expressionStatements = Nonterminal.Create<Statement.ExpressionStatement>( "Expression statement.",
+                    functionCall.Extended().Append( ";" ).Finish( ( s ) => new Statement.ExpressionStatement( s ) ),
+                    methodCall.Extended().Append( ";" ).Finish( ( s ) => new Statement.ExpressionStatement( s ) )
+                );
+
             statement.SetProductions(
-                functionCall.Extended().Append( ";" ).Finish<Statement>( s => new Statement.MethodCallStatement( s ) ),
                 variableDeclaration.Extended().Append( ";" ).Finish<Statement>( s => s ),
                 returnStatement.Extended().Append( ";" ).Finish<Statement>( s => s ),
                 ifStatement.AsIs(),

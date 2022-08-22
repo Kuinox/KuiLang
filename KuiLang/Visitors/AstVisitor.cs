@@ -1,16 +1,13 @@
-using KuiLang.Compiler.Symbols;
 using KuiLang.Syntax;
 using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using static KuiLang.Syntax.Ast;
 using static KuiLang.Syntax.Ast.Expression;
 using static KuiLang.Syntax.Ast.Expression.Literal;
 using static KuiLang.Syntax.Ast.Expression.FuncCall;
-using static KuiLang.Syntax.Ast.Expression.FuncCall.Operator;
 using static KuiLang.Syntax.Ast.Statement;
 using static KuiLang.Syntax.Ast.Statement.Definition;
 using static KuiLang.Syntax.Ast.Statement.Definition.Typed;
+using static KuiLang.Syntax.Ast.Expression.FuncCall.MethodCall;
 
 namespace KuiLang
 {
@@ -32,15 +29,12 @@ namespace KuiLang
             FieldAssignation assignation => Visit( assignation ),
             Return returnStatement => Visit( returnStatement ),
             If @if => Visit( @if ),
-            MethodCallStatement methodCallStatement => Visit( methodCallStatement ),
+            ExpressionStatement expressionStatemtn => Visit( expressionStatemtn ),
             _ => throw new InvalidOperationException( $"Unknown Statement{statement}" )
         };
 
-        protected virtual object Visit( MethodCallStatement statement )
-        {
-            Visit( statement.MethodCallExpression );
-            return default!;
-        }
+        protected virtual object Visit( ExpressionStatement expressionStatement )
+            => Visit( expressionStatement.TheExpression );
 
         protected virtual object Visit( If @if )
         {
@@ -122,8 +116,7 @@ namespace KuiLang
 
         protected virtual object Visit( FuncCall funcCall )
         {
-            if( funcCall is MethodCall m ) return Visit( m );
-            if( funcCall is Operator s ) Visit( s );
+            if( funcCall is MethodCall m ) Visit( m );
 
             foreach( var argument in funcCall.Arguments )
             {
@@ -132,7 +125,11 @@ namespace KuiLang
             return default!;
         }
 
-        protected virtual object Visit( MethodCall methodCall ) => Visit( methodCall.Target );
+        protected virtual object Visit( MethodCall methodCall )
+        {
+            if( methodCall is Operator s ) Visit( s );
+            return Visit( methodCall.Target );
+        }
 
         protected virtual object Visit( Operator @operator ) => default!;
 

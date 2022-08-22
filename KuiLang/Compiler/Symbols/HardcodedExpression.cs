@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class HardcodedExpressionsSymbol : IExpression, ISymbol
+    public class HardcodedExpressionsSymbol : IExpressionSymbol, ISymbol
     {
         public HardcodedExpressionsSymbol( ISymbol parent, TypeSymbol returnType)
         {

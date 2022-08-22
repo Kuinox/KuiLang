@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using static KuiLang.Syntax.Ast.Expression;
+using static KuiLang.Syntax.Ast.Expression.FuncCall;
 
 namespace KuiLang.Syntax
 {
@@ -31,8 +32,7 @@ namespace KuiLang.Syntax
 
 
             }
-
-            public sealed record MethodCallStatement( FuncCall MethodCallExpression ) : Statement;
+            public sealed record ExpressionStatement( Expression TheExpression ) : Statement;
 
             public sealed record Return(
                 Expression? ReturnedValue
@@ -53,13 +53,15 @@ namespace KuiLang.Syntax
         {
             public record FuncCall( string Name, IReadOnlyList<Expression> Arguments ) : Expression
             {
-                public record MethodCall( Expression Target, string Name, IReadOnlyList<Expression> Arguments ) : FuncCall( Name, Arguments );
-                public record Operator( string Name, Expression Left, Expression Right ) : FuncCall( Name, new[] { Left, Right } )
+                public record MethodCall( Expression Target, string Name, IReadOnlyList<Expression> Arguments ) : FuncCall( Name, Arguments )
                 {
-                    public sealed record Multiply( Expression Left, Expression Right ) : Operator( "*", Left, Right );
-                    public sealed record Divide( Expression Left, Expression Right ) : Operator( "/", Left, Right );
-                    public sealed record Add( Expression Left, Expression Right ) : Operator( "+", Left, Right );
-                    public sealed record Subtract( Expression Left, Expression Right ) : Operator( "-", Left, Right );
+                    public record Operator( string Name, Expression Left, Expression Right ) : MethodCall( Left, Name, new[] { Right } )
+                    {
+                        public sealed record Multiply( Expression Left, Expression Right ) : Operator( "*", Left, Right );
+                        public sealed record Divide( Expression Left, Expression Right ) : Operator( "/", Left, Right );
+                        public sealed record Add( Expression Left, Expression Right ) : Operator( "+", Left, Right );
+                        public sealed record Subtract( Expression Left, Expression Right ) : Operator( "-", Left, Right );
+                    }
                 }
             }
             public sealed record IdentifierValue( Identifier Identifier ) : Expression;

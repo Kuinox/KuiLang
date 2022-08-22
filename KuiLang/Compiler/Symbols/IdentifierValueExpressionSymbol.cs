@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class IdentifierValueExpressionSymbol : IExpression, ISymbol
+    public class IdentifierValueExpressionSymbol : IExpressionSymbol, ISymbol
     {
         public IdentifierValueExpressionSymbol( ISymbol parent, Ast.Expression.IdentifierValue symbolAst )
         {
