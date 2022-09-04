@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -10,8 +11,18 @@ namespace KuiLang.Diagnostics
 {
     public class DiagnosticChannel
     {
-        readonly List<Diagnostic> _diagnostics = new();
+        readonly MyList<Diagnostic> _diagnostics = new();
         public void EmitDiagnostic( Diagnostic diagnostic ) => _diagnostics.Add( diagnostic );
+
+        public bool HaveError => _diagnostics.Any( s => s.Severity >= Severity.Error );
+
+        public void PrintDiagnostics( TextWriter writer )
+        {
+            foreach( var item in _diagnostics )
+            {
+                writer.WriteLine( item.ToString() );
+            }
+        }
     }
 
     public static class DiagnosticsExtensions
@@ -23,5 +34,21 @@ namespace KuiLang.Diagnostics
             message,
             null
         ) );
+
+        public static void CompilerError( this DiagnosticChannel @this, string message )
+            => @this.EmitDiagnostic( new Diagnostic(
+            Severity.Error,
+            null,
+            message,
+            null
+        ) );
+
+        public static void CompilerErrorIfTrue( this DiagnosticChannel @this, bool emit, [CallerArgumentExpression( "emit" )] string? message = null )
+        {
+            if(emit)
+            {
+                @this.CompilerError( message! );
+            }
+        }
     }
 }

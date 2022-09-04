@@ -20,14 +20,11 @@ namespace KuiLang.Compiler
 
         protected override object Visit( TypeSymbol symbol )
         {
-            var ctor = new MethodSymbol( symbol, new Ast.Statement.Definition.Typed.Method( symbol.Identifier, symbol.Name, null, null ) );
+            var ctor = new MethodSymbol( symbol, new Ast.Statement.Definition.Typed.Method( symbol.Identifier, symbol.Ast.Name, null, null ) );
             var ret = new ReturnStatementSymbol(
                 ctor,
                 null
-            )
-            {
-                ReturnType = symbol
-            };
+            );
             ret.ReturnedValue = new InstantiateObjectExpression( ret );
             ctor.Statement = ret;
             symbol.Constructor = ctor;

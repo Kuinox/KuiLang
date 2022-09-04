@@ -57,7 +57,7 @@ namespace KuiLang.Compiler
             if( TryGetLanguageType( typeIdentifier, out var typeSymbol ) ) return typeSymbol;
             if( typeIdentifier.Parts.Length > 1 ) throw new NotSupportedException( "Right now we do not support namespace or nested types." );
             var curr = typeIdentifier.SubParts.Parts.Span[0];
-            if( parent.Name == curr ) return parent;
+            if( parent.Ast.Name == curr ) return parent;
             return parent.Parent.FindType( typeIdentifier );
         }
 

@@ -17,7 +17,12 @@ namespace KuiLang.Compiler.Symbols
             Ast = ast;
         }
 
-        public List<StatementSymbol> Statements { get; } = new();
+        public MyList<StatementSymbol> Statements { get; } = new();
         public Ast.Statement.Block? Ast { get; }
+
+        protected override string ValueString =>
+$@"[
+{string.Join( ",\n", Statements )}
+]";
     }
 }

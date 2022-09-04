@@ -9,7 +9,7 @@ namespace KuiLang.Compiler.Symbols
 {
     public class HardcodedExpressionsSymbol : IExpressionSymbol, ISymbol
     {
-        public HardcodedExpressionsSymbol( ISymbol parent, TypeSymbol returnType)
+        public HardcodedExpressionsSymbol( ISymbol parent, TypeSymbol returnType )
         {
             Parent = parent;
             ReturnType = returnType;
@@ -17,7 +17,6 @@ namespace KuiLang.Compiler.Symbols
         public TypeSymbol ReturnType { get; }
 
         public ISymbol Parent { get; }
-
 
         public class NumberAddSymbol : HardcodedExpressionsSymbol
         {

@@ -22,5 +22,7 @@ namespace KuiLang.Compiler.Symbols
         public Ast.Expression.Literal.Number SymbolAst { get; }
 
         public TypeSymbol ReturnType => HardcodedSymbols.NumberType;
+
+        public override string ToString() => Value.ToString();
     }
 }

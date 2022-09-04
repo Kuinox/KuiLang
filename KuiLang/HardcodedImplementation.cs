@@ -14,20 +14,20 @@ namespace KuiLang
     {
         static HardcodedSymbols()
         {
-            NumberType = new( null!, new( "number", new List<Ast.Statement.Definition>() ) );
+            NumberType = new( null!, new( "number", new MyList<Ast.Statement.Definition>() ) );
             NumberValueField = new( new Ast.Statement.Definition.Typed.Field(NumberIdentifier, "value", new Ast.Expression.Literal.Number( 0 ) ), NumberType );
             Number = new( NumberType );
-            NumberType.Fields.Add( NumberValueField.Name, NumberValueField );
+            NumberType.Fields.Add( NumberValueField.Ast.Name, NumberValueField );
 
             var add = OperatorBuilder( "+", ( ret ) => new HardcodedExpressionsSymbol.NumberAddSymbol( ret, NumberType ) );
             var substract = OperatorBuilder( "-", ( ret ) => new HardcodedExpressionsSymbol.NumberSubstractSymbol( ret, NumberType ) );
             var multiply = OperatorBuilder( "*", ( ret ) => new HardcodedExpressionsSymbol.NumberMultiplySymbol( ret, NumberType ) );
             var divide = OperatorBuilder( "/", ( ret ) => new HardcodedExpressionsSymbol.NumberDivideSymbol( ret, NumberType ) );
 
-            NumberType.Methods.Add( add.Name, add );
-            NumberType.Methods.Add( substract.Name, substract );
-            NumberType.Methods.Add( multiply.Name, multiply );
-            NumberType.Methods.Add( divide.Name, divide );
+            NumberType.Methods.Add( add.Ast.Name, add );
+            NumberType.Methods.Add( substract.Ast.Name, substract );
+            NumberType.Methods.Add( multiply.Ast.Name, multiply );
+            NumberType.Methods.Add( divide.Ast.Name, divide );
         }
 
         public static readonly string NumberName = "number";
@@ -49,10 +49,7 @@ namespace KuiLang
             {
                 Type = NumberType
             };
-            var ret = new ReturnStatementSymbol( method, null )
-            {
-                ReturnType = NumberType
-            };
+            var ret = new ReturnStatementSymbol( method, null );
             ret.ReturnedValue = funcBuilder( ret );
             method.ParameterSymbols.Add( right.Ast.Name, right );
             method.Statement = ret;

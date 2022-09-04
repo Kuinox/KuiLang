@@ -43,7 +43,7 @@ namespace KuiLang.Compiler
                 _ => throw new InvalidOperationException( "Unknown method parent" )
             };
             var symbol = new MethodSymbol( current, method );
-            current.Methods.Add( symbol.Name, symbol );
+            current.Methods.Add( symbol.Ast.Name, symbol );
             _current = symbol;
             base.Visit( method );
             _current = symbol.Parent;
@@ -76,7 +76,7 @@ namespace KuiLang.Compiler
             if( _current is TypeSymbol type )
             {
                 var fieldSymbol = new FieldSymbol( field, type );
-                type.Fields.Add( fieldSymbol.Name, fieldSymbol );
+                type.Fields.Add( fieldSymbol.Ast.Name, fieldSymbol );
                 _current = fieldSymbol;
                 fieldSymbol.InitValue = field.InitValue != null ? Visit( field.InitValue ) : null;
                 _current = fieldSymbol.Parent;

@@ -15,7 +15,7 @@ namespace KuiLang.Runner
     public static class ScriptHelpers
     {
         static readonly RuntimeFarkle<Ast.Statement.Block> StatementListParser = KuiLang.StatementListDesignTime.Build();
-        public static RuntimeObject RunScript( string scriptText )
+        public static RuntimeObject? RunScript( string scriptText, bool debug = false )
         {
             var res = StatementListParser.Parse( scriptText );
             if( !res.IsOk )
@@ -32,13 +32,40 @@ namespace KuiLang.Runner
             var resolver = new ResolveMemberTypeVisitor( diagnostics );
             var orderedResolver = new ResolveOrderedSymbols( diagnostics );
             var interpreter = new InterpreterVisitor( diagnostics );
+            try
+            {
 
-            var rootSymbol = symbolsBuilder.Visit( statements );
-            resolver.Visit( rootSymbol );
-            orderedResolver.Visit( rootSymbol );
-            var val = interpreter.Visit( rootSymbol ); //Thats where all the magic happens.
-            Console.WriteLine( $"Execution returned value: {val}" );
-            return val;
+                if( debug ) Console.WriteLine( "Ast:" );
+                if( debug ) Console.WriteLine( statements );
+                var rootSymbol = symbolsBuilder.Visit( statements );
+
+                if( debug ) Console.WriteLine( "Symbols:" );
+                if( debug ) Console.WriteLine( rootSymbol );
+                resolver.Visit( rootSymbol );
+
+                if( debug ) Console.WriteLine( "Unordered resolution:" );
+                if( debug ) Console.WriteLine( rootSymbol );
+                orderedResolver.Visit( rootSymbol );
+
+                if( debug )
+                {
+                    Console.WriteLine( "Ordered resolution:" );
+                    Console.WriteLine( rootSymbol );
+                    var validator = new ValidatorVisitor( diagnostics );
+                    validator.Visit( rootSymbol );
+                }
+
+                var val = interpreter.Visit( rootSymbol ); //Thats where all the magic happens.
+                if( debug ) Console.WriteLine( $"Execution returned value: {val}" );
+                return val;
+            }
+            finally
+            {
+                Console.WriteLine( "Compiler diagnostics:" );
+                diagnostics.PrintDiagnostics( Console.Out );
+            }
+
+
         }
 
         public static decimal AsNumber( this RuntimeObject @this )

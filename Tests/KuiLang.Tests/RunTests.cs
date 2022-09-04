@@ -14,7 +14,7 @@ namespace KuiLang.Tests
         [Test]
         public void ReturnTest()
         {
-            ScriptHelpers.RunScript( "return 1;" ).AsNumber().Should().Be( 1 );
+            ScriptHelpers.RunScript( "return 1;" )!.AsNumber().Should().Be( 1 );
         }
 
         [Test]
@@ -23,7 +23,7 @@ namespace KuiLang.Tests
             ScriptHelpers.RunScript(
 @"number foo = 42;
 return 42;"
-            ).AsNumber().Should().Be( 42 );
+            )!.AsNumber().Should().Be( 42 );
         }
 
         [Test]
@@ -33,19 +33,19 @@ return 42;"
 @"
 number aFunction() { return 12; }
 return aFunction();"
-            ).AsNumber().Should().Be( 12 );
+            )!.AsNumber().Should().Be( 12 );
         }
 
         [Test]
         public void OperatorTest()
         {
-            ScriptHelpers.RunScript( @"return 12*4;" ).AsNumber().Should().Be( 48 );
+            ScriptHelpers.RunScript( @"return 12*4;", true )!.AsNumber().Should().Be( 48 );
         }
 
         [Test]
         public void IfTest()
         {
-            ScriptHelpers.RunScript( @"if(1) { return 2; } return 1;" ).AsNumber().Should().Be( 2 );
+            ScriptHelpers.RunScript( @"if(1) { return 2; } return 1;" )!.AsNumber().Should().Be( 2 );
         }
 
         [TestCase( 2, 2, 4 )]
@@ -62,7 +62,7 @@ number Pow(number x, number y)
 }}
 return Pow({x},{y});
 "
-).AsNumber().Should().Be( z );
+)!.AsNumber().Should().Be( z );
         }
 
         [TestCase( 2, 2, 4 )]
@@ -79,7 +79,7 @@ number Pow(number x, number y)
 }}
 return Pow({x},{y});
 "
-).AsNumber().Should().Be( z );
+)!.AsNumber().Should().Be( z );
         }
 
         [Test]

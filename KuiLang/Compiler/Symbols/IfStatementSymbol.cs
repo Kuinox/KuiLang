@@ -21,5 +21,6 @@ namespace KuiLang.Compiler.Symbols
         public StatementSymbol Statement { get; set; } = null!;
 
         public Ast.Statement.If SymbolAst { get; }
+
     }
 }

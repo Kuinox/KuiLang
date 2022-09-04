@@ -18,7 +18,10 @@ namespace KuiLang.Compiler.Symbols
         }
 
         public IExpressionSymbol? ReturnedValue { get; internal set; }
-        public TypeSymbol ReturnType { get; internal set; } = null!;
         public Ast.Statement.Return? Ast { get; }
+
+        protected override string ValueString => @$"{{
+            ""Expression"": {ReturnedValue?.ToString() ?? "null"}
+        }}";
     }
 }

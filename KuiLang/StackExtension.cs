@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,7 @@ namespace KuiLang
             return @this;
         }
 
-        public static List<T> Plus<T>(this List<T> @this, T element)
+        public static MyList<T> Plus<T>(this MyList<T> @this, T element)
         {
             @this.Add(element);
             return @this;

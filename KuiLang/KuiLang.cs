@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Farkle;
 using Farkle.Builder;
@@ -45,24 +44,24 @@ namespace KuiLang
               fullName.Extended().Extend( simpleNamePart ).Finish( ( type, argName ) => new Statement.Definition.Typed.Parameter( type, argName, null ) )
             );
 
-            var argumentList = Nonterminal.Create<List<Statement.Definition.Typed.Parameter>>( "Argument List" );
+            var argumentList = Nonterminal.Create<MyList<Statement.Definition.Typed.Parameter>>( "Argument List" );
             argumentList.SetProductions(
                 argumentList.Extended()
                     .Append( "," )
                     .Extend( argument )
                     .Finish( ( xs, s ) => xs.Plus( s ) ),
-                argument.Finish( ( s ) => new List<Statement.Definition.Typed.Parameter>() { s } )
+                argument.Finish( ( s ) => new MyList<Statement.Definition.Typed.Parameter>() { s } )
             );
 
             var expression = Nonterminal.Create<Expression>( "Expression" );
 
-            var argumentPassingList = Nonterminal.Create<List<Expression>>( "Expression List" );
+            var argumentPassingList = Nonterminal.Create<MyList<Expression>>( "Expression List" );
             argumentPassingList.SetProductions(
                 argumentPassingList.Extended()
                 .Append( "," )
                 .Extend( expression )
                 .Finish( ( xs, s ) => xs.Plus( s ) ),
-                expression.Finish( s => new List<Expression>() { s } )
+                expression.Finish( s => new MyList<Expression>() { s } )
             );
 
             var functionCall =
@@ -71,7 +70,7 @@ namespace KuiLang
                     .Append( "(" )
                     .Extend( argumentPassingList.Optional() )
                     .Append( ")" )
-                    .Finish( ( functionName, args ) => new Expression.FuncCall( functionName, args ?? new List<Expression>() ) )
+                    .Finish( ( functionName, args ) => new Expression.FuncCall( functionName, args ?? new MyList<Expression>() ) )
             );
 
             var methodCall = Nonterminal.Create( "Method Call",
@@ -82,7 +81,7 @@ namespace KuiLang
                     .Extend( argumentPassingList.Optional() )
                     .Append( ")" )
                     .Finish( ( expr, funcName, args ) =>
-                    new Expression.FuncCall.MethodCall( expr, funcName, args ?? new List<Expression>() ) )
+                    new Expression.FuncCall.MethodCall( expr, funcName, args ?? new MyList<Expression>() ) )
             );
 
             var assignation = Nonterminal.Create( "Assignation",
@@ -125,7 +124,7 @@ namespace KuiLang
 
             var statement = Nonterminal.Create<Statement>( "Statement" );
             var statementList = Nonterminal.Create( "Statement List", statement
-                .Many<Statement, List<Statement>>()
+                .Many<Statement, MyList<Statement>>()
                 .Finish( s => new Statement.Block( s ) )
             );
             var statementScope = Nonterminal.Create( "Statement Scope",
@@ -159,7 +158,7 @@ namespace KuiLang
                         => new Statement.Definition.Typed.Method(
                             typeName,
                             methodName,
-                            args ?? new List<Statement.Definition.Typed.Parameter>(),
+                            args ?? new MyList<Statement.Definition.Typed.Parameter>(),
                             statements
                         )
                     )
@@ -186,7 +185,7 @@ namespace KuiLang
             var definitionBlock =
                 Nonterminal.Create( "Definition Block",
                     "{".Appended()
-                        .Extend( definition.Many<Statement.Definition, List<Statement.Definition>>() )
+                        .Extend( definition.Many<Statement.Definition, MyList<Statement.Definition>>() )
                         .Append( "}" )
                         .AsIs()
             );

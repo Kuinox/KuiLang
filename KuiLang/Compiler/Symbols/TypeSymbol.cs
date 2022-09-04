@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static KuiLang.Syntax.Ast;
 
 namespace KuiLang.Semantic
 {
@@ -15,7 +16,6 @@ namespace KuiLang.Semantic
         {
             Parent = parent;
             Ast = ast;
-            Name = ast.Name;
         }
 
         public ProgramRootSymbol Parent { get; }
@@ -23,7 +23,6 @@ namespace KuiLang.Semantic
         ISymbol? ISymbol.Parent => Parent;
 
         public Ast.Statement.Definition.Type Ast { get; }
-        public string Name { get; }
 
         public Dictionary<string, MethodSymbol> Methods { get; } = new();
 
@@ -31,6 +30,20 @@ namespace KuiLang.Semantic
 
         public MethodSymbol Constructor { get; internal set; } = null!;
 
-        public Identifier Identifier => new(Name);
+        public Identifier Identifier => new(Ast.Name);
+
+        public override string ToString()
+            =>
+$@"
+{{
+    ""Fields"": [
+{string.Join( "\n,", Fields.Values.Select( s => s.ToString() ) )}
+        ],
+    ""Methods"": [
+{string.Join( "\n,", Methods.Values.Select( s => s.ToString()  ) )}
+        ]
+    }}
+";
+
     }
 }

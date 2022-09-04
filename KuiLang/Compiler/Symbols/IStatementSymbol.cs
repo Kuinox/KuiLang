@@ -12,10 +12,10 @@ namespace KuiLang.Compiler.Symbols
         public StatementSymbol( ISymbol parent )
         {
             Parent = parent;
-            if(parent is ProgramRootSymbol root)
+            if( parent is ProgramRootSymbol root )
             {
-                if( root.Statement == null ) return;//special case for when the root is initializing.
-                root.Statement.Statements.Add( this );
+                if( root.Statement != null ) throw new InvalidOperationException();
+                root.Statement = (StatementBlockSymbol)this;
                 return;
             }
             if( parent is StatementBlockSymbol block )
@@ -30,5 +30,12 @@ namespace KuiLang.Compiler.Symbols
                 return;
             }
         }
+
+        protected virtual string ValueString => "\"TODO\"";
+
+        public override string ToString() =>
+$@"{{
+""{GetType().Name}"":{ValueString}
+}}";
     }
 }

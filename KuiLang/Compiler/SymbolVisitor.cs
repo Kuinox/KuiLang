@@ -88,7 +88,7 @@ namespace KuiLang.Compiler
             return default!;
         }
 
-        protected virtual T Visit( IExpressionSymbol symbolBase ) => symbolBase switch
+        protected virtual T Visit( IExpressionSymbol symbol ) => symbol switch
         {
             IdentifierValueExpressionSymbol s => Visit( s ),
             FunctionCallExpressionSymbol s => Visit( s ),
@@ -96,7 +96,7 @@ namespace KuiLang.Compiler
             NumberLiteralSymbol s => Visit( s ),
             HardcodedExpressionsSymbol s => Visit( s ),
             InstantiateObjectExpression s => Visit( s ),
-            _ => throw new ArgumentException( $"Unknown expression symbol {symbolBase}" )
+            _ => throw new ArgumentException( $"Unknown expression symbol {symbol}" )
         };
 
         protected virtual T Visit( InstantiateObjectExpression symbol ) => default!;
