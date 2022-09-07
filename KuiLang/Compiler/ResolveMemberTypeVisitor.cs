@@ -67,19 +67,8 @@ namespace KuiLang.Compiler
             return base.Visit( symbol );
         }
 
-        protected override object Visit( MethodCallExpressionSymbol symbol )
-        {
-            var ret = base.Visit( symbol );
-            var returnType = symbol.CallTarget.ReturnType;
-            var method = returnType.Methods[symbol.Ast.Name];
-            if( method == null ) _diagnostics.Error( $"Could not resolve method {symbol.Ast}." );
-            symbol.TargetMethod = method!;
-            return ret;
-        }
-
         protected override object Visit( FunctionCallExpressionSymbol symbol )
         {
-            var holder = symbol.GetContainingMethodHolder();
 
             holder.Methods.TryGetValue( symbol.Ast.Name, out var localMethod );
             if( localMethod == null )

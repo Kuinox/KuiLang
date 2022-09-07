@@ -162,7 +162,7 @@ namespace KuiLang.Compiler
 
         protected override IExpressionSymbol Visit( Ast.Expression expression ) => (IExpressionSymbol)base.Visit( expression );
 
-        protected virtual MethodCallExpressionSymbol VisitMethod( MethodCall funcCall )
+        protected virtual FunctionCallExpressionSymbol VisitMethod( MethodCall funcCall )
         {
             var target = Visit( funcCall.Target );
             var prev = _current;

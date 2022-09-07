@@ -7,7 +7,6 @@ using static KuiLang.Syntax.Ast.Expression.FuncCall;
 using static KuiLang.Syntax.Ast.Statement;
 using static KuiLang.Syntax.Ast.Statement.Definition;
 using static KuiLang.Syntax.Ast.Statement.Definition.Typed;
-using static KuiLang.Syntax.Ast.Expression.FuncCall.MethodCall;
 
 namespace KuiLang
 {
@@ -116,19 +115,13 @@ namespace KuiLang
 
         protected virtual object Visit( FuncCall funcCall )
         {
-            if( funcCall is MethodCall m ) Visit( m );
+            if( funcCall is Operator s ) Visit( s );
 
             foreach( var argument in funcCall.Arguments )
             {
                 Visit( argument );
             }
             return default!;
-        }
-
-        protected virtual object Visit( MethodCall methodCall )
-        {
-            if( methodCall is Operator s ) Visit( s );
-            return Visit( methodCall.Target );
         }
 
         protected virtual object Visit( Operator @operator ) => default!;

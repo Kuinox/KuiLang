@@ -23,7 +23,7 @@ namespace KuiLang.Compiler
             return base.Visit( symbol );
         }
 
-        protected override object Visit( MethodCallExpressionSymbol symbol )
+        protected override object Visit( FunctionCallExpressionSymbol symbol )
         {
             _diagnostics.CompilerErrorIfTrue( symbol.CallTarget is null );
             _diagnostics.CompilerErrorIfTrue( symbol.TargetMethod is null );

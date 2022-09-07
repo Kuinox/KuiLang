@@ -75,23 +75,7 @@ namespace KuiLang.Interpreter
             return obj;
         }
 
-        protected override RuntimeObject Visit( FunctionCallExpressionSymbol functionCall )
-        {
-            var newScope = new Dictionary<ISymbol, object>();
-            int i = 0;
-            foreach( var parameter in functionCall.TargetMethod.ParameterSymbols )
-            {
-                var expressionValue = functionCall.Arguments[i++];
-                newScope[parameter.Value] = Visit( expressionValue );
-            }
-            _stack.Push( newScope );
-
-            var val = Visit( functionCall.TargetMethod.Statement );
-            if( val is ReturnControlFlow rcf ) return (RuntimeObject)rcf.ReturnValue!;
-            return default!;
-        }
-
-        protected override RuntimeObject Visit( MethodCallExpressionSymbol methodCall )
+        protected override RuntimeObject Visit( FunctionCallExpressionSymbol methodCall )
         {
 
             var callTarget = Visit( methodCall.CallTarget );

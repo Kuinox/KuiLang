@@ -9,6 +9,14 @@ using static KuiLang.Syntax.Ast.Expression.FuncCall;
 
 namespace KuiLang.Syntax
 {
+    public class Foo
+    {
+        public string Name { get; }
+
+        public Foo( string name )
+        {
+        }
+    }
     public abstract record Ast
     {
         public abstract record Statement : Ast
@@ -51,17 +59,14 @@ namespace KuiLang.Syntax
 
         public abstract record Expression : Ast
         {
-            public record FuncCall( string Name, IReadOnlyList<Expression> Arguments ) : Expression
+            public record FuncCall( Expression CallTarget, IReadOnlyList<Expression> Arguments ) : Expression
             {
-                public record MethodCall( Expression Target, string Name, IReadOnlyList<Expression> Arguments ) : FuncCall( Name, Arguments )
+                public record Operator( string Name, Expression Left, Expression Right ) : FuncCall( Left, new MyList<Expression> { Right } )
                 {
-                    public record Operator( string Name, Expression Left, Expression Right ) : MethodCall( Left, Name, new MyList<Expression> { Right } )
-                    {
-                        public sealed record Multiply( Expression Left, Expression Right ) : Operator( "*", Left, Right );
-                        public sealed record Divide( Expression Left, Expression Right ) : Operator( "/", Left, Right );
-                        public sealed record Add( Expression Left, Expression Right ) : Operator( "+", Left, Right );
-                        public sealed record Subtract( Expression Left, Expression Right ) : Operator( "-", Left, Right );
-                    }
+                    public sealed record Multiply( Expression Left, Expression Right ) : Operator( "*", Left, Right );
+                    public sealed record Divide( Expression Left, Expression Right ) : Operator( "/", Left, Right );
+                    public sealed record Add( Expression Left, Expression Right ) : Operator( "+", Left, Right );
+                    public sealed record Subtract( Expression Left, Expression Right ) : Operator( "-", Left, Right );
                 }
             }
             public sealed record IdentifierValue( Identifier Identifier ) : Expression;

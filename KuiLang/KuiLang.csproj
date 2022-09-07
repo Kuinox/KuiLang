@@ -13,7 +13,7 @@
     <ItemGroup>
         <PackageReference Include="Farkle" Version="6.4.0" />
         <PackageReference Include="Farkle.Tools.MSBuild" Version="6.4.0" PrivateAssets="all" />
-        <PackageReference Include="OneOf" Version="3.0.216" />
-        <PackageReference Include="OneOf.SourceGenerator" Version="3.0.216" />
+        <PackageReference Include="OneOf" Version="3.0.223" />
+        <PackageReference Include="OneOf.SourceGenerator" Version="3.0.223" />
     </ItemGroup>
 </Project>

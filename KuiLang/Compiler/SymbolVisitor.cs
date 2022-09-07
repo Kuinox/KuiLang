@@ -92,7 +92,6 @@ namespace KuiLang.Compiler
         {
             IdentifierValueExpressionSymbol s => Visit( s ),
             FunctionCallExpressionSymbol s => Visit( s ),
-            MethodCallExpressionSymbol s => Visit( s ),
             NumberLiteralSymbol s => Visit( s ),
             HardcodedExpressionsSymbol s => Visit( s ),
             InstantiateObjectExpression s => Visit( s ),
@@ -101,16 +100,8 @@ namespace KuiLang.Compiler
 
         protected virtual T Visit( InstantiateObjectExpression symbol ) => default!;
         protected virtual T Visit( IdentifierValueExpressionSymbol symbol ) => default!;
+       
         protected virtual T Visit( FunctionCallExpressionSymbol symbol )
-        {
-            foreach( var arg in symbol.Arguments )
-            {
-                Visit( arg );
-            }
-            return default!;
-        }
-
-        protected virtual T Visit( MethodCallExpressionSymbol symbol )
         {
             Visit( symbol.CallTarget );
             foreach( var arg in symbol.Arguments )
