@@ -96,17 +96,17 @@ namespace KuiLang
               new LeftAssociative( "+", "-" ),
               new LeftAssociative( "*", "/" ) );
 
-            var operators = Nonterminal.Create( "Operators",
-                expression.Extended().Append( "*" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.Operator.Multiply( left, right ) ),
-                expression.Extended().Append( "/" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.Operator.Divide( left, right ) ),
-                expression.Extended().Append( "+" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.Operator.Add( left, right ) ),
-                expression.Extended().Append( "-" ).Extend( expression ).Finish<Expression>( ( left, right ) => new Expression.FuncCall.Operator.Subtract( left, right ) )
+            var operators = Nonterminal.Create<Expression>( "Operators",
+                expression.Extended().Append( "*" ).Extend( expression ).Finish( ( left, right ) => new Expression.FuncCall.Operator.Multiply( left, right ) ),
+                expression.Extended().Append( "/" ).Extend( expression ).Finish( ( left, right ) => new Expression.FuncCall.Operator.Divide( left, right ) ),
+                expression.Extended().Append( "+" ).Extend( expression ).Finish( ( left, right ) => new Expression.FuncCall.Operator.Add( left, right ) ),
+                expression.Extended().Append( "-" ).Extend( expression ).Finish( ( left, right ) => new Expression.FuncCall.Operator.Subtract( left, right ) )
             ).WithOperatorScope( opScope );
 
             expression.SetProductions(
-                functionCall.AsIs<Expression>(),
-                fullName.Finish<Identifier, Expression>( s => new Expression.IdentifierValue( s ) ),
-                number.Finish<decimal, Expression>( s => new Expression.Literal.Number( s ) ),
+                functionCall.AsIs(),
+                fullName.Finish( s => new Expression.IdentifierValue( s ) ),
+                number.Finish( s => new Expression.Literal.Number( s ) ),
                 operators.AsIs()
             );
 
@@ -186,9 +186,9 @@ namespace KuiLang
                     .Finish( ( typeName, fields ) => new Statement.Definition.Type( typeName, fields ) )
             );
             definition.SetProductions(
-                methodDeclaration.AsIs<Statement.Definition>(),
-                //fieldDeclaration.Extended().Append(";").Finish<Statement.Definition>(s => s),
-                typeDeclaration.AsIs<Statement.Definition>()
+                methodDeclaration.AsIs(),
+                //fieldDeclaration.Extended().Append(";").AsIs(),
+                typeDeclaration.AsIs()
             );
 
             var expressionStatements = Nonterminal.Create( "Expression statement.",
@@ -196,12 +196,12 @@ namespace KuiLang
                 );
 
             statement.SetProductions(
-                expressionStatements.AsIs<Statement>(),
-                variableDeclaration.Extended().Append( ";" ).Finish<Statement>( s => s ),
-                returnStatement.Extended().Append( ";" ).Finish<Statement>( s => s ),
+                expressionStatements.AsIs(),
+                variableDeclaration.Extended().Append( ";" ).AsIs(),
+                returnStatement.Extended().Append( ";" ).AsIs(),
                 ifStatement.AsIs(),
-                statementScope.AsIs<Statement>(),
-                definition.AsIs<Statement>()
+                statementScope.AsIs(),
+                definition.AsIs()
             );
 
 
