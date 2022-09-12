@@ -8,6 +8,6 @@ namespace KuiLang.Compiler.Symbols
         {
         }
 
-        public IExpressionSymbol Expression { get; internal set; }
+        public IExpressionSymbol Expression { get; internal set; } = null!;
     }
 }

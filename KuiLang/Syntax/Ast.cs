@@ -9,14 +9,6 @@ using static KuiLang.Syntax.Ast.Expression.FuncCall;
 
 namespace KuiLang.Syntax
 {
-    public class Foo
-    {
-        public string Name { get; }
-
-        public Foo( string name )
-        {
-        }
-    }
     public abstract record Ast
     {
         public abstract record Statement : Ast

@@ -82,7 +82,7 @@ namespace KuiLang.Interpreter
 
             var newScope = new Dictionary<ISymbol, object>();
             int i = 0;
-            foreach( var parameter in methodCall.TargetMethod.ParameterSymbols )
+            foreach( var parameter in methodCall.TargetMethod.Parameters )
             {
                 var expressionValue = methodCall.Arguments[i++];
                 newScope[parameter.Value] = Visit( expressionValue );

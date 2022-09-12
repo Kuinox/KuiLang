@@ -28,16 +28,22 @@ namespace KuiLang.Compiler
                 GetContainingStatement( expr ) : (StatementSymbol)parent;
         }
 
-        public static IMethodSymbol GetContainingFunction( this ISymbol symbol )
+        public static FunctionExpressionSymbol GetContainingFunction( this ISymbol symbol )
         {
-            if( symbol.Parent is IMethodSymbol method ) return method;
+            if( symbol.Parent is FunctionExpressionSymbol method ) return method;
             return GetContainingFunction( symbol.Parent! );
         }
 
-        public static ISymbolWithMethods GetContainingMethodHolder( this ISymbol symbol )
+        public static ISymbolWithFields GetContainingType( this ISymbol symbol )
         {
-            if( symbol.Parent is ISymbolWithMethods s ) return s;
-            return GetContainingMethodHolder( symbol.Parent );
+            if( symbol.Parent is ISymbolWithFields s ) return s;
+            return GetContainingType( symbol.Parent );
+        }
+
+        public static ProgramRootSymbol GetRoot( this ISymbol symbol )
+        {
+            if( symbol is ProgramRootSymbol root ) return root;
+            return GetRoot( symbol.Parent! );
         }
 
         public static TypeSymbol FindType( this ProgramRootSymbol root, Identifier typeIdentifier )
@@ -48,7 +54,7 @@ namespace KuiLang.Compiler
             if( typeIdentifier.TryGetLanguageType( out var typeSymbol ) ) return typeSymbol;
             if( symbol.Parent is null ) return null;
             if( symbol.Parent is ProgramRootSymbol root ) return root.FindType( typeIdentifier );
-            if( symbol.Parent is MethodSymbol method ) return method.Parent.FindType( typeIdentifier );
+            if( symbol.Parent is FunctionExpressionSymbol method ) return method.Parent.FindType( typeIdentifier );
             return FindType( symbol.Parent!, typeIdentifier );
         }
 
@@ -61,7 +67,7 @@ namespace KuiLang.Compiler
             return parent.Parent.FindType( typeIdentifier );
         }
 
-        public static TypeSymbol? FindType( this MethodSymbol symbol, Identifier typeIdentifier )
+        public static TypeSymbol? FindType( this FunctionExpressionSymbol symbol, Identifier typeIdentifier )
         {
             if( TryGetLanguageType( typeIdentifier, out var typeSymbol ) ) return typeSymbol;
             return symbol.Parent switch
@@ -122,7 +128,7 @@ namespace KuiLang.Compiler
                 var varDec = (VariableSymbol)statement.CrawlStatements( ( s ) => s is VariableSymbol v && v.Name == identifier.Name, true )!;
                 if( varDec is not null ) return varDec;
                 var method = symbol.GetContainingFunction();
-                foreach( var parameter in method.ParameterSymbols )
+                foreach( var parameter in method.Parameters )
                 {
                     if( parameter.Key == identifier.Name ) return parameter.Value;
                 }

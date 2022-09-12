@@ -15,7 +15,7 @@ namespace KuiLang
         static HardcodedSymbols()
         {
             NumberType = new( null!, new( "number", new MyList<Ast.Statement.Definition>() ) );
-            NumberValueField = new( new Ast.Statement.Definition.Typed.Field(NumberIdentifier, "value", new Ast.Expression.Literal.Number( 0 ) ), NumberType );
+            NumberValueField = new( new Ast.Statement.Definition.Typed.Field( NumberIdentifier, "value", new Ast.Expression.Literal.Number( 0 ) ), NumberType );
             Number = new( NumberType );
             NumberType.Fields.Add( NumberValueField.Ast.Name, NumberValueField );
 
@@ -23,37 +23,39 @@ namespace KuiLang
             var substract = OperatorBuilder( "-", ( ret ) => new HardcodedExpressionsSymbol.NumberSubstractSymbol( ret, NumberType ) );
             var multiply = OperatorBuilder( "*", ( ret ) => new HardcodedExpressionsSymbol.NumberMultiplySymbol( ret, NumberType ) );
             var divide = OperatorBuilder( "/", ( ret ) => new HardcodedExpressionsSymbol.NumberDivideSymbol( ret, NumberType ) );
-
-            NumberType.Methods.Add( add.Ast.Name, add );
-            NumberType.Methods.Add( substract.Ast.Name, substract );
-            NumberType.Methods.Add( multiply.Ast.Name, multiply );
-            NumberType.Methods.Add( divide.Ast.Name, divide );
+            NumberType.Fields.Add( add.Ast.Name, add );
+            NumberType.Fields.Add( substract.Ast.Name, substract );
+            NumberType.Fields.Add( multiply.Ast.Name, multiply );
+            NumberType.Fields.Add( divide.Ast.Name, divide );
         }
 
         public static readonly string NumberName = "number";
         public static readonly Identifier NumberIdentifier = new( NumberName );
 
-        static MethodSymbol OperatorBuilder(
+        static FieldSymbol OperatorBuilder(
             string methodName,
             Func<ReturnStatementSymbol, IExpressionSymbol> funcBuilder
         )
         {
-            var method = new MethodSymbol( NumberType, new Ast.Statement.Definition.Typed.Method(NumberIdentifier, methodName, new Ast.Statement.Definition.Typed.Parameter[]
-            {
-                new Ast.Statement.Definition.Typed.Parameter(NumberIdentifier, "right", null )
-            }, null ) )
+            
+            var method = new FunctionExpressionSymbol( NumberType, methodName, null )
             {
                 ReturnType = NumberType
             };
-            var right = new MethodParameterSymbol( new Ast.Statement.Definition.Typed.Parameter(NumberIdentifier, "right", null), method )
+            var field = new FieldSymbol( new Ast.Statement.Definition.Typed.Field( default, methodName, null ), NumberType )
+            {
+                InitValue = method
+            };
+            NumberType.Fields.Add( methodName, field );
+            var right = new ParameterSymbol( new Ast.Statement.Definition.Typed.Parameter( NumberIdentifier, "right", null ), method )
             {
                 Type = NumberType
             };
             var ret = new ReturnStatementSymbol( method, null );
             ret.ReturnedValue = funcBuilder( ret );
-            method.ParameterSymbols.Add( right.Ast.Name, right );
+            method.Parameters.Add( right.Ast.Name, right );
             method.Statement = ret;
-            return method;
+            return field;
         }
 
         public static readonly FieldSymbol NumberValueField;

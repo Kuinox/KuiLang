@@ -7,7 +7,9 @@ namespace KuiLang.Semantic
 {
     public class FieldSymbol : ITypedSymbol
     {
-        public FieldSymbol( Ast.Statement.Definition.Typed.Field ast, TypeSymbol parent )
+        private Ast.Statement.Definition.Typed.Field _field;
+
+        public FieldSymbol( Ast.Statement.Definition.Typed.Field ast, ISymbolWithFields parent )
         {
             Debug.Assert( ast != null );
             Ast = ast;
@@ -17,7 +19,7 @@ namespace KuiLang.Semantic
         public TypeSymbol Type { get; internal set; } = null!;
         public IExpressionSymbol? InitValue { get; internal set; }
         public Ast.Statement.Definition.Typed.Field Ast { get; }
-        public TypeSymbol Parent { get; }
+        public ISymbolWithFields Parent { get; }
 
         ISymbol? ISymbol.Parent => Parent;
 

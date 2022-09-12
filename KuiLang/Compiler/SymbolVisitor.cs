@@ -17,7 +17,7 @@ namespace KuiLang.Compiler
             {
                 Visit( type );
             }
-            foreach( var method in symbol.Methods.Values )
+            foreach( var method in symbol.Fields.Values )
             {
                 Visit( method );
             }
@@ -30,19 +30,14 @@ namespace KuiLang.Compiler
             {
                 Visit( field );
             }
-
-            foreach( var method in symbol.Methods.Values )
-            {
-                Visit( method );
-            }
             return default!;
         }
 
         protected virtual T Visit( FieldSymbol symbol ) => default!;
 
-        protected virtual T Visit( MethodSymbol symbol )
+        protected virtual T Visit( FunctionExpressionSymbol symbol )
         {
-            foreach( var arguments in symbol.ParameterSymbols )
+            foreach( var arguments in symbol.Parameters)
             {
                 Visit( arguments.Value );
             }
@@ -51,7 +46,7 @@ namespace KuiLang.Compiler
             return default!;
         }
 
-        protected virtual T Visit( MethodParameterSymbol symbol ) => default!;
+        protected virtual T Visit( ParameterSymbol symbol ) => default!;
 
         protected virtual T Visit( StatementSymbol symbolBase ) => symbolBase switch
         {

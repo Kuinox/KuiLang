@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class MethodParameterSymbol : ITypedSymbol
+    public class ParameterSymbol : ITypedSymbol
     {
-        public MethodParameterSymbol( Ast.Statement.Definition.Typed.Parameter ast, MethodSymbol parent )
+        public ParameterSymbol( Ast.Statement.Definition.Typed.Parameter ast, FunctionExpressionSymbol parent )
         {
             Debug.Assert( ast is not null );
             Ast = ast;
@@ -19,7 +19,7 @@ namespace KuiLang.Compiler.Symbols
         }
         public TypeSymbol Type { get; internal set; } = null!;
         public Ast.Statement.Definition.Typed.Parameter Ast { get; }
-        public MethodSymbol Parent { get; }
+        public FunctionExpressionSymbol Parent { get; }
 
         ISymbol? ISymbol.Parent => Parent;
     }

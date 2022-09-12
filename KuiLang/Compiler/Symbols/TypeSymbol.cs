@@ -10,7 +10,7 @@ using static KuiLang.Syntax.Ast;
 
 namespace KuiLang.Semantic
 {
-    public class TypeSymbol : ISymbol, ISymbolWithMethods
+    public class TypeSymbol : ISymbol, ISymbolWithFields
     {
         public TypeSymbol( ProgramRootSymbol parent, Ast.Statement.Definition.Type ast )
         {
@@ -18,19 +18,19 @@ namespace KuiLang.Semantic
             Ast = ast;
         }
 
+        public bool IsMethod { get; }
+
         public ProgramRootSymbol Parent { get; }
 
         ISymbol? ISymbol.Parent => Parent;
 
         public Ast.Statement.Definition.Type Ast { get; }
 
-        public Dictionary<string, MethodSymbol> Methods { get; } = new();
-
         public OrderedDictionary<string, FieldSymbol> Fields { get; } = new();
 
-        public MethodSymbol Constructor { get; internal set; } = null!;
+        public FunctionExpressionSymbol Constructor { get; internal set; } = null!;
 
-        public Identifier Identifier => new(Ast.Name);
+        public Identifier Identifier => new( Ast.Name );
 
         public override string ToString()
             =>
@@ -38,11 +38,7 @@ $@"
 {{
     ""Fields"": [
 {string.Join( "\n,", Fields.Values.Select( s => s.ToString() ) )}
-        ],
-    ""Methods"": [
-{string.Join( "\n,", Methods.Values.Select( s => s.ToString()  ) )}
         ]
-    }}
 ";
 
     }

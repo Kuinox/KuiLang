@@ -20,7 +20,13 @@ namespace KuiLang.Compiler
 
         protected override object Visit( TypeSymbol symbol )
         {
-            var ctor = new MethodSymbol( symbol, new Ast.Statement.Definition.Typed.Method( symbol.Identifier, symbol.Ast.Name, null, null ) );
+            var field = new FieldSymbol( new Ast.Statement.Definition.Typed.Field( default, symbol.Ast.Name, null ), symbol )
+            {
+                Type = symbol
+            };
+            symbol.Fields.Add( symbol.Ast.Name, field );
+            var ctor = new FunctionExpressionSymbol( symbol, symbol.Ast.Name, null );
+            field.InitValue = ctor;
             var ret = new ReturnStatementSymbol(
                 ctor,
                 null
@@ -31,23 +37,26 @@ namespace KuiLang.Compiler
             ctor.ReturnType = symbol;
             var res = base.Visit( symbol );//after this, all fields types should be resolved.
 
-            foreach( var item in symbol.Fields.Select( s => new MethodParameterSymbol(
+            foreach( var item in symbol.Fields.Select( s => new ParameterSymbol(
                 new Ast.Statement.Definition.Typed.Parameter( s.Value.Ast.TypeIdentifier, s.Value.Ast.Name, s.Value.Ast.InitValue ),
                 ctor )
             ) )
             {
-                ctor.ParameterSymbols.Add( item.Ast.Name, item );
+                ctor.Parameters.Add( item.Ast.Name, item );
             }
             return res;
         }
 
-        protected override object Visit( MethodSymbol symbol )
+        protected override object Visit( FunctionExpressionSymbol symbol )
         {
-            symbol.ReturnType = symbol.FindType( symbol.Ast!.ReturnTypeIdentifier );
+            if(symbol.ReturnType is null && symbol.FuncReturnTypeIdentifier.HasValue)
+            {
+                symbol.ReturnType = symbol.FindType( symbol.FuncReturnTypeIdentifier.Value )!;
+            }
             return base.Visit( symbol );
         }
 
-        protected override object Visit( MethodParameterSymbol symbol )
+        protected override object Visit( ParameterSymbol symbol )
         {
             symbol.Type = symbol.Parent.FindType( symbol.Ast.TypeIdentifier );
             return base.Visit( symbol );
@@ -69,25 +78,7 @@ namespace KuiLang.Compiler
 
         protected override object Visit( FunctionCallExpressionSymbol symbol )
         {
-
-            holder.Methods.TryGetValue( symbol.Ast.Name, out var localMethod );
-            if( localMethod == null )
-            {
-                var targetType = symbol.FindType( new Identifier( symbol.Ast.Name ) );
-                if( targetType == null )
-                {
-                    _diagnostics.EmitDiagnostic( new Diagnostic( Severity.Error, null, $"Could not find a function or type named {symbol.Ast.Name}", null ) );
-                }
-                else
-                {
-                    localMethod = targetType?.Constructor;
-                    if( localMethod == null )
-                    {
-                        _diagnostics.EmitDiagnostic( new Diagnostic( Severity.Error, null, $"Type {targetType} does not have a constructor.", null ) );
-                    }
-                }
-            }
-            symbol.TargetMethod = localMethod!;
+            //later will have signature resolution.
             return base.Visit( symbol );
         }
 

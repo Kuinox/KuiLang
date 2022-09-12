@@ -10,11 +10,10 @@ namespace KuiLang.Compiler.Symbols
 {
     public class FunctionCallExpressionSymbol : IExpressionSymbol
     {
-        public FunctionCallExpressionSymbol( ISymbol parent, IExpressionSymbol callTarget, Ast.Expression.FuncCall ast )
+        public FunctionCallExpressionSymbol( ISymbol parent, Ast.Expression.FuncCall ast )
         {
             Parent = parent;
             Ast = ast;
-            CallTarget = callTarget;
         }
 
         public ISymbol Parent { get; }
@@ -22,8 +21,8 @@ namespace KuiLang.Compiler.Symbols
         public IReadOnlyList<IExpressionSymbol> Arguments { get; internal set; } = null!;
 
         public TypeSymbol ReturnType => TargetMethod?.ReturnType!;
-        public MethodSymbol TargetMethod { get; internal set; } = null!; // resolve member step.
-        public IExpressionSymbol CallTarget { get; }
+        public FunctionExpressionSymbol TargetMethod { get; internal set; } = null!; // resolve member step.
+        public IExpressionSymbol CallTarget { get; internal set; }
 
         public override string ToString() =>
 $@"{{
@@ -32,7 +31,7 @@ $@"{{
         ""Arguments"": [
     {string.Join( ",\n", Arguments )}
     ],
-        ""TargetMethod"": {(TargetMethod?.Ast.Name is null ? "null" : $@"""{TargetMethod?.Ast.Name}""")},
+        ""TargetMethod"": {(TargetMethod?.Name is null ? "null" : $@"""{TargetMethod?.Name}""")},
         ""Type"": ""{ReturnType?.Identifier.ToString() ?? "null"}""
     }}
 }}";
