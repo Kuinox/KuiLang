@@ -1,3 +1,7 @@
+Determine identifier location at compile time.
+Need to create static instance.
+
+
 # KuiLang
 
 Declarative, Object Oriented, General Purpose Programming Language.
@@ -20,7 +24,6 @@ number sum(numbers: number[]){
         sum += number
     }
 }
-
 ```
 
 There, by accident, you specified that:  

@@ -49,22 +49,23 @@ namespace KuiLang.Compiler
 
         protected override object Visit( FunctionExpressionSymbol symbol )
         {
-            if(symbol.ReturnType is null && symbol.FuncReturnTypeIdentifier.HasValue)
+            if(symbol.ReturnType is null && symbol.FuncReturnTypeIdentifier is not null)
             {
-                symbol.ReturnType = symbol.FindType( symbol.FuncReturnTypeIdentifier.Value )!;
+                symbol.ReturnType = symbol.FindType( symbol.FuncReturnTypeIdentifier )!;
             }
             return base.Visit( symbol );
         }
 
         protected override object Visit( ParameterSymbol symbol )
         {
-            symbol.Type = symbol.Parent.FindType( symbol.Ast.TypeIdentifier );
+            
+            symbol.Type ??= symbol.Parent.FindType( symbol.Ast.TypeIdentifier );
             return base.Visit( symbol );
         }
 
         protected override object Visit( FieldSymbol symbol )
         {
-            symbol.Type = symbol.Parent.FindType( symbol.Ast.TypeIdentifier );
+            symbol.Type ??= symbol.Parent.FindType( symbol.Ast.TypeIdentifier )!;
             return base.Visit( symbol );
         }
 
@@ -84,7 +85,7 @@ namespace KuiLang.Compiler
 
         protected override object Visit( IdentifierValueExpressionSymbol symbol )
         {
-            symbol.Field = symbol.FindIdentifierValueDeclaration( symbol.Ast.Identifier );
+            symbol.Field = symbol.FindIdentifierValueDeclaration(_diagnostics, symbol.Ast.Identifier );
             return base.Visit( symbol );
         }
     }

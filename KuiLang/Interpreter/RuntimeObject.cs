@@ -1,4 +1,6 @@
+using KuiLang.Compiler.Symbols;
 using KuiLang.Semantic;
+using OneOf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,15 +9,21 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Interpreter
 {
-    public class RuntimeObject
+    public class RuntimeReference
     {
-        public TypeSymbol Type { get; }
-
-        public RuntimeObject( TypeSymbol type )
+        public RuntimeReference( RuntimeObject owner, object field )
         {
-            Type = type;
+            Owner = owner;
+            Field = field;
+            if( !owner.Fields.ContainsKey( field ) ) throw new Wat();
         }
 
-        public Dictionary<ISymbol, object> Fields { get; } = new();
+        public RuntimeObject Owner { get; }
+        public object Field { get; }
+    }
+
+    public class RuntimeObject
+    {
+        public Dictionary<object, OneOf<RuntimeObject, object, FunctionExpressionSymbol>> Fields { get; } = new();
     }
 }

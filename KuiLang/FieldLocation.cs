@@ -3,11 +3,8 @@ using System.Collections.Generic;
 
 namespace KuiLang
 {
-    public struct Identifier
+    public class Identifier
     {
-
-        public Identifier() => Parts = Array.Empty<string>();
-
         public Identifier(string firstPart)
         {
             Parts = new string[] { firstPart };
@@ -15,6 +12,7 @@ namespace KuiLang
 
         Identifier(ReadOnlyMemory<string> parts)
         {
+            if( parts.IsEmpty ) throw new Wat();
             Parts = parts;
         }
 

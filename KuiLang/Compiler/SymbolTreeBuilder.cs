@@ -26,7 +26,6 @@ namespace KuiLang.Compiler
         {
             var root = new ProgramRootSymbol( ast );
             _current = root;
-            root.Add( HardcodedSymbols.NumberType );
             base.Visit( ast );
             _current = null!;
             return root;
@@ -36,21 +35,17 @@ namespace KuiLang.Compiler
 
         protected override object Visit( Method method )
         {
-            var current = _current switch
-            {
-                ISymbolWithFields methodHolder => methodHolder,
-                StatementBlockSymbol block when block.Parent is ProgramRootSymbol root => root,
-                _ => throw new InvalidOperationException( "Unknown method parent" )
-            };
-            var funcSymbol = new FunctionExpressionSymbol( current, method.Name, method );
-            var field = new FieldSymbol( new Field( default/*todo*/, method.Name, null ), current )
+            var methodType = _current.GetContainingType();
+            var current = _current;
+            var funcSymbol = new FunctionExpressionSymbol( methodType, method.Name, method );
+            var field = new FieldSymbol( new Field( method.ReturnTypeIdentifier, method.Name, null ), methodType )
             {
                 InitValue = funcSymbol
             };
-            current.Fields.Add( method.Name, field);
+            methodType.Fields.Add( method.Name, field);
             _current = funcSymbol;
             base.Visit( method );
-            _current = funcSymbol.Parent;
+            _current = current;
             return default!;
         }
 
@@ -66,12 +61,13 @@ namespace KuiLang.Compiler
 
         protected override object Visit( Ast.Statement.Definition.Type type )
         {
-            var current = (ProgramRootSymbol)_current.Parent!;
-            var symbol = new TypeSymbol( current, type );
-            current.Add( symbol );
+            var current = _current;
+            var root = _current.GetRoot();
+            var symbol = new TypeSymbol( root, type );
+            root.Add( symbol );
             _current = symbol;
             base.Visit( type );
-            _current = symbol.Parent;
+            _current = current;
             return default!;
         }
 

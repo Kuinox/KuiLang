@@ -12,7 +12,7 @@ namespace KuiLang.Semantic
 {
     public class TypeSymbol : ISymbol, ISymbolWithFields
     {
-        public TypeSymbol( ProgramRootSymbol parent, Ast.Statement.Definition.Type ast )
+        public TypeSymbol( ProgramRootSymbol? parent, Ast.Statement.Definition.Type ast )
         {
             Parent = parent;
             Ast = ast;
@@ -20,7 +20,7 @@ namespace KuiLang.Semantic
 
         public bool IsMethod { get; }
 
-        public ProgramRootSymbol Parent { get; }
+        public ProgramRootSymbol? Parent { get; }
 
         ISymbol? ISymbol.Parent => Parent;
 
@@ -35,7 +35,7 @@ namespace KuiLang.Semantic
         public override string ToString()
             =>
 $@"
-{{
+""TypeSymbol"": {{ 
     ""Fields"": [
 {string.Join( "\n,", Fields.Values.Select( s => s.ToString() ) )}
         ]

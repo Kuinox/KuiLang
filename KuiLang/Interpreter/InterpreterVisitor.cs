@@ -1,22 +1,17 @@
-using Farkle.Builder.OperatorPrecedence;
 using KuiLang.Compiler;
 using KuiLang.Compiler.Symbols;
 using KuiLang.Diagnostics;
 using KuiLang.Semantic;
-using KuiLang.Syntax;
-using Microsoft.FSharp.Core;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KuiLang.Interpreter
 {
     public class InterpreterVisitor : SymbolVisitor<object>
     {
-        readonly Stack<Dictionary<ISymbol, object>> _stack = new();
+        readonly Stack<RuntimeObject> _stack = new();
         readonly DiagnosticChannel _diagnostics;
 
         public InterpreterVisitor( DiagnosticChannel diagnostics )
@@ -24,79 +19,88 @@ namespace KuiLang.Interpreter
             _diagnostics = diagnostics;
         }
 
-        Dictionary<ISymbol, object> Current => _stack.Peek();
-
-        public override RuntimeObject Visit( ProgramRootSymbol root )
+        public static object _constructorRef = new();
+        public override RuntimeReference Visit( ProgramRootSymbol root )
         {
-            _stack.Push( new Dictionary<ISymbol, object>() );
-            var res = Visit( root.Statement );
+            var rootScope = new RuntimeObject();
+            _stack.Push(rootScope);
+            foreach( var type in root.TypesSymbols.Values )
+            {
+                var heapType = new RuntimeObject();
+                rootScope.Fields[type] = heapType;
+                heapType.Fields[_constructorRef] = type.Constructor;
+            }
+
+            var res = Visit( root.MainFunction.Statement );
             _stack.Pop();
             if( res is ReturnControlFlow rcf ) return rcf.ReturnValue!;
             return default!;
         }
         protected override object Visit( VariableSymbol variableDeclaration )
         {
-            Current.Add( variableDeclaration, variableDeclaration.InitValue != null ? Visit( variableDeclaration.InitValue ) : null! );
+            _stack.Peek().Fields.Add( variableDeclaration, variableDeclaration.InitValue != null ? Visit( variableDeclaration.InitValue ) : null! );
             return base.Visit( variableDeclaration );
         }
 
         protected override object Visit( FieldSymbol variableDeclaration )
         {
-            Current.Add( variableDeclaration, variableDeclaration.InitValue != null ? Visit( variableDeclaration.InitValue ) : null! );
+            _stack.ToArray()[^2].Fields.Add( variableDeclaration, variableDeclaration.InitValue != null ? Visit( variableDeclaration.InitValue ) : null! );
             return base.Visit( variableDeclaration );
         }
 
         protected override object Visit( FieldAssignationStatementSymbol symbol )
         {
             var scope = LocateSymbolScope( symbol.AssignedField );
-            scope[symbol.AssignedField] = Visit( symbol.NewFieldValue );
+            scope.Fields[symbol.AssignedField] = Visit( symbol.NewFieldValue );
             return default!; // assignement is a statement.
             // I don't want 'if(thing = true)' errors happening.
         }
 
-        protected override RuntimeObject Visit( IExpressionSymbol symbolBase ) => (RuntimeObject)base.Visit( symbolBase );
+        protected override RuntimeReference Visit( IExpressionSymbol symbolBase ) => (RuntimeReference)base.Visit( symbolBase );
 
-        protected override object Visit( InstantiateObjectExpression symbol )
-            => new RuntimeObject( symbol.ReturnType );
-
-        protected override object Visit( IdentifierValueExpressionSymbol variable )
+        protected override RuntimeReference Visit( InstantiateObjectExpression symbol )
         {
-            var scope = LocateSymbolScope( variable.Field );
-            bool res = scope.TryGetValue( variable.Field, out var val );
-            if( !res ) throw new InvalidOperationException( "Runtime error: Couldn't retrieve value." );
-            if( val == null ) throw new InvalidOperationException( "Runtime error: uninitialized value was accessed." );
-            return val!;
+            var obj = new RuntimeObject();
+            var root = _stack.ToArray()[0];
+            root.Fields[obj] = obj;
+            return new RuntimeReference( root, obj );
         }
 
-        protected override object Visit( NumberLiteralSymbol constant )
+        protected override RuntimeReference Visit( IdentifierValueExpressionSymbol variable )
+            => new( LocateSymbolScope( variable.Field ), variable.Field );
+
+        protected override RuntimeReference Visit( NumberLiteralSymbol constant )
         {
-            var obj = new RuntimeObject( HardcodedSymbols.NumberType );
-            obj.Fields.Add( HardcodedSymbols.NumberValueField, constant.Value );
-            return obj;
+            var root = _stack.ToArray()[0];
+            var obj = new RuntimeObject();
+            root.Fields[obj] = obj;
+            obj.Fields.Add( constant.GetRoot().HardcodedSymbols.NumberValueField, constant.Value );
+            return new RuntimeReference(root, obj);
         }
 
-        protected override RuntimeObject Visit( FunctionCallExpressionSymbol methodCall )
+        protected override RuntimeReference Visit( FunctionCallExpressionSymbol methodCall )
         {
+            var targetRef = Visit( methodCall.CallTarget );
+            var callTarget = targetRef.Owner.Fields[targetRef.Field].AsT2;
 
-            var callTarget = Visit( methodCall.CallTarget );
-
-            var newScope = new Dictionary<ISymbol, object>();
+            var newScope = new RuntimeObject();
             int i = 0;
-            foreach( var parameter in methodCall.TargetMethod.Parameters )
+            foreach( var parameter in methodCall.TargetMethod.Parameters.Values )
             {
                 var expressionValue = methodCall.Arguments[i++];
-                newScope[parameter.Value] = Visit( expressionValue );
+                newScope.Fields[parameter] = Visit( expressionValue );
             }
-
-            _stack.Push( callTarget.Fields );
-
+            _stack.Push( targetRef.Owner );
             _stack.Push( newScope );
 
             var val = Visit( methodCall.TargetMethod.Statement );
 
-            if( val is ReturnControlFlow rcf ) return (RuntimeObject)rcf.ReturnValue!;
+            if( val is ReturnControlFlow rcf ) return rcf.ReturnValue!;
             return default!;
         }
+
+        protected override object Visit( FunctionExpressionSymbol symbol )
+            => throw new InvalidOperationException( "wat" );
 
 
         protected override object Visit( StatementBlockSymbol block )
@@ -111,84 +115,93 @@ namespace KuiLang.Interpreter
 
         protected override object Visit( IfStatementSymbol @if )
         {
-            var ret = Visit( @if.Condition );
-
-            if( (decimal)ret.Fields[HardcodedSymbols.NumberValueField] == 1 )
+            var retRef = Visit( @if.Condition );
+            var retVal = retRef.Owner.Fields[retRef.Field].AsT0;
+            if( (decimal)retVal.Fields[@if.GetRoot().HardcodedSymbols.NumberValueField].AsT1 == 1 )
             {
                 return Visit( @if.Statement );
             }
             return default!;
         }
 
-        protected override RuntimeObject Visit( HardcodedExpressionsSymbol.NumberAddSymbol symbol )
+        protected override RuntimeReference Visit( HardcodedExpressionsSymbol.NumberAddSymbol symbol )
         {
-            var left = (decimal)GetCurrentInstance()[HardcodedSymbols.NumberValueField];
-            var right = (decimal)_stack.Peek().Values.Single();
-            return new RuntimeObject( HardcodedSymbols.NumberType )
+            var numberField = symbol.GetRoot().HardcodedSymbols.NumberValueField;
+            var left = (decimal)GetCurrentInstance().Fields[numberField].AsT1;
+            var right = (decimal)_stack.Peek().Fields[numberField].AsT1;
+            var obj = new RuntimeObject()
             {
                 Fields =
                 {
-                    {HardcodedSymbols.NumberValueField, left+right }
+                    {symbol.GetRoot().HardcodedSymbols.NumberValueField, left+right }
                 }
             };
+            return new RuntimeReference( obj, obj.Fields.Single() );
         }
 
-        protected override RuntimeObject Visit( HardcodedExpressionsSymbol.NumberDivideSymbol symbol )
+        protected override RuntimeReference Visit( HardcodedExpressionsSymbol.NumberDivideSymbol symbol )
         {
-            var left = (decimal)GetCurrentInstance()[HardcodedSymbols.NumberValueField];
-            var right = (decimal)_stack.Peek().Values.Single();
-            return new RuntimeObject( HardcodedSymbols.NumberType )
+            var numberField = symbol.GetRoot().HardcodedSymbols.NumberValueField;
+            var left = (decimal)GetCurrentInstance().Fields[numberField].AsT1;
+            var right = (decimal)_stack.Peek().Fields[numberField].AsT1;
+            var obj = new RuntimeObject()
             {
                 Fields =
                 {
-                    {HardcodedSymbols.NumberValueField, left/right }
+                    {symbol.GetRoot().HardcodedSymbols.NumberValueField, left/right }
                 }
             };
+            return new RuntimeReference( obj, obj.Fields.Single() );
         }
 
-        protected override RuntimeObject Visit( HardcodedExpressionsSymbol.NumberMultiplySymbol symbol )
+        protected override RuntimeReference Visit( HardcodedExpressionsSymbol.NumberMultiplySymbol symbol )
         {
-            var left = (decimal)GetCurrentInstance()[HardcodedSymbols.NumberValueField];
-            var right = (decimal)_stack.Peek().Values.Single();
-            return new RuntimeObject( HardcodedSymbols.NumberType )
+            var numberField = symbol.GetRoot().HardcodedSymbols.NumberValueField;
+            var left = (decimal)GetCurrentInstance().Fields[numberField].AsT1;
+            var right = (decimal)_stack.Peek().Fields[numberField].AsT1;
+            var obj = new RuntimeObject()
             {
                 Fields =
                 {
-                    {HardcodedSymbols.NumberValueField, left*right }
+                    {symbol.GetRoot().HardcodedSymbols.NumberValueField, left*right }
                 }
             };
+            return new RuntimeReference( obj, obj.Fields.Single() );
         }
 
-        protected override RuntimeObject Visit( HardcodedExpressionsSymbol.NumberSubstractSymbol symbol )
+        protected override RuntimeReference Visit( HardcodedExpressionsSymbol.NumberSubstractSymbol symbol )
         {
-            var left = (decimal)GetCurrentInstance()[HardcodedSymbols.NumberValueField];
-            var right = (decimal)_stack.Peek().Values.Single();
-            return new RuntimeObject( HardcodedSymbols.NumberType )
+            var numberField = symbol.GetRoot().HardcodedSymbols.NumberValueField;
+            var left = (decimal)GetCurrentInstance().Fields[numberField].AsT1;
+            var right = (decimal)_stack.Peek().Fields[numberField].AsT1;
+            var obj = new RuntimeObject()
             {
                 Fields =
                 {
-                    {HardcodedSymbols.NumberValueField, left-right }
+                    {symbol.GetRoot().HardcodedSymbols.NumberValueField, left-right }
                 }
             };
+            return new RuntimeReference( obj, obj.Fields.Single() );
         }
 
         record ControlFlow();
-        record ReturnControlFlow( RuntimeObject? ReturnValue ) : ControlFlow;
+        record ReturnControlFlow( RuntimeReference? ReturnValue ) : ControlFlow;
         protected override object Visit( ReturnStatementSymbol returnStatement )
             => returnStatement.ReturnedValue != null ?
                 new ReturnControlFlow( Visit( returnStatement.ReturnedValue ) )
                 : new ReturnControlFlow( null );
 
-        Dictionary<ISymbol, object> GetCurrentInstance() => _stack.ToArray()[^2];
+        RuntimeObject GetCurrentInstance() => _stack.ToArray()[^2];
 
-        Dictionary<ISymbol, object> LocateSymbolScope( ISymbol symbol )
+        RuntimeObject LocateSymbolScope( ISymbol symbol )
         {
-            if( symbol is null ) throw new ArgumentNullException( nameof( symbol ) );
-            foreach( var item in _stack )
+            return symbol switch
             {
-                if( item.ContainsKey( symbol ) ) return item;
-            }
-            throw new InvalidOperationException();
+                TypeSymbol => _stack.ToArray()[0],
+                FieldSymbol => GetCurrentInstance(),
+                VariableSymbol => _stack.Peek(),
+                _ => throw new InvalidOperationException()
+            };
         }
     }
 }

@@ -93,8 +93,10 @@ namespace KuiLang
                 expression.Extended().Extend( assignation ).Finish( ( a, b ) => new Statement.FieldAssignation( a, b ) ) );
 
             var opScope = new OperatorScope(
-              new LeftAssociative( "+", "-" ),
-              new LeftAssociative( "*", "/" ) );
+                new PrecedenceOnly( "(" ),
+                new LeftAssociative( "+", "-" ),
+                new LeftAssociative( "*", "/" )
+            );
 
             var operators = Nonterminal.Create<Expression>( "Operators",
                 expression.Extended().Append( "*" ).Extend( expression ).Finish( ( left, right ) => new Expression.FuncCall.Operator.Multiply( left, right ) ),

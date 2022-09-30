@@ -4,12 +4,13 @@ using NUnit.Framework;
 using Farkle;
 using KuiLang.Syntax;
 using Farkle.Builder;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace KuiLang.Tests
 {
     public class ParseTests
     {
-
         static readonly RuntimeFarkle<Identifier> _fullNameRuntime = KuiLang.FullNameDesigntime.Build();
         static readonly RuntimeFarkle<Ast.Expression> _expressionRuntime = KuiLang.ExpressionDesigntime.Build();
         static readonly RuntimeFarkle<Ast.Statement.Definition.Typed.Method> _methodDeclarationRuntime = KuiLang.MethodDeclarationDesigntime.Build();
@@ -33,7 +34,7 @@ namespace KuiLang.Tests
         }
 
         [TestCase(
-@"type Foo
+    @"type Foo
 {
     void Test()
     {

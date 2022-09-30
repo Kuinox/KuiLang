@@ -11,13 +11,17 @@ namespace KuiLang.Compiler.Symbols
 
         public StatementSymbol( ISymbol parent )
         {
-            Parent = parent;
             if( parent is ProgramRootSymbol root )
             {
-                if( root.Statement != null ) throw new InvalidOperationException();
-                root.Statement = (StatementBlockSymbol)this;
+                if( root.MainFunction != null ) throw new InvalidOperationException();
+                root.MainFunction = new FunctionExpressionSymbol( root, "Main", null )
+                {
+                    Statement = this
+                };
+                Parent = root.MainFunction;
                 return;
             }
+            Parent = parent;
             if( parent is StatementBlockSymbol block )
             {
                 block.Statements.Add( this );

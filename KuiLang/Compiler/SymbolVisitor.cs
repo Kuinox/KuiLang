@@ -21,7 +21,7 @@ namespace KuiLang.Compiler
             {
                 Visit( method );
             }
-            return Visit( symbol.Statement );
+            return Visit( symbol.MainFunction );
         }
 
         protected virtual T Visit( TypeSymbol symbol )
@@ -42,7 +42,7 @@ namespace KuiLang.Compiler
                 Visit( arguments.Value );
             }
 
-            Visit( symbol.Statement );
+            var res = Visit( symbol.Statement );
             return default!;
         }
 
