@@ -23,11 +23,6 @@ namespace KuiLang.Semantic
 
         ISymbol? ISymbol.Parent => Parent;
 
-        public override string ToString()
-            => @$"{{
-""{Ast.Name}"" : {{
-    ""Type"": ""{Type?.Identifier}""
-}}
-}}";
+        public override string ToString() => Ast.Name;
     }
 }

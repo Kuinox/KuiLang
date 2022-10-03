@@ -46,13 +46,16 @@ namespace KuiLang.Runner
                 if( debug ) Console.WriteLine( "Unordered resolution:" );
                 if( debug ) Console.WriteLine( rootSymbol );
                 orderedResolver.Visit( rootSymbol );
-
+                var validator = new ValidatorVisitor( diagnostics );
+                validator.Visit( rootSymbol );
+                if(diagnostics.HaveError)
+                {
+                    throw new InvalidProgramException();
+                }
                 if( debug )
                 {
                     Console.WriteLine( "Ordered resolution:" );
                     Console.WriteLine( rootSymbol );
-                    var validator = new ValidatorVisitor( diagnostics );
-                    validator.Visit( rootSymbol );
                 }
 
                 var val = interpreter.Visit( rootSymbol ); //Thats where all the magic happens.

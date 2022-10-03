@@ -124,6 +124,7 @@ namespace KuiLang.Compiler
 
         public static ITypedSymbol FindIdentifierValueDeclaration( this IdentifierValueExpressionSymbol symbol, DiagnosticChannel diagnostics, Identifier identifier )
         {
+            ISymbolWithFields? methodType = null;
             if( identifier.Parts.Length == 1 )
             {
                 // looking up the identifier in the statement.
@@ -140,9 +141,10 @@ namespace KuiLang.Compiler
                     }
                 }
                 diagnostics.CompilerErrorIfTrue( varDec != null, "Local variable conflict with parameter." );
-                return (ITypedSymbol)found! ?? varDec!;
+                if(found != null || varDec != null ) return (ITypedSymbol)found! ?? varDec!;
+                methodType = method.GetContainingType();
             }
-            var methodType = symbol.FindType( identifier.ParentLocation );
+            methodType ??= symbol.FindType( identifier.ParentLocation );
             if( methodType!.Fields.TryGetValue( identifier.Name, out var field ) )
             {
                 return field;

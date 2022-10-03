@@ -34,7 +34,7 @@ namespace KuiLang
         }
 
         public Identifier SubParts => new(Parts[1..]);
-        public Identifier ParentLocation => new( Parts[..1] );
+        public Identifier? ParentLocation => Parts.Length == 1 ? null : new( Parts[..1] );
         public string Name => Parts.Span[^1];
         public override string ToString() => string.Join(".", Parts.ToArray());
 

@@ -18,8 +18,6 @@ namespace KuiLang.Semantic
             Ast = ast;
         }
 
-        public bool IsMethod { get; }
-
         public ProgramRootSymbol? Parent { get; }
 
         ISymbol? ISymbol.Parent => Parent;

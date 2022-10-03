@@ -24,17 +24,7 @@ namespace KuiLang.Compiler.Symbols
         public FunctionExpressionSymbol TargetMethod { get; internal set; } = null!; // resolve member step.
         public IExpressionSymbol CallTarget { get; internal set; }
 
-        public override string ToString() =>
-$@"{{
-    ""{nameof( FunctionCallExpressionSymbol )}"": {{
-        ""Target"": {CallTarget?.ToString() ?? "null"},
-        ""Arguments"": [
-    {string.Join( ",\n", Arguments )}
-    ],
-        ""TargetMethod"": {(TargetMethod?.Name is null ? "null" : $@"""{TargetMethod?.Name}""")},
-        ""Type"": ""{ReturnType?.Identifier.ToString() ?? "null"}""
-    }}
-}}";
+        public override string ToString() =>$"{CallTarget?.ToString()}({string.Join( ",", Arguments )})";
 
     }
 }

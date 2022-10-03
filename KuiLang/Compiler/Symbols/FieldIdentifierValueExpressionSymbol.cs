@@ -21,5 +21,7 @@ namespace KuiLang.Compiler.Symbols
 
         public ITypedSymbol Field { get; internal set; } = null!;
         public TypeSymbol ReturnType => Field?.Type!;
+
+        public override string ToString() => Ast.Identifier.ToString();
     }
 }

@@ -79,7 +79,10 @@ namespace KuiLang.Compiler
 
         protected override object Visit( FunctionCallExpressionSymbol symbol )
         {
-            //later will have signature resolution.
+            Visit( symbol.CallTarget );
+
+            symbol.TargetMethod = (FunctionExpressionSymbol)symbol.CallTarget;
+
             return base.Visit( symbol );
         }
 
