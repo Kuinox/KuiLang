@@ -31,7 +31,21 @@ namespace KuiLang.Interpreter
                 heapType.Fields[_constructorRef] = type.Constructor;
             }
 
+            var rootInstance = new RuntimeObject();
+            foreach( var field in root.Fields )
+            {
+                if( field.Value.InitValue != null )
+                {
+                    rootInstance.Fields[field.Value] = (FunctionExpressionSymbol)field.Value.InitValue;
+                }
+            }
+            _stack.Push(rootInstance);
+
+            var mainFuncScope = new RuntimeObject();
+            _stack.Push(mainFuncScope);
             var res = Visit( root.MainFunction.Statement );
+            _stack.Pop();
+            _stack.Pop();
             _stack.Pop();
             if( res is ReturnControlFlow rcf ) return rcf.ReturnValue!;
             return default!;

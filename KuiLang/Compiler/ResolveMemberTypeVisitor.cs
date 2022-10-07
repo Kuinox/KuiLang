@@ -20,7 +20,8 @@ namespace KuiLang.Compiler
 
         protected override object Visit( TypeSymbol symbol )
         {
-            var field = new FieldSymbol( new Ast.Statement.Definition.Typed.Field( default, symbol.Ast.Name, null ), symbol )
+            var field = new FieldSymbol( new Ast.Statement.Definition.Typed.Field( default, symbol.Ast.Name, null ),
+                symbol )
             {
                 Type = symbol
             };
@@ -35,30 +36,32 @@ namespace KuiLang.Compiler
             ctor.Statement = ret;
             symbol.Constructor = ctor;
             ctor.ReturnType = symbol;
-            var res = base.Visit( symbol );//after this, all fields types should be resolved.
+            var res = base.Visit( symbol ); //after this, all fields types should be resolved.
 
             foreach( var item in symbol.Fields.Select( s => new ParameterSymbol(
-                new Ast.Statement.Definition.Typed.Parameter( s.Value.Ast.TypeIdentifier, s.Value.Ast.Name, s.Value.Ast.InitValue ),
-                ctor )
-            ) )
+                        new Ast.Statement.Definition.Typed.Parameter( s.Value.Ast.TypeIdentifier, s.Value.Ast.Name,
+                            s.Value.Ast.InitValue ),
+                        ctor )
+                    ) )
             {
                 ctor.Parameters.Add( item.Ast.Name, item );
             }
+
             return res;
         }
 
         protected override object Visit( FunctionExpressionSymbol symbol )
         {
-            if(symbol.ReturnType is null && symbol.FuncReturnTypeIdentifier is not null)
+            if( symbol.ReturnType is null && symbol.FuncReturnTypeIdentifier is not null )
             {
                 symbol.ReturnType = symbol.FindType( symbol.FuncReturnTypeIdentifier )!;
             }
+
             return base.Visit( symbol );
         }
 
         protected override object Visit( ParameterSymbol symbol )
         {
-            
             symbol.Type ??= symbol.Parent.FindType( symbol.Ast.TypeIdentifier );
             return base.Visit( symbol );
         }
@@ -80,15 +83,15 @@ namespace KuiLang.Compiler
         protected override object Visit( FunctionCallExpressionSymbol symbol )
         {
             Visit( symbol.CallTarget );
-
-            symbol.TargetMethod = (FunctionExpressionSymbol)symbol.CallTarget;
+            var type = symbol.CallTarget.ReturnType;
+            symbol.TargetMethod = type.IsMethod ? type.FunctionExpressionSymbol : type.Constructor;
 
             return base.Visit( symbol );
         }
 
         protected override object Visit( IdentifierValueExpressionSymbol symbol )
         {
-            symbol.Field = symbol.FindIdentifierValueDeclaration(_diagnostics, symbol.Ast.Identifier );
+            symbol.Field = symbol.FindIdentifierValueDeclaration( _diagnostics, symbol.Ast.Identifier );
             return base.Visit( symbol );
         }
     }

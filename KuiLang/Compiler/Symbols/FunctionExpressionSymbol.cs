@@ -8,16 +8,12 @@ using System.Threading.Tasks;
 
 namespace KuiLang.Compiler.Symbols
 {
-    public class FunctionExpressionSymbol : ISymbol, IExpressionSymbol
+    public class FunctionExpressionSymbol : ISymbol, IExpressionSymbol, ISymbolWithAStatement
     {
         public FunctionExpressionSymbol( ISymbol parent, string name, Ast.Statement.Definition.Typed.Method? method )
         {
             Parent = parent;
             Name = name;
-            ReturnType = new TypeSymbol( parent.GetRoot(), new Ast.Statement.Definition.Type( name, new List<Ast.Statement.Definition>()
-            {
-
-            } ) );
             FuncReturnTypeIdentifier = method?.ReturnTypeIdentifier;
         }
 
@@ -26,7 +22,6 @@ namespace KuiLang.Compiler.Symbols
         public OrderedDictionary<string, ParameterSymbol> Parameters { get; } = new();
 
         public StatementSymbol Statement { get; set; }
-        public TypeSymbol FuncReturnType { get; set; }
         public TypeSymbol ReturnType { get; internal set; }
         public Identifier? FuncReturnTypeIdentifier { get; }
     }

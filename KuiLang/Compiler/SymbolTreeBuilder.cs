@@ -35,14 +35,18 @@ namespace KuiLang.Compiler
 
         protected override object Visit( Method method )
         {
-            var methodType = _current.GetContainingType();
+            var methodParent = _current.GetContainingType();
+
             var current = _current;
-            var funcSymbol = new FunctionExpressionSymbol( methodType, method.Name, method );
-            var field = new FieldSymbol( new Field( method.ReturnTypeIdentifier, method.Name, null ), methodType )
+            var funcSymbol = new FunctionExpressionSymbol( methodParent, method.Name, method );
+            var methodType = new TypeSymbol( methodParent, null, funcSymbol );
+
+            var field = new FieldSymbol( new Field( null , method.Name, null ), methodParent )
             {
-                InitValue = funcSymbol
+                InitValue = funcSymbol,
+                Type = methodType
             };
-            methodType.Fields.Add( method.Name, field);
+            methodParent.Fields.Add( method.Name, field);
             _current = funcSymbol;
             base.Visit( method );
             _current = current;
@@ -63,7 +67,7 @@ namespace KuiLang.Compiler
         {
             var current = _current;
             var root = _current.GetRoot();
-            var symbol = new TypeSymbol( root, type );
+            var symbol = new TypeSymbol( root, type, null );
             root.Add( symbol );
             _current = symbol;
             base.Visit( type );
@@ -162,7 +166,7 @@ namespace KuiLang.Compiler
 
         protected override IExpressionSymbol Visit( Ast.Expression expression ) => (IExpressionSymbol)base.Visit( expression );
 
-        
+
         protected override IExpressionSymbol Visit( FuncCall funcCall )
         {
             var prev = _current;

@@ -19,7 +19,7 @@ namespace KuiLang
 
         public HardcodedSymbols(ProgramRootSymbol root)
         {
-            NumberType = new( root, new( "number", new MyList<Ast.Statement.Definition>() ) );
+            NumberType = new( root, new( "number", new MyList<Ast.Statement.Definition>() ), null );
             root.Add( NumberType );
             NumberValueField = new( new Ast.Statement.Definition.Typed.Field( NumberIdentifier, "value", new Ast.Expression.Literal.Number( 0 ) ), NumberType );
             NumberType.Fields.Add( NumberValueField.Ast.Name, NumberValueField );
@@ -38,7 +38,7 @@ namespace KuiLang
             Func<ReturnStatementSymbol, IExpressionSymbol> funcBuilder
         )
         {
-            
+
             var method = new FunctionExpressionSymbol( NumberType, methodName, null )
             {
                 ReturnType = NumberType

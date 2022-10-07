@@ -3,6 +3,7 @@ using KuiLang.Compiler.Symbols;
 using KuiLang.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,19 +11,21 @@ using static KuiLang.Syntax.Ast;
 
 namespace KuiLang.Semantic
 {
-    public class TypeSymbol : ISymbol, ISymbolWithFields
+    public class TypeSymbol : ISymbolWithFields, ITypedSymbol
     {
-        public TypeSymbol( ProgramRootSymbol? parent, Ast.Statement.Definition.Type ast )
+        public FunctionExpressionSymbol? FunctionExpressionSymbol { get; }
+
+        public TypeSymbol( ISymbol? parent, Ast.Statement.Definition.Type? ast, FunctionExpressionSymbol? functionExpressionSymbol )
         {
+            FunctionExpressionSymbol = functionExpressionSymbol;
             Parent = parent;
             Ast = ast;
         }
 
-        public ProgramRootSymbol? Parent { get; }
 
-        ISymbol? ISymbol.Parent => Parent;
+        public ISymbol Parent { get; }
 
-        public Ast.Statement.Definition.Type Ast { get; }
+        public Ast.Statement.Definition.Type? Ast { get; }
 
         public OrderedDictionary<string, FieldSymbol> Fields { get; } = new();
 
@@ -30,14 +33,11 @@ namespace KuiLang.Semantic
 
         public Identifier Identifier => new( Ast.Name );
 
-        public override string ToString()
-            =>
-$@"
-""TypeSymbol"": {{ 
-    ""Fields"": [
-{string.Join( "\n,", Fields.Values.Select( s => s.ToString() ) )}
-        ]
-";
+        [MemberNotNullWhen( true, nameof(FunctionExpressionSymbol) )]
+        public bool IsMethod => FunctionExpressionSymbol != null;
 
+        public override string ToString() => Identifier.ToString();
+
+        TypeSymbol ITypedSymbol.Type => this;
     }
 }

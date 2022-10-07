@@ -33,7 +33,11 @@ namespace KuiLang.Compiler
             return default!;
         }
 
-        protected virtual T Visit( FieldSymbol symbol ) => default!;
+        protected virtual T Visit( FieldSymbol symbol )
+        {
+            if( symbol.InitValue != null ) Visit( symbol.InitValue );
+            return default!;
+        }
 
         protected virtual T Visit( FunctionExpressionSymbol symbol )
         {
@@ -56,6 +60,7 @@ namespace KuiLang.Compiler
             StatementBlockSymbol s => Visit( s ),
             IfStatementSymbol s => Visit( s ),
             VariableSymbol s => Visit( s ),
+            null => throw new NullReferenceException(),
             _ => throw new ArgumentException( $"Unknown statement symbol{symbolBase}." )
         };
 
@@ -90,12 +95,13 @@ namespace KuiLang.Compiler
             NumberLiteralSymbol s => Visit( s ),
             HardcodedExpressionsSymbol s => Visit( s ),
             InstantiateObjectExpression s => Visit( s ),
+            FunctionExpressionSymbol s => Visit(s),
             _ => throw new ArgumentException( $"Unknown expression symbol {symbol}" )
         };
 
         protected virtual T Visit( InstantiateObjectExpression symbol ) => default!;
         protected virtual T Visit( IdentifierValueExpressionSymbol symbol ) => default!;
-       
+
         protected virtual T Visit( FunctionCallExpressionSymbol symbol )
         {
             Visit( symbol.CallTarget );

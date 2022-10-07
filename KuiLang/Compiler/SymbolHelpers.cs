@@ -15,7 +15,6 @@ namespace KuiLang.Compiler
 {
     public static class SymbolHelpers
     {
-
         /// <summary>
         /// return the statement that contain this expression
         /// </summary>
@@ -24,8 +23,7 @@ namespace KuiLang.Compiler
         public static StatementSymbol GetContainingStatement( this IExpressionSymbol symbol )
         {
             var parent = symbol.Parent;
-            return parent is IExpressionSymbol expr ?
-                GetContainingStatement( expr ) : (StatementSymbol)parent;
+            return parent is IExpressionSymbol expr ? GetContainingStatement( expr ) : (StatementSymbol)parent;
         }
 
         public static FunctionExpressionSymbol GetContainingFunction( this ISymbol symbol )
@@ -48,12 +46,16 @@ namespace KuiLang.Compiler
         }
 
         public static TypeSymbol FindType( this ProgramRootSymbol root, Identifier typeIdentifier )
-            => root.TypesSymbols[typeIdentifier.Name];// no namespace/subtype yet.
+        {
+            root.TypesSymbols.TryGetValue( typeIdentifier.Name, out var val );
+            return val;
+            // no namespace/subtype yet.
+        }
 
         public static TypeSymbol? FindType( this ISymbol? symbol, Identifier typeIdentifier )
         {
-
-            if( typeIdentifier.TryGetLanguageType( symbol.GetRoot().HardcodedSymbols, out var typeSymbol ) ) return typeSymbol;
+            if( typeIdentifier.TryGetLanguageType( symbol.GetRoot().HardcodedSymbols, out var typeSymbol ) )
+                return typeSymbol;
             if( symbol is null ) return null;
             if( symbol is ProgramRootSymbol root ) return root.FindType( typeIdentifier );
             if( symbol is FunctionExpressionSymbol method ) return method.Parent.FindType( typeIdentifier );
@@ -62,8 +64,10 @@ namespace KuiLang.Compiler
 
         public static TypeSymbol? FindType( this TypeSymbol parent, Identifier typeIdentifier )
         {
-            if( TryGetLanguageType( typeIdentifier, parent.GetRoot().HardcodedSymbols, out var typeSymbol ) ) return typeSymbol;
-            if( typeIdentifier.Parts.Length > 1 ) throw new NotSupportedException( "Right now we do not support namespace or nested types." );
+            if( TryGetLanguageType( typeIdentifier, parent.GetRoot().HardcodedSymbols, out var typeSymbol ) )
+                return typeSymbol;
+            if( typeIdentifier.Parts.Length > 1 )
+                throw new NotSupportedException( "Right now we do not support namespace or nested types." );
             var curr = typeIdentifier.SubParts.Parts.Span[0];
             if( parent.Ast.Name == curr ) return parent;
             return parent.Parent.FindType( typeIdentifier );
@@ -71,7 +75,8 @@ namespace KuiLang.Compiler
 
         public static TypeSymbol? FindType( this FunctionExpressionSymbol symbol, Identifier typeIdentifier )
         {
-            if( TryGetLanguageType( typeIdentifier, symbol.GetRoot().HardcodedSymbols, out var typeSymbol ) ) return typeSymbol;
+            if( TryGetLanguageType( typeIdentifier, symbol.GetRoot().HardcodedSymbols, out var typeSymbol ) )
+                return typeSymbol;
             return symbol.Parent switch
             {
                 ProgramRootSymbol parent => parent.FindType( typeIdentifier ),
@@ -81,7 +86,8 @@ namespace KuiLang.Compiler
         }
 
 
-        public static bool TryGetLanguageType( this Identifier typeName, HardcodedSymbols hardcodedSymbols, [NotNullWhen( true )] out TypeSymbol? typeSymbol )
+        public static bool TryGetLanguageType( this Identifier typeName, HardcodedSymbols hardcodedSymbols,
+            [NotNullWhen( true )] out TypeSymbol? typeSymbol )
         {
             typeSymbol = null;
             if( typeName.Parts.Length == 1 && typeName.Name == "number" )
@@ -89,6 +95,7 @@ namespace KuiLang.Compiler
                 typeSymbol = hardcodedSymbols.NumberType;
                 return true;
             }
+
             return false;
         }
 
@@ -122,39 +129,48 @@ namespace KuiLang.Compiler
         //}
 
 
-        public static ITypedSymbol FindIdentifierValueDeclaration( this IdentifierValueExpressionSymbol symbol, DiagnosticChannel diagnostics, Identifier identifier )
+        public static ITypedSymbol FindIdentifierValueDeclaration( this IdentifierValueExpressionSymbol symbol,
+            DiagnosticChannel diagnostics, Identifier identifier )
         {
             ISymbolWithFields? methodType = null;
             if( identifier.Parts.Length == 1 )
             {
                 // looking up the identifier in the statement.
                 var statement = symbol.GetContainingStatement();
-                var varDec = (VariableSymbol)statement.CrawlStatements( ( s ) => s is VariableSymbol v && v.Name == identifier.Name, true )!;
+                var varDec =
+                    (VariableSymbol)statement.CrawlStatements(
+                        ( s ) => s is VariableSymbol v && v.Name == identifier.Name, true )!;
                 var method = symbol.GetContainingFunction();
                 ParameterSymbol? found = null;
                 foreach( var parameter in method.Parameters )
                 {
                     if( parameter.Key == identifier.Name )
                     {
-                        diagnostics.CompilerErrorIfTrue( found != null, "Variable with same name already declared previously." );
+                        diagnostics.CompilerErrorIfTrue( found != null,
+                            "Variable with same name already declared previously." );
                         found = parameter.Value;
                     }
                 }
+
                 diagnostics.CompilerErrorIfTrue( varDec != null, "Local variable conflict with parameter." );
-                if(found != null || varDec != null ) return (ITypedSymbol)found! ?? varDec!;
+                if( found != null || varDec != null ) return (ITypedSymbol)found! ?? varDec!;
+
                 methodType = method.GetContainingType();
             }
+
+            var targetedType = methodType.FindType( identifier );
+            if( targetedType != null ) return targetedType;
             methodType ??= symbol.FindType( identifier.ParentLocation );
             if( methodType!.Fields.TryGetValue( identifier.Name, out var field ) )
             {
                 return field;
             }
-            var targetedType = methodType.FindType( identifier );
 
             return methodType.Fields[identifier.Name];
         }
 
-        public static StatementSymbol? CrawlStatements( this StatementSymbol symbol, Func<StatementSymbol, bool> crawler, bool backward = false )
+        public static StatementSymbol? CrawlStatements( this StatementSymbol symbol,
+            Func<StatementSymbol, bool> crawler, bool backward = false )
         {
             if( symbol.Parent is not StatementSymbol statement ) return null;
             if( symbol.Parent is not StatementBlockSymbol block ) return statement.CrawlStatements( crawler, backward );
@@ -174,6 +190,7 @@ namespace KuiLang.Compiler
                     if( crawler( block.Statements[i] ) ) return block.Statements[i];
                 }
             }
+
             return block.CrawlStatements( crawler, backward );
         }
     }
